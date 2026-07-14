@@ -9,230 +9,279 @@
   <meta name="apple-mobile-web-app-title" content="Europris">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <title>Europris – potwierdzenie dostawy</title>
+  <title>Europris</title>
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #d1d5db;
-      --button: #111827;
-      --button-text: #ffffff;
-      --danger: #b91c1c;
+      --bg:#f3f4f6; --card:#fff; --text:#111827; --muted:#6b7280;
+      --border:#d1d5db; --button:#111827; --button-text:#fff;
+      --secondary:#e5e7eb; --secondary-text:#111827; --danger:#b91c1c;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0b1220;
-        --card: #111827;
-        --text: #f9fafb;
-        --muted: #9ca3af;
-        --border: #374151;
-        --button: #f9fafb;
-        --button-text: #111827;
-        --danger: #fca5a5;
+        --bg:#0b1220; --card:#111827; --text:#f9fafb; --muted:#9ca3af;
+        --border:#374151; --button:#f9fafb; --button-text:#111827;
+        --secondary:#1f2937; --secondary-text:#f9fafb; --danger:#fca5a5;
       }
     }
-    * { box-sizing: border-box; }
+    * { box-sizing:border-box; }
     body {
-      margin: 0;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      padding: 18px;
+      margin:0; min-height:100svh; display:grid; place-items:center;
+      background:var(--bg); color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      padding:16px;
     }
     main {
-      width: min(100%, 430px);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 12px 35px rgba(0,0,0,.12);
+      width:min(100%,430px); background:var(--card);
+      border:1px solid var(--border); border-radius:20px; padding:20px;
+      box-shadow:0 12px 35px rgba(0,0,0,.12);
     }
-    h1 { margin: 0 0 8px; font-size: 1.45rem; }
-    p { margin: 0 0 20px; color: var(--muted); line-height: 1.45; }
-    label { display: block; font-weight: 700; margin-bottom: 8px; }
-    input {
-      width: 100%;
-      min-height: 58px;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 0 16px;
-      font-size: 1.35rem;
-      text-align: center;
-      letter-spacing: .08em;
-      background: transparent;
-      color: var(--text);
-      outline: none;
+    .lang-row {
+      display:flex; justify-content:flex-end; gap:8px; margin-bottom:14px;
     }
-    input:focus { border-color: var(--text); }
+    .lang-btn {
+      width:auto; min-width:52px; min-height:40px; padding:0 12px; margin:0;
+      border:1px solid var(--border); background:transparent; color:var(--text);
+      border-radius:10px; font-weight:800;
+    }
+    .lang-btn.active {
+      background:var(--button); color:var(--button-text); border-color:var(--button);
+    }
+    h1 { margin:0 0 8px; font-size:1.42rem; }
+    p { margin:0 0 18px; color:var(--muted); line-height:1.4; }
+    .display {
+      min-height:62px; display:grid; place-items:center;
+      border:2px solid var(--border); border-radius:14px;
+      font-size:1.9rem; font-weight:800; letter-spacing:.12em;
+      margin-bottom:12px;
+    }
+    .keypad {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:9px;
+    }
     button {
-      width: 100%;
-      min-height: 56px;
-      margin-top: 14px;
-      border: 0;
-      border-radius: 14px;
-      background: var(--button);
-      color: var(--button-text);
-      font-size: 1.05rem;
-      font-weight: 800;
-      cursor: pointer;
+      min-height:54px; border:0; border-radius:14px;
+      background:var(--button); color:var(--button-text);
+      font-size:1.05rem; font-weight:800; cursor:pointer;
+      touch-action:manipulation;
     }
+    .key {
+      background:var(--secondary); color:var(--secondary-text);
+      border:1px solid var(--border); font-size:1.45rem;
+    }
+    .open-btn { width:100%; margin-top:12px; min-height:58px; }
     .error {
-      min-height: 24px;
-      margin: 10px 2px 0;
-      color: var(--danger);
-      font-weight: 650;
+      min-height:23px; margin:9px 2px 0;
+      color:var(--danger); font-weight:700;
     }
-    .history-title {
-      margin-top: 20px;
-      font-weight: 750;
-      color: var(--muted);
-      font-size: .92rem;
+    .recent-title {
+      margin-top:17px; color:var(--muted); font-size:.92rem; font-weight:750;
     }
-    .history {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
+    .recent {
+      display:flex; flex-wrap:wrap; gap:8px; margin-top:9px;
     }
     .chip {
-      width: auto;
-      min-height: 42px;
-      margin: 0;
-      padding: 0 16px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text);
-      font-size: 1rem;
+      width:auto; min-height:40px; margin:0; padding:0 15px;
+      border:1px solid var(--border); background:transparent;
+      color:var(--text); font-size:1rem;
     }
     .footer {
-      margin-top: 20px;
-      font-size: .82rem;
-      color: var(--muted);
-      text-align: center;
+      margin-top:18px; font-size:.8rem; color:var(--muted); text-align:center;
     }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Potwierdzenie dostawy Europris</h1>
-    <p>Wpisz numer sklepu. Aplikacja otworzy właściwą stronę transportową.</p>
+<main>
+  <div class="lang-row" aria-label="Language">
+    <button class="lang-btn" data-lang="pl">PL</button>
+    <button class="lang-btn" data-lang="no">NO</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+  </div>
 
-    <form id="storeForm" novalidate>
-      <label for="storeNumber">Numer sklepu</label>
-      <input
-        id="storeNumber"
-        name="storeNumber"
-        type="text"
-        inputmode="numeric"
-        pattern="[0-9]*"
-        autocomplete="off"
-        enterkeyhint="go"
-        maxlength="8"
-        placeholder="np. 324"
-        autofocus
-      >
-      <button type="submit">Otwórz stronę dostawy</button>
-      <div id="error" class="error" role="alert" aria-live="polite"></div>
-    </form>
+  <h1 id="title"></h1>
+  <p id="description"></p>
 
-    <div id="historyBlock" hidden>
-      <div class="history-title">Ostatnio używane</div>
-      <div id="history" class="history"></div>
-    </div>
+  <div id="display" class="display" aria-live="polite">—</div>
 
-    <div class="footer">Działa na iPhone i Androidzie. Nie zapisuje haseł ani danych dostawy.</div>
-  </main>
+  <div class="keypad" aria-label="Numeric keypad">
+    <button class="key" data-digit="1">1</button>
+    <button class="key" data-digit="2">2</button>
+    <button class="key" data-digit="3">3</button>
+    <button class="key" data-digit="4">4</button>
+    <button class="key" data-digit="5">5</button>
+    <button class="key" data-digit="6">6</button>
+    <button class="key" data-digit="7">7</button>
+    <button class="key" data-digit="8">8</button>
+    <button class="key" data-digit="9">9</button>
+    <button class="key" id="clearBtn">C</button>
+    <button class="key" data-digit="0">0</button>
+    <button class="key" id="backBtn">⌫</button>
+  </div>
 
-  <script>
-    (() => {
-      "use strict";
+  <button id="openBtn" class="open-btn"></button>
+  <div id="error" class="error" role="alert" aria-live="polite"></div>
 
-      const BASE_URL = "https://events.app.fourprosolutions.com/europris/";
-      const URL_SUFFIX = "/transport";
-      const STORAGE_KEY = "europris_recent_stores_v1";
-      const MAX_RECENT = 6;
+  <div id="recentBlock" hidden>
+    <div id="recentTitle" class="recent-title"></div>
+    <div id="recent" class="recent"></div>
+  </div>
 
-      const form = document.getElementById("storeForm");
-      const input = document.getElementById("storeNumber");
-      const error = document.getElementById("error");
-      const historyBlock = document.getElementById("historyBlock");
-      const historyEl = document.getElementById("history");
+  <div id="footer" class="footer"></div>
+</main>
 
-      const normalize = value => value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+<script>
+(() => {
+  "use strict";
 
-      function loadRecent() {
-        try {
-          const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-          return Array.isArray(data) ? data.filter(x => /^\d{1,8}$/.test(x)).slice(0, MAX_RECENT) : [];
-        } catch {
-          return [];
-        }
+  const BASE_URL = "https://events.app.fourprosolutions.com/europris/";
+  const URL_SUFFIX = "/transport";
+  const RECENT_KEY = "europris_recent_stores_v1";
+  const LANG_KEY = "europris_language_v1";
+  const MAX_RECENT = 6;
+  const MAX_LENGTH = 8;
+
+  const texts = {
+    pl: {
+      title: "Potwierdzenie dostawy Europris",
+      description: "Wpisz numer sklepu na klawiaturze.",
+      open: "Otwórz stronę dostawy",
+      recent: "Ostatnio używane",
+      error: "Najpierw wpisz prawidłowy numer sklepu.",
+      footer: "Wybrany język jest zapamiętywany na tym telefonie."
+    },
+    no: {
+      title: "Bekreftelse av levering til Europris",
+      description: "Skriv inn butikknummeret på tastaturet.",
+      open: "Åpne leveringssiden",
+      recent: "Nylig brukt",
+      error: "Skriv inn et gyldig butikknummer først.",
+      footer: "Valgt språk lagres på denne telefonen."
+    },
+    en: {
+      title: "Europris delivery confirmation",
+      description: "Enter the store number using the keypad.",
+      open: "Open delivery page",
+      recent: "Recently used",
+      error: "Enter a valid store number first.",
+      footer: "The selected language is saved on this phone."
+    }
+  };
+
+  let current = "";
+  let language = localStorage.getItem(LANG_KEY) || "pl";
+  if (!texts[language]) language = "pl";
+
+  const display = document.getElementById("display");
+  const error = document.getElementById("error");
+  const recentBlock = document.getElementById("recentBlock");
+  const recentEl = document.getElementById("recent");
+
+  function updateDisplay() {
+    display.textContent = current || "—";
+    error.textContent = "";
+  }
+
+  function applyLanguage() {
+    const t = texts[language];
+    document.documentElement.lang = language === "no" ? "nb" : language;
+    document.getElementById("title").textContent = t.title;
+    document.getElementById("description").textContent = t.description;
+    document.getElementById("openBtn").textContent = t.open;
+    document.getElementById("recentTitle").textContent = t.recent;
+    document.getElementById("footer").textContent = t.footer;
+
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.lang === language);
+      btn.setAttribute("aria-pressed", btn.dataset.lang === language ? "true" : "false");
+    });
+
+    renderRecent();
+  }
+
+  function loadRecent() {
+    try {
+      const data = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      return Array.isArray(data)
+        ? data.filter(x => /^\d{1,8}$/.test(x)).slice(0, MAX_RECENT)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveRecent(store) {
+    const recent = loadRecent().filter(x => x !== store);
+    recent.unshift(store);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+  }
+
+  function renderRecent() {
+    const recent = loadRecent();
+    recentEl.replaceChildren();
+    recentBlock.hidden = recent.length === 0;
+
+    for (const store of recent) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip";
+      btn.textContent = store;
+      btn.addEventListener("click", () => openStore(store));
+      recentEl.appendChild(btn);
+    }
+  }
+
+  function openStore(raw) {
+    const store = String(raw).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+
+    if (!/^\d{1,8}$/.test(store)) {
+      error.textContent = texts[language].error;
+      return;
+    }
+
+    saveRecent(store);
+    renderRecent();
+    current = "";
+    updateDisplay();
+    window.location.assign(BASE_URL + encodeURIComponent(store) + URL_SUFFIX);
+  }
+
+  document.querySelectorAll("[data-digit]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (current.length < MAX_LENGTH) {
+        current += btn.dataset.digit;
+        updateDisplay();
       }
+    });
+  });
 
-      function saveRecent(store) {
-        const recent = loadRecent().filter(x => x !== store);
-        recent.unshift(store);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
-      }
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    current = "";
+    updateDisplay();
+  });
 
-      function renderRecent() {
-        const recent = loadRecent();
-        historyEl.replaceChildren();
-        historyBlock.hidden = recent.length === 0;
+  document.getElementById("backBtn").addEventListener("click", () => {
+    current = current.slice(0, -1);
+    updateDisplay();
+  });
 
-        for (const store of recent) {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "chip";
-          btn.textContent = store;
-          btn.setAttribute("aria-label", `Otwórz sklep ${store}`);
-          btn.addEventListener("click", () => openStore(store));
-          historyEl.appendChild(btn);
-        }
-      }
+  document.getElementById("openBtn").addEventListener("click", () => openStore(current));
 
-      function openStore(rawValue) {
-        const store = normalize(rawValue);
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      language = btn.dataset.lang;
+      localStorage.setItem(LANG_KEY, language);
+      applyLanguage();
+    });
+  });
 
-        if (!/^\d{1,8}$/.test(store)) {
-          error.textContent = "Wpisz prawidłowy numer sklepu, używając tylko cyfr.";
-          input.focus();
-          return;
-        }
+  updateDisplay();
+  applyLanguage();
 
-        error.textContent = "";
-        saveRecent(store);
-        renderRecent();
-
-        const destination = BASE_URL + encodeURIComponent(store) + URL_SUFFIX;
-        window.location.assign(destination);
-      }
-
-      input.addEventListener("input", () => {
-        const cleaned = input.value.replace(/\D/g, "");
-        if (input.value !== cleaned) input.value = cleaned;
-        error.textContent = "";
-      });
-
-      form.addEventListener("submit", event => {
-        event.preventDefault();
-        openStore(input.value);
-      });
-
-      renderRecent();
-
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
-        });
-      }
-    })();
-  </script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+})();
+</script>
 </body>
 </html>
