@@ -707,8 +707,9 @@
   }
 
   function cleanNumber(value) {
-    const number = String(value).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
-    return number === "42" ? "632" : number;
+    return String(value)
+      .replace(/\D/g, "")
+      .replace(/^0+(?=\d)/, "");
   }
 
   function hasValidCoordinates(store) {
