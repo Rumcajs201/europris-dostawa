@@ -279,6 +279,69 @@
     }
 
 
+
+    .phone-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .private-edit {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .private-panel {
+      margin-top: 9px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .private-panel input {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      padding: 0 10px;
+    }
+
+    .private-panel-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .private-panel-actions button {
+      min-height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--green);
+      background: transparent;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .private-panel-actions .delete {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .private-contact-info {
+      color: var(--muted);
+      font-size: .88rem;
+      text-align: center;
+      min-height: 20px;
+    }
+
     .history-toggle {
       width: 100%;
       min-height: 48px;
@@ -476,7 +539,23 @@
       <button id="open" class="action-button open"></button>
       <button id="openSave" class="action-button open"></button>
       <button id="navigate" class="action-button navigate" disabled></button>
-      <button id="call" class="action-button navigate" disabled></button>
+
+      <div class="phone-row">
+        <button id="call" class="action-button navigate" disabled></button>
+        <button id="callPrivate" class="action-button navigate" disabled></button>
+      </div>
+
+      <button id="editPrivate" class="private-edit" disabled></button>
+
+      <section id="privatePanel" class="private-panel" hidden>
+        <input id="privateName" type="text" autocomplete="off">
+        <input id="privatePhone" type="tel" inputmode="tel" autocomplete="tel">
+        <div class="private-panel-actions">
+          <button id="privateSave" type="button"></button>
+          <button id="privateDelete" class="delete" type="button"></button>
+        </div>
+        <div id="privateInfo" class="private-contact-info"></div>
+      </section>
     </div>
 
     <div id="error" class="error" role="alert" aria-live="polite"></div>
@@ -518,8 +597,9 @@
   const GOOGLE_MAPS_DIRECTIONS = "https://www.google.com/maps/dir/?api=1";
 
   const DB_NAME = "europris_delivery_history";
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const DB_STORE = "deliveries";
+  const DB_CONTACTS = "privateContacts";
   const LANGUAGE_KEY = "europris_language_v6";
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
@@ -532,7 +612,16 @@
       open: "Otwórz stronę dostawy",
       openSave: "Otwórz i zapisz dostawę",
       navigate: "Nawiguj w Google Maps",
-      call: "Zadzwoń do sklepu",
+      call: "Zadzwoń",
+      callPrivate: "Zadzwoń prywatnie",
+      editPrivate: "Dodaj / edytuj numer prywatny",
+      privateNamePlaceholder: "Opis, np. kierownik",
+      privatePhonePlaceholder: "Prywatny numer telefonu",
+      privateSave: "Zapisz",
+      privateDelete: "Usuń",
+      privateSaved: "Prywatny kontakt został zapisany.",
+      privateDeleted: "Prywatny kontakt został usunięty.",
+      privateInvalid: "Wpisz prawidłowy numer telefonu.",
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
       historyPrint: "Drukuj zestawienie miesiąca",
@@ -574,7 +663,16 @@
       open: "Åpne leveringssiden",
       openSave: "Åpne og lagre levering",
       navigate: "Naviger i Google Maps",
-      call: "Ring butikken",
+      call: "Ring",
+      callPrivate: "Ring privat",
+      editPrivate: "Legg til / rediger privatnummer",
+      privateNamePlaceholder: "Beskrivelse, f.eks. butikksjef",
+      privatePhonePlaceholder: "Privat telefonnummer",
+      privateSave: "Lagre",
+      privateDelete: "Slett",
+      privateSaved: "Privat kontakt er lagret.",
+      privateDeleted: "Privat kontakt er slettet.",
+      privateInvalid: "Skriv inn et gyldig telefonnummer.",
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
       historyPrint: "Skriv ut månedsoversikt",
@@ -616,7 +714,16 @@
       open: "Open delivery page",
       openSave: "Open and save delivery",
       navigate: "Navigate in Google Maps",
-      call: "Call store",
+      call: "Call",
+      callPrivate: "Call private",
+      editPrivate: "Add / edit private number",
+      privateNamePlaceholder: "Description, e.g. manager",
+      privatePhonePlaceholder: "Private phone number",
+      privateSave: "Save",
+      privateDelete: "Delete",
+      privateSaved: "Private contact saved.",
+      privateDeleted: "Private contact deleted.",
+      privateInvalid: "Enter a valid phone number.",
       history: "Delivery history",
       historyTitle: "Delivery history",
       historyPrint: "Print monthly report",
@@ -660,6 +767,7 @@
   let currentNumber = "";
   let currentName = "";
   let currentStore = null;
+  let currentPrivateContact = null;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -673,6 +781,14 @@
   const openSaveButton = document.getElementById("openSave");
   const navigateButton = document.getElementById("navigate");
   const callButton = document.getElementById("call");
+  const callPrivateButton = document.getElementById("callPrivate");
+  const editPrivateButton = document.getElementById("editPrivate");
+  const privatePanel = document.getElementById("privatePanel");
+  const privateName = document.getElementById("privateName");
+  const privatePhone = document.getElementById("privatePhone");
+  const privateSave = document.getElementById("privateSave");
+  const privateDelete = document.getElementById("privateDelete");
+  const privateInfo = document.getElementById("privateInfo");
   const historyToggle = document.getElementById("historyToggle");
   const historyPanel = document.getElementById("historyPanel");
   const historyClose = document.getElementById("historyClose");
@@ -726,11 +842,31 @@
     return stores.find(store => String(store.number) === String(number)) || null;
   }
 
-  function syncCurrentStore() {
+  async function syncCurrentStore() {
     currentStore = findStoreByNumber(currentNumber);
     navigateButton.disabled = !hasValidCoordinates(currentStore);
+
     const phoneDigits = String(currentStore?.phone || "").replace(/\D/g, "");
     callButton.disabled = !/^\d{8}$/.test(phoneDigits);
+    editPrivateButton.disabled = !currentStore;
+
+    currentPrivateContact = currentStore
+      ? await getPrivateContact(String(currentStore.number))
+      : null;
+
+    const privateDigits = String(currentPrivateContact?.phone || "").replace(/\D/g, "");
+    callPrivateButton.disabled = !/^\d{8,15}$/.test(privateDigits);
+    privateDelete.disabled = !currentPrivateContact;
+
+    if (currentPrivateContact) {
+      privateName.value = currentPrivateContact.name || "";
+      privatePhone.value = currentPrivateContact.phone || "";
+      privateInfo.textContent = currentPrivateContact.name || "";
+    } else {
+      privateName.value = "";
+      privatePhone.value = "";
+      privateInfo.textContent = "";
+    }
   }
 
   function applyLanguage() {
@@ -743,6 +879,12 @@
     openSaveButton.textContent = text.openSave;
     navigateButton.textContent = text.navigate;
     callButton.textContent = text.call;
+    callPrivateButton.textContent = text.callPrivate;
+    editPrivateButton.textContent = text.editPrivate;
+    privateName.placeholder = text.privateNamePlaceholder;
+    privatePhone.placeholder = text.privatePhonePlaceholder;
+    privateSave.textContent = text.privateSave;
+    privateDelete.textContent = text.privateDelete;
     historyToggle.textContent = text.history;
     document.getElementById("historyTitle").textContent = text.historyTitle;
     historyPrint.textContent = text.historyPrint;
@@ -775,27 +917,29 @@
     if (!historyPanel.hidden) renderHistory();
   }
 
-  function updateSelected() {
+  async function updateSelected() {
     selectedNumber.textContent = currentNumber || "—";
     selectedName.textContent = currentName || "";
     error.textContent = "";
-    syncCurrentStore();
+    await syncCurrentStore();
   }
 
-  function selectStore(store) {
+  async function selectStore(store) {
     currentNumber = String(store.number);
     currentName = cleanStoreName(store.name);
     currentStore = store;
     search.value = currentName || currentNumber;
     results.replaceChildren();
-    updateSelected();
+    await updateSelected();
   }
 
-  function clearSelection() {
+  async function clearSelection() {
     currentNumber = "";
     currentName = "";
     currentStore = null;
-    updateSelected();
+    currentPrivateContact = null;
+    privatePanel.hidden = true;
+    await updateSelected();
   }
 
   function renderSearchResults(query) {
@@ -822,12 +966,12 @@
       name.textContent = cleanStoreName(store.name);
 
       button.append(number, name);
-      button.addEventListener("click", () => selectStore(store));
+      button.addEventListener("click", () => { void selectStore(store); });
       results.appendChild(button);
     }
   }
 
-  function handleSearchInput() {
+  async function handleSearchInput() {
     const value = search.value.trim();
 
     if (/^\d+$/.test(value)) {
@@ -835,11 +979,11 @@
       currentStore = findStoreByNumber(currentNumber);
       currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       results.replaceChildren();
-      updateSelected();
+      await updateSelected();
       return;
     }
 
-    clearSelection();
+    await clearSelection();
     renderSearchResults(value);
   }
 
@@ -958,11 +1102,67 @@
           store.createIndex("createdAt", "createdAt");
           store.createIndex("month", "month");
         }
+
+        if (!db.objectStoreNames.contains(DB_CONTACTS)) {
+          db.createObjectStore(DB_CONTACTS, { keyPath: "storeNumber" });
+        }
       };
 
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
+  }
+
+
+  async function getPrivateContact(storeNumber) {
+    const db = await openDatabase();
+    const result = await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_CONTACTS, "readonly");
+      const request = tx.objectStore(DB_CONTACTS).get(String(storeNumber));
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return result;
+  }
+
+  async function savePrivateContact(storeNumber, name, phone) {
+    const db = await openDatabase();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_CONTACTS, "readwrite");
+      tx.objectStore(DB_CONTACTS).put({
+        storeNumber: String(storeNumber),
+        name: String(name || "").trim(),
+        phone: String(phone || "").trim(),
+        updatedAt: new Date().toISOString()
+      });
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function deletePrivateContact(storeNumber) {
+    const db = await openDatabase();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_CONTACTS, "readwrite");
+      tx.objectStore(DB_CONTACTS).delete(String(storeNumber));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function getAllPrivateContacts() {
+    const db = await openDatabase();
+    const result = await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_CONTACTS, "readonly");
+      const request = tx.objectStore(DB_CONTACTS).getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return result;
   }
 
   async function addDelivery(store) {
@@ -1160,10 +1360,16 @@
   }
 
   async function exportJson() {
-    const entries = await getAllDeliveries();
+    const deliveries = await getAllDeliveries();
+    const privateContacts = await getAllPrivateContacts();
+
     downloadFile(
-      `europris-historia-${new Date().toISOString().slice(0, 10)}.json`,
-      JSON.stringify(entries, null, 2),
+      `europris-kopia-${new Date().toISOString().slice(0, 10)}.json`,
+      JSON.stringify({
+        version: 2,
+        deliveries,
+        privateContacts
+      }, null, 2),
       "application/json"
     );
   }
@@ -1173,21 +1379,39 @@
 
     try {
       const data = JSON.parse(await file.text());
-      if (!Array.isArray(data)) throw new Error("Invalid history");
+
+      const deliveries = Array.isArray(data)
+        ? data
+        : Array.isArray(data.deliveries) ? data.deliveries : [];
+
+      const privateContacts = Array.isArray(data.privateContacts)
+        ? data.privateContacts
+        : [];
 
       const db = await openDatabase();
       await new Promise((resolve, reject) => {
-        const tx = db.transaction(DB_STORE, "readwrite");
-        const store = tx.objectStore(DB_STORE);
+        const tx = db.transaction([DB_STORE, DB_CONTACTS], "readwrite");
+        const deliveryStore = tx.objectStore(DB_STORE);
+        const contactStore = tx.objectStore(DB_CONTACTS);
 
-        for (const item of data) {
-          if (item && item.id && item.createdAt && item.storeNumber) store.put(item);
+        for (const item of deliveries) {
+          if (item && item.id && item.createdAt && item.storeNumber) {
+            deliveryStore.put(item);
+          }
+        }
+
+        for (const contact of privateContacts) {
+          if (contact && contact.storeNumber && contact.phone) {
+            contactStore.put(contact);
+          }
         }
 
         tx.oncomplete = resolve;
         tx.onerror = () => reject(tx.error);
       });
       db.close();
+
+      await syncCurrentStore();
 
       error.textContent = text.historyImportOk;
       await renderHistory();
@@ -1216,10 +1440,50 @@
     window.location.assign(deliveryUrl(number));
   }
 
-  function callStore() {
-    syncCurrentStore();
+  async function callStore() {
+    await syncCurrentStore();
     const digits = String(currentStore?.phone || "").replace(/\D/g, "");
     if (/^\d{8}$/.test(digits)) window.location.href = `tel:+47${digits}`;
+  }
+
+  async function callPrivate() {
+    await syncCurrentStore();
+    const digits = String(currentPrivateContact?.phone || "").replace(/\D/g, "");
+    if (!/^\d{8,15}$/.test(digits)) return;
+
+    const telNumber = digits.length === 8 ? `+47${digits}` : `+${digits}`;
+    window.location.href = `tel:${telNumber}`;
+  }
+
+  async function saveCurrentPrivateContact() {
+    const text = translations[language];
+
+    if (!currentStore) return;
+
+    const digits = String(privatePhone.value || "").replace(/\D/g, "");
+    if (!/^\d{8,15}$/.test(digits)) {
+      error.textContent = text.privateInvalid;
+      return;
+    }
+
+    await savePrivateContact(
+      currentStore.number,
+      privateName.value,
+      digits
+    );
+
+    await syncCurrentStore();
+    privatePanel.hidden = true;
+    error.textContent = text.privateSaved;
+  }
+
+  async function deleteCurrentPrivateContact() {
+    if (!currentStore || !currentPrivateContact) return;
+
+    await deletePrivateContact(currentStore.number);
+    await syncCurrentStore();
+    privatePanel.hidden = true;
+    error.textContent = translations[language].privateDeleted;
   }
 
   function openDelivery() {
@@ -1268,21 +1532,21 @@
       currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       search.value = currentNumber;
       results.replaceChildren();
-      updateSelected();
+      void updateSelected();
     });
   });
 
   document.getElementById("clear").addEventListener("click", () => {
     search.value = "";
     results.replaceChildren();
-    clearSelection();
+    void clearSelection();
   });
 
   document.getElementById("back").addEventListener("click", () => {
     if (!/^\d*$/.test(search.value)) {
       search.value = "";
       results.replaceChildren();
-      clearSelection();
+      void clearSelection();
       return;
     }
 
@@ -1290,13 +1554,23 @@
     currentStore = findStoreByNumber(currentNumber);
     currentName = currentStore ? cleanStoreName(currentStore.name) : "";
     search.value = currentNumber;
-    updateSelected();
+    void updateSelected();
   });
 
   openButton.addEventListener("click", openDelivery);
   openSaveButton.addEventListener("click", openAndSaveDelivery);
   navigateButton.addEventListener("click", openNavigation);
   callButton.addEventListener("click", callStore);
+  callPrivateButton.addEventListener("click", callPrivate);
+
+  editPrivateButton.addEventListener("click", async () => {
+    await syncCurrentStore();
+    if (!currentStore) return;
+    privatePanel.hidden = !privatePanel.hidden;
+  });
+
+  privateSave.addEventListener("click", saveCurrentPrivateContact);
+  privateDelete.addEventListener("click", deleteCurrentPrivateContact);
 
   historyToggle.addEventListener("click", async () => {
     historyPanel.hidden = false;
@@ -1337,7 +1611,7 @@
   });
 
   retryLocation.addEventListener("click", requestNearestStore);
-  search.addEventListener("input", handleSearchInput);
+  search.addEventListener("input", () => { void handleSearchInput(); });
 
   document.querySelectorAll("[data-lang]").forEach(button => {
     button.addEventListener("click", () => {
@@ -1350,9 +1624,9 @@
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
-  updateSelected();
+  void updateSelected();
 
-  fetch("stores.json?v=8", { cache: "no-store" })
+  fetch("stores.json?v=9", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -1368,7 +1642,7 @@
       ));
 
       status.textContent = translations[language].loaded(stores.length);
-      handleSearchInput();
+      void handleSearchInput();
       if (!historyPanel.hidden) renderHistory();
 
       if (!locationRequestedThisLaunch) {
