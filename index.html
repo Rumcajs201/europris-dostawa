@@ -24,6 +24,7 @@
       --muted: #6b7280;
       --border: #d1d5db;
       --green: #08783e;
+      --green-dark: #065f34;
       --green-text: #ffffff;
       --key: #e5e7eb;
       --danger: #b91c1c;
@@ -51,6 +52,10 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       padding: 14px;
     }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; }
+    button:disabled { cursor: not-allowed; opacity: .48; }
 
     main {
       width: min(100%, 460px);
@@ -100,6 +105,34 @@
       line-height: 1.4;
     }
 
+    .location-panel {
+      margin-bottom: 13px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--green) 7%, transparent);
+    }
+
+    .location-heading { margin: 0 0 6px; font-size: 1rem; font-weight: 850; }
+    .location-message { color: var(--muted); line-height: 1.35; font-size: .92rem; }
+    .location-result { margin-top: 9px; font-weight: 800; line-height: 1.35; }
+    .location-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+    .location-button {
+      flex: 1;
+      min-height: 43px;
+      border: 1px solid var(--green);
+      border-radius: 11px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .location-button.secondary {
+      background: transparent;
+      color: var(--green);
+    }
+
     .search {
       width: 100%;
       min-height: 56px;
@@ -112,9 +145,7 @@
       outline: none;
     }
 
-    .search:focus {
-      border-color: var(--green);
-    }
+    .search:focus { border-color: var(--green); }
 
     .results {
       display: grid;
@@ -143,14 +174,11 @@
       font-size: 1.05rem;
     }
 
-    .result-name {
-      font-weight: 750;
-      font-size: 1rem;
-    }
+    .result-name { font-weight: 750; font-size: 1rem; }
 
     .selected {
       margin-top: 12px;
-      min-height: 62px;
+      min-height: 72px;
       display: grid;
       place-items: center;
       text-align: center;
@@ -186,19 +214,37 @@
       color: var(--text);
       font-size: 1.35rem;
       font-weight: 850;
-      touch-action: manipulation;
+    }
+
+    .main-actions {
+      display: grid;
+      gap: 9px;
+      margin-top: 11px;
+    }
+
+    .action-button {
+      width: 100%;
+      min-height: 58px;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 850;
     }
 
     .open {
-      width: 100%;
-      min-height: 58px;
-      margin-top: 11px;
       border: 0;
-      border-radius: 14px;
       background: var(--green);
       color: var(--green-text);
-      font-size: 1.05rem;
-      font-weight: 850;
+    }
+
+    .navigate {
+      border: 2px solid var(--green);
+      background: transparent;
+      color: var(--green);
+    }
+
+    .navigate:not(:disabled):active,
+    .navigate:not(:disabled):focus-visible {
+      background: color-mix(in srgb, var(--green) 12%, transparent);
     }
 
     .error {
@@ -232,28 +278,13 @@
       font-weight: 750;
     }
 
-    .location-panel {
-      margin-bottom: 13px;
-      padding: 13px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: color-mix(in srgb, var(--green) 7%, transparent);
-    }
-    .location-heading { margin: 0 0 6px; font-size: 1rem; font-weight: 850; }
-    .location-message { color: var(--muted); line-height: 1.35; font-size: .92rem; }
-    .location-result { margin-top: 9px; font-weight: 800; line-height: 1.35; }
-    .location-actions { display: flex; gap: 8px; margin-top: 10px; }
-    .location-button {
-      flex: 1; min-height: 43px; border: 1px solid var(--green);
-      border-radius: 11px; background: var(--green); color: #fff; font-weight: 800;
-    }
-    .location-button.secondary { background: transparent; color: var(--green); }
     .status {
       margin-top: 12px;
       color: var(--muted);
       font-size: .78rem;
       text-align: center;
     }
+
     .footer {
       margin: 16px 4px 4px;
       color: var(--muted);
@@ -318,7 +349,11 @@
       <button class="key" id="back">⌫</button>
     </div>
 
-    <button id="open" class="open"></button>
+    <div class="main-actions">
+      <button id="open" class="action-button open"></button>
+      <button id="navigate" class="action-button navigate" disabled></button>
+    </div>
+
     <div id="error" class="error" role="alert" aria-live="polite"></div>
 
     <div id="recentBlock" hidden>
@@ -328,6 +363,7 @@
 
     <div id="status" class="status"></div>
   </section>
+
   <div id="footer" class="footer"></div>
 </main>
 
@@ -337,8 +373,9 @@
 
   const DELIVERY_BASE = "https://events.app.fourprosolutions.com/europris/";
   const DELIVERY_SUFFIX = "/transport";
+  const GOOGLE_MAPS_DIRECTIONS = "https://www.google.com/maps/dir/?api=1";
 
-  const RECENT_KEY = "europris_recent_stores_v6";
+  const RECENT_KEY = "europris_recent_stores_v7";
   const LANGUAGE_KEY = "europris_language_v6";
   const MAX_RECENT = 6;
   const MAX_RESULTS = 15;
@@ -350,8 +387,10 @@
       description: "Wpisz numer sklepu albo zacznij wpisywać jego nazwę.",
       placeholder: "Numer lub nazwa sklepu",
       open: "Otwórz stronę dostawy",
+      navigate: "Nawiguj w Google Maps",
       recent: "Ostatnio używane",
       error: "Wybierz sklep albo wpisz prawidłowy numer.",
+      navigationError: "Ten sklep nie ma poprawnych współrzędnych GPS w bazie.",
       loading: "Wczytywanie bazy sklepów…",
       loaded: count => `Baza sklepów: ${count}`,
       loadError: "Nie udało się wczytać bazy sklepów. Nadal możesz wpisać numer.",
@@ -371,8 +410,10 @@
       description: "Skriv inn butikknummeret eller begynn å skrive butikknavnet.",
       placeholder: "Butikknummer eller butikknavn",
       open: "Åpne leveringssiden",
+      navigate: "Naviger i Google Maps",
       recent: "Nylig brukt",
       error: "Velg en butikk eller skriv inn et gyldig nummer.",
+      navigationError: "Denne butikken har ikke gyldige GPS-koordinater i databasen.",
       loading: "Laster butikklisten…",
       loaded: count => `Butikkdatabase: ${count}`,
       loadError: "Butikklisten kunne ikke lastes. Du kan fortsatt skrive inn nummeret.",
@@ -392,8 +433,10 @@
       description: "Enter the store number or start typing the store name.",
       placeholder: "Store number or store name",
       open: "Open delivery page",
+      navigate: "Navigate in Google Maps",
       recent: "Recently used",
       error: "Select a store or enter a valid number.",
+      navigationError: "This store has no valid GPS coordinates in the database.",
       loading: "Loading store database…",
       loaded: count => `Store database: ${count}`,
       loadError: "The store database could not be loaded. You can still enter a number.",
@@ -416,6 +459,7 @@
   let stores = [];
   let currentNumber = "";
   let currentName = "";
+  let currentStore = null;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -425,6 +469,8 @@
   const results = document.getElementById("results");
   const selectedNumber = document.getElementById("selectedNumber");
   const selectedName = document.getElementById("selectedName");
+  const openButton = document.getElementById("open");
+  const navigateButton = document.getElementById("navigate");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const locationHeading = document.getElementById("locationHeading");
@@ -451,13 +497,33 @@
     return number === "42" ? "632" : number;
   }
 
+  function hasValidCoordinates(store) {
+    if (!store) return false;
+    const latitude = Number(store.latitude);
+    const longitude = Number(store.longitude);
+    return Number.isFinite(latitude) &&
+      Number.isFinite(longitude) &&
+      latitude >= -90 && latitude <= 90 &&
+      longitude >= -180 && longitude <= 180;
+  }
+
+  function findStoreByNumber(number) {
+    return stores.find(store => String(store.number) === String(number)) || null;
+  }
+
+  function syncCurrentStore() {
+    currentStore = findStoreByNumber(currentNumber);
+    navigateButton.disabled = !hasValidCoordinates(currentStore);
+  }
+
   function applyLanguage() {
     const text = translations[language];
 
     document.documentElement.lang = language === "no" ? "nb" : language;
     document.getElementById("title").textContent = text.title;
     document.getElementById("description").textContent = text.description;
-    document.getElementById("open").textContent = text.open;
+    openButton.textContent = text.open;
+    navigateButton.textContent = text.navigate;
     document.getElementById("recentTitle").textContent = text.recent;
     search.placeholder = text.placeholder;
     locationHeading.textContent = text.locationHeading;
@@ -467,24 +533,17 @@
 
     document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);
-      button.setAttribute(
-        "aria-pressed",
-        button.dataset.lang === language ? "true" : "false"
-      );
+      button.setAttribute("aria-pressed", button.dataset.lang === language ? "true" : "false");
     });
 
-    status.textContent = stores.length
-      ? text.loaded(stores.length)
-      : text.loading;
+    status.textContent = stores.length ? text.loaded(stores.length) : text.loading;
 
     if (nearestStore && Number.isFinite(nearestDistanceMeters)) {
       const name = cleanStoreName(nearestStore.name);
       const distance = formatDistance(nearestDistanceMeters);
-
       locationResult.textContent = nearestWasAutoSelected
         ? text.locationAuto(nearestStore.number, name, distance)
         : text.locationSuggestion(nearestStore.number, name, distance);
-
       useNearest.hidden = nearestWasAutoSelected;
     }
 
@@ -495,11 +554,13 @@
     selectedNumber.textContent = currentNumber || "—";
     selectedName.textContent = currentName || "";
     error.textContent = "";
+    syncCurrentStore();
   }
 
   function selectStore(store) {
     currentNumber = String(store.number);
     currentName = cleanStoreName(store.name);
+    currentStore = store;
     search.value = currentName || currentNumber;
     results.replaceChildren();
     updateSelected();
@@ -508,13 +569,17 @@
   function clearSelection() {
     currentNumber = "";
     currentName = "";
+    currentStore = null;
     updateSelected();
   }
 
   function loadRecent() {
     try {
-      const value = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
-      return Array.isArray(value) ? value : [];
+      const current = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      if (Array.isArray(current) && current.length) return current;
+
+      const old = JSON.parse(localStorage.getItem("europris_recent_stores_v6") || "[]");
+      return Array.isArray(old) ? old : [];
     } catch {
       return [];
     }
@@ -538,13 +603,18 @@
       const button = document.createElement("button");
       button.type = "button";
       button.className = "chip";
-      button.textContent = item.name
-        ? `${item.number} ${item.name}`
-        : item.number;
+      button.textContent = item.name ? `${item.number} ${item.name}` : item.number;
 
       button.addEventListener("click", () => {
+        const store = findStoreByNumber(item.number);
+        if (store) {
+          selectStore(store);
+          return;
+        }
+
         currentNumber = String(item.number);
         currentName = item.name || "";
+        currentStore = null;
         search.value = item.name || item.number;
         results.replaceChildren();
         updateSelected();
@@ -588,14 +658,8 @@
 
     if (/^\d+$/.test(value)) {
       currentNumber = cleanNumber(value);
-      currentName = "";
-
-      const exactStore = stores.find(
-        store => String(store.number) === currentNumber
-      );
-
-      if (exactStore) currentName = cleanStoreName(exactStore.name);
-
+      currentStore = findStoreByNumber(currentNumber);
+      currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       results.replaceChildren();
       updateSelected();
       return;
@@ -627,11 +691,7 @@
   }
 
   function findNearestStore(latitude, longitude) {
-    const valid = stores.filter(store =>
-      Number.isFinite(Number(store.latitude)) &&
-      Number.isFinite(Number(store.longitude))
-    );
-
+    const valid = stores.filter(hasValidCoordinates);
     if (!valid.length) return null;
 
     let best = null;
@@ -654,7 +714,6 @@
 
     const name = cleanStoreName(best.store.name);
     const distance = formatDistance(best.distance);
-
     nearestWasAutoSelected = best.distance <= 1000;
 
     if (nearestWasAutoSelected) {
@@ -727,6 +786,26 @@
     );
   }
 
+  function openNavigation() {
+    syncCurrentStore();
+
+    if (!hasValidCoordinates(currentStore)) {
+      error.textContent = translations[language].navigationError;
+      return;
+    }
+
+    saveRecent(currentStore.number, currentStore.name);
+
+    const latitude = Number(currentStore.latitude);
+    const longitude = Number(currentStore.longitude);
+    const destination = encodeURIComponent(`${latitude},${longitude}`);
+    const url = `${GOOGLE_MAPS_DIRECTIONS}&destination=${destination}&travelmode=driving`;
+
+    // _blank zachowuje otwartą aplikację PWA po powrocie z Google Maps.
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (!newWindow) window.location.assign(url);
+  }
+
   document.querySelectorAll("[data-digit]").forEach(button => {
     button.addEventListener("click", () => {
       if (!/^\d*$/.test(search.value)) {
@@ -738,13 +817,9 @@
 
       currentNumber += button.dataset.digit;
       currentNumber = cleanNumber(currentNumber);
+      currentStore = findStoreByNumber(currentNumber);
+      currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       search.value = currentNumber;
-
-      const exactStore = stores.find(
-        store => String(store.number) === currentNumber
-      );
-
-      currentName = exactStore ? cleanStoreName(exactStore.name) : "";
       results.replaceChildren();
       updateSelected();
     });
@@ -765,17 +840,14 @@
     }
 
     currentNumber = currentNumber.slice(0, -1);
+    currentStore = findStoreByNumber(currentNumber);
+    currentName = currentStore ? cleanStoreName(currentStore.name) : "";
     search.value = currentNumber;
-
-    const exactStore = stores.find(
-      store => String(store.number) === currentNumber
-    );
-
-    currentName = exactStore ? cleanStoreName(exactStore.name) : "";
     updateSelected();
   });
 
-  document.getElementById("open").addEventListener("click", openDelivery);
+  openButton.addEventListener("click", openDelivery);
+  navigateButton.addEventListener("click", openNavigation);
 
   useNearest.addEventListener("click", () => {
     if (nearestStore) {
@@ -805,7 +877,7 @@
   applyLanguage();
   updateSelected();
 
-  fetch("stores.json?v=6", { cache: "no-store" })
+  fetch("stores.json?v=7", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -819,8 +891,10 @@
         Number(store.number) === 42 &&
         normalized(store.name).includes("holmestrand")
       ));
+
       status.textContent = translations[language].loaded(stores.length);
       handleSearchInput();
+      renderRecent();
 
       if (!locationRequestedThisLaunch) {
         locationRequestedThisLaunch = true;
@@ -829,6 +903,8 @@
     })
     .catch(() => {
       stores = [];
+      currentStore = null;
+      navigateButton.disabled = true;
       status.textContent = translations[language].loadError;
       locationMessage.textContent = translations[language].locationNoCoordinates;
     });
