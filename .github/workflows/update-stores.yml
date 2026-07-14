@@ -1,0 +1,36 @@
+name: Jednorazowo pobierz sklepy Europris
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  download-stores:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+
+      - name: Ustaw Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Zainstaluj requests
+        run: pip install requests
+
+      - name: Pobierz i zbuduj gotową bazę sklepów
+        env:
+          KASSALAPP_API_KEY: ${{ secrets.KASSALAPP_API_KEY }}
+        run: python fetch_stores.py
+
+      - name: Zapisz gotową listę w repozytorium
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add stores.json stores.csv stores_without_number.json
+          git commit -m "Dodaj gotową bazę sklepów Europris" || exit 0
+          git push
