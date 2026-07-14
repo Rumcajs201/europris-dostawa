@@ -404,7 +404,46 @@
       font-weight: 700;
     }
 
-    .history-list { display: grid; gap: 8px; }
+    .history-list { display: grid; gap: 10px; }
+
+
+    .history-day {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--green) 4%, transparent);
+    }
+
+    .history-day-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 900;
+    }
+
+    .history-day-count {
+      color: var(--muted);
+      font-size: .86rem;
+      white-space: nowrap;
+    }
+
+    .history-day-list {
+      display: grid;
+    }
+
+    .history-day .history-item {
+      border: 0;
+      border-radius: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-day .history-item:last-child {
+      border-bottom: 0;
+    }
+
 
     .history-item {
       border: 1px solid var(--border);
@@ -584,6 +623,7 @@
   <div id="footer" class="footer"></div>
 </main>
 
+<script src="xlsx.full.min.js"></script>
 <script>
 (() => {
   "use strict";
@@ -621,7 +661,7 @@
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
       historyPrint: "Drukuj zestawienie miesiąca",
-      historyCsv: "Eksport CSV",
+      historyCsv: "Eksport do Excel (.xlsx)",
       historyJson: "Kopia JSON",
       historyImport: "Importuj kopię",
       historyClear: "Wyczyść wybrany miesiąc",
@@ -672,7 +712,7 @@
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
       historyPrint: "Skriv ut månedsoversikt",
-      historyCsv: "Eksporter CSV",
+      historyCsv: "Eksporter til Excel (.xlsx)",
       historyJson: "JSON-sikkerhetskopi",
       historyImport: "Importer sikkerhetskopi",
       historyClear: "Tøm valgt måned",
@@ -723,7 +763,7 @@
       history: "Delivery history",
       historyTitle: "Delivery history",
       historyPrint: "Print monthly report",
-      historyCsv: "Export CSV",
+      historyCsv: "Export to Excel (.xlsx)",
       historyJson: "JSON backup",
       historyImport: "Import backup",
       historyClear: "Clear selected month",
@@ -1242,10 +1282,27 @@
     return `${GOOGLE_MAPS_DIRECTIONS}&destination=${destination}&travelmode=driving`;
   }
 
+  function localDateKey(value) {
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function formatDayHeading(value) {
+    return new Intl.DateTimeFormat(language === "no" ? "nb-NO" : language, {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(new Date(value));
+  }
+
   async function renderHistory() {
     const text = translations[language];
     const entries = (await getAllDeliveries())
-      .filter(item => item.month === historyMonth.value);
+      .filter(item => localDateKey(item.createdAt).slice(0, 7) === historyMonth.value);
 
     historyList.replaceChildren();
     historySummary.textContent = text.historySummary(entries.length);
@@ -1258,64 +1315,102 @@
       return;
     }
 
+    const groups = new Map();
+
     for (const item of entries) {
-      const card = document.createElement("article");
-      card.className = "history-item";
+      const key = localDateKey(item.createdAt);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
 
-      const main = document.createElement("div");
-      main.className = "history-item-main";
+    for (const [dayKey, dayEntries] of groups) {
+      const dayCard = document.createElement("section");
+      dayCard.className = "history-day";
 
-      const store = document.createElement("div");
-      store.className = "history-item-number";
-      store.textContent = `${item.storeNumber} — ${item.storeName}`;
+      const header = document.createElement("div");
+      header.className = "history-day-header";
 
-      const date = document.createElement("div");
-      date.className = "history-item-date";
-      date.textContent = formatDateTime(item.createdAt);
+      const heading = document.createElement("div");
+      heading.textContent = formatDayHeading(`${dayKey}T12:00:00`);
 
-      const address = document.createElement("div");
-      address.textContent = item.address || "";
+      const count = document.createElement("div");
+      count.className = "history-day-count";
+      count.textContent = text.historySummary(dayEntries.length);
 
-      const actions = document.createElement("div");
-      actions.className = "history-item-actions";
+      header.append(heading, count);
 
-      const page = document.createElement("button");
-      page.type = "button";
-      page.textContent = text.historyOpen;
-      page.addEventListener("click", () => {
-        window.open(deliveryUrl(item.storeNumber), "_blank", "noopener,noreferrer");
-      });
+      const dayList = document.createElement("div");
+      dayList.className = "history-day-list";
 
-      const map = document.createElement("button");
-      map.type = "button";
-      map.textContent = text.historyMap;
-      map.disabled = !Number.isFinite(Number(item.latitude)) || !Number.isFinite(Number(item.longitude));
-      map.addEventListener("click", () => {
-        if (!map.disabled) window.open(mapsUrl(item), "_blank", "noopener,noreferrer");
-      });
+      for (const item of dayEntries) {
+        const card = document.createElement("article");
+        card.className = "history-item";
 
-      const call = document.createElement("button");
-      call.type = "button";
-      call.textContent = text.historyCall;
-      const digits = String(item.phone || "").replace(/\D/g, "");
-      call.disabled = !/^\d{8}$/.test(digits);
-      call.addEventListener("click", () => {
-        if (!call.disabled) window.location.href = `tel:+47${digits}`;
-      });
+        const main = document.createElement("div");
+        main.className = "history-item-main";
 
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "delete";
-      remove.textContent = text.historyDelete;
-      remove.addEventListener("click", async () => {
-        await deleteDelivery(item.id);
-        await renderHistory();
-      });
+        const store = document.createElement("div");
+        store.className = "history-item-number";
+        store.textContent = `${item.storeNumber} — ${item.storeName}`;
 
-      actions.append(page, map, call, remove);
-      main.append(store, date, address);
-      card.append(main, actions);
-      historyList.appendChild(card);
+        const time = document.createElement("div");
+        time.className = "history-item-date";
+        time.textContent = new Intl.DateTimeFormat(
+          language === "no" ? "nb-NO" : language,
+          { hour: "2-digit", minute: "2-digit" }
+        ).format(new Date(item.createdAt));
+
+        const address = document.createElement("div");
+        address.textContent = item.address || "";
+
+        const actions = document.createElement("div");
+        actions.className = "history-item-actions";
+
+        const page = document.createElement("button");
+        page.type = "button";
+        page.textContent = text.historyOpen;
+        page.addEventListener("click", () => {
+          window.open(deliveryUrl(item.storeNumber), "_blank", "noopener,noreferrer");
+        });
+
+        const map = document.createElement("button");
+        map.type = "button";
+        map.textContent = text.historyMap;
+        map.disabled =
+          !Number.isFinite(Number(item.latitude)) ||
+          !Number.isFinite(Number(item.longitude));
+        map.addEventListener("click", () => {
+          if (!map.disabled) {
+            window.open(mapsUrl(item), "_blank", "noopener,noreferrer");
+          }
+        });
+
+        const call = document.createElement("button");
+        call.type = "button";
+        call.textContent = text.historyCall;
+        const digits = String(item.phone || "").replace(/\D/g, "");
+        call.disabled = !/^\d{8}$/.test(digits);
+        call.addEventListener("click", () => {
+          if (!call.disabled) window.location.href = `tel:+47${digits}`;
+        });
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "delete";
+        remove.textContent = text.historyDelete;
+        remove.addEventListener("click", async () => {
+          await deleteDelivery(item.id);
+          await renderHistory();
+        });
+
+        actions.append(page, map, call, remove);
+        main.append(store, time, address);
+        card.append(main, actions);
+        dayList.appendChild(card);
+      }
+
+      dayCard.append(header, dayList);
+      historyList.appendChild(dayCard);
     }
   }
 
@@ -1331,28 +1426,63 @@
     URL.revokeObjectURL(url);
   }
 
-  async function exportCsv() {
-    const month = historyMonth.value;
-    const entries = (await getAllDeliveries()).filter(item => item.month === month);
-    const rows = [["Data", "Godzina", "Numer sklepu", "Nazwa sklepu", "Adres", "Telefon"]];
-
-    for (const item of entries) {
-      const date = new Date(item.createdAt);
-      rows.push([
-        date.toLocaleDateString("pl-PL"),
-        date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
-        item.storeNumber,
-        item.storeName,
-        item.address,
-        item.phone
-      ]);
+  async function exportExcel() {
+    if (typeof XLSX === "undefined") {
+      error.textContent = translations[language].historyImportError;
+      return;
     }
 
-    const csv = rows
-      .map(row => row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(";"))
-      .join("\r\n");
+    const month = historyMonth.value;
+    const entries = (await getAllDeliveries())
+      .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
+      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
 
-    downloadFile(`europris-dostawy-${month}.csv`, "\ufeff" + csv, "text/csv;charset=utf-8");
+    const rows = entries.map(item => {
+      const date = new Date(item.createdAt);
+
+      return {
+        "Data": date.toLocaleDateString("pl-PL"),
+        "Godzina": date.toLocaleTimeString("pl-PL", {
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
+        "Numer sklepu": String(item.storeNumber || ""),
+        "Nazwa sklepu": String(item.storeName || ""),
+        "Adres": String(item.address || ""),
+        "Telefon": String(item.phone || "")
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows, {
+      header: [
+        "Data",
+        "Godzina",
+        "Numer sklepu",
+        "Nazwa sklepu",
+        "Adres",
+        "Telefon"
+      ]
+    });
+
+    worksheet["!cols"] = [
+      { wch: 13 },
+      { wch: 10 },
+      { wch: 14 },
+      { wch: 25 },
+      { wch: 42 },
+      { wch: 14 }
+    ];
+
+    worksheet["!autofilter"] = {
+      ref: worksheet["!ref"] || "A1:F1"
+    };
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Dostawy");
+
+    XLSX.writeFile(workbook, `europris-dostawy-${month}.xlsx`, {
+      compression: true
+    });
   }
 
   async function exportJson() {
@@ -1577,7 +1707,7 @@
   historyClose.addEventListener("click", () => { historyPanel.hidden = true; });
   historyMonth.addEventListener("change", renderHistory);
   historyPrint.addEventListener("click", () => window.print());
-  historyCsv.addEventListener("click", exportCsv);
+  historyCsv.addEventListener("click", exportExcel);
   historyJson.addEventListener("click", exportJson);
   historyImport.addEventListener("click", () => historyImportFile.click());
 
@@ -1622,7 +1752,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=10", { cache: "no-store" })
+  fetch("stores.json?v=11", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();

@@ -1,8 +1,9 @@
-const CACHE_NAME = "europris-app-v14-private-panel-hidden";
+const CACHE_NAME = "europris-app-v15-excel-daily-history";
 
 const STATIC_FILES = [
   "./",
   "./index.html",
+  "./xlsx.full.min.js",
   "./manifest.webmanifest",
   "./stores.json",
   "./europris-icon-180.png",
