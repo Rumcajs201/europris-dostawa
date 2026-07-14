@@ -1,289 +1,59 @@
 <!doctype html>
-<html lang="pl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Europris">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="europris-icon-180.png?v=1">
-  <link rel="icon" type="image/png" sizes="192x192" href="europris-icon-192.png?v=1">
-  <link rel="icon" type="image/png" sizes="512x512" href="europris-icon-512.png?v=1">
-  <title>Europris</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg:#f3f4f6; --card:#fff; --text:#111827; --muted:#6b7280;
-      --border:#d1d5db; --button:#111827; --button-text:#fff;
-      --secondary:#e5e7eb; --secondary-text:#111827; --danger:#b91c1c;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg:#0b1220; --card:#111827; --text:#f9fafb; --muted:#9ca3af;
-        --border:#374151; --button:#f9fafb; --button-text:#111827;
-        --secondary:#1f2937; --secondary-text:#f9fafb; --danger:#fca5a5;
-      }
-    }
-    * { box-sizing:border-box; }
-    body {
-      margin:0; min-height:100svh; display:grid; place-items:center;
-      background:var(--bg); color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      padding:16px;
-    }
-    main {
-      width:min(100%,430px); background:var(--card);
-      border:1px solid var(--border); border-radius:20px; padding:20px;
-      box-shadow:0 12px 35px rgba(0,0,0,.12);
-    }
-    .lang-row {
-      display:flex; justify-content:flex-end; gap:8px; margin-bottom:14px;
-    }
-    .lang-btn {
-      width:auto; min-width:52px; min-height:40px; padding:0 12px; margin:0;
-      border:1px solid var(--border); background:transparent; color:var(--text);
-      border-radius:10px; font-weight:800;
-    }
-    .lang-btn.active {
-      background:var(--button); color:var(--button-text); border-color:var(--button);
-    }
-    h1 { margin:0 0 8px; font-size:1.42rem; }
-    p { margin:0 0 18px; color:var(--muted); line-height:1.4; }
-    .display {
-      min-height:62px; display:grid; place-items:center;
-      border:2px solid var(--border); border-radius:14px;
-      font-size:1.9rem; font-weight:800; letter-spacing:.12em;
-      margin-bottom:12px;
-    }
-    .keypad {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:9px;
-    }
-    button {
-      min-height:54px; border:0; border-radius:14px;
-      background:var(--button); color:var(--button-text);
-      font-size:1.05rem; font-weight:800; cursor:pointer;
-      touch-action:manipulation;
-    }
-    .key {
-      background:var(--secondary); color:var(--secondary-text);
-      border:1px solid var(--border); font-size:1.45rem;
-    }
-    .open-btn { width:100%; margin-top:12px; min-height:58px; }
-    .error {
-      min-height:23px; margin:9px 2px 0;
-      color:var(--danger); font-weight:700;
-    }
-    .recent-title {
-      margin-top:17px; color:var(--muted); font-size:.92rem; font-weight:750;
-    }
-    .recent {
-      display:flex; flex-wrap:wrap; gap:8px; margin-top:9px;
-    }
-    .chip {
-      width:auto; min-height:40px; margin:0; padding:0 15px;
-      border:1px solid var(--border); background:transparent;
-      color:var(--text); font-size:1rem;
-    }
-    .footer {
-      margin-top:18px; font-size:.8rem; color:var(--muted); text-align:center;
-    }
-  </style>
-</head>
-<body>
-<main>
-  <div class="lang-row" aria-label="Language">
-    <button class="lang-btn" data-lang="pl">PL</button>
-    <button class="lang-btn" data-lang="no">NO</button>
-    <button class="lang-btn" data-lang="en">EN</button>
-  </div>
-
-  <h1 id="title"></h1>
-  <p id="description"></p>
-
-  <div id="display" class="display" aria-live="polite">—</div>
-
-  <div class="keypad" aria-label="Numeric keypad">
-    <button class="key" data-digit="1">1</button>
-    <button class="key" data-digit="2">2</button>
-    <button class="key" data-digit="3">3</button>
-    <button class="key" data-digit="4">4</button>
-    <button class="key" data-digit="5">5</button>
-    <button class="key" data-digit="6">6</button>
-    <button class="key" data-digit="7">7</button>
-    <button class="key" data-digit="8">8</button>
-    <button class="key" data-digit="9">9</button>
-    <button class="key" id="clearBtn">C</button>
-    <button class="key" data-digit="0">0</button>
-    <button class="key" id="backBtn">⌫</button>
-  </div>
-
-  <button id="openBtn" class="open-btn"></button>
-  <div id="error" class="error" role="alert" aria-live="polite"></div>
-
-  <div id="recentBlock" hidden>
-    <div id="recentTitle" class="recent-title"></div>
-    <div id="recent" class="recent"></div>
-  </div>
-
-  <div id="footer" class="footer"></div>
-</main>
-
+<html lang="pl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="europris-icon-180.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="europris-icon-192.png?v=2">
+<title>Europris</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--border:#d1d5db;--btn:#126b31;--btntext:#fff;--sec:#e5e7eb;--danger:#b91c1c}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#111827;--text:#f9fafb;--muted:#9ca3af;--border:#374151;--sec:#1f2937}}
+*{box-sizing:border-box}body{margin:0;min-height:100svh;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;padding:14px}
+main{width:min(100%,460px);margin:auto}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 10px 28px rgba(0,0,0,.1)}
+.lang{display:flex;justify-content:flex-end;gap:7px;margin-bottom:10px}.lang button{min-width:48px;min-height:38px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--text);font-weight:800}.lang button.active{background:var(--btn);color:#fff}
+h1{margin:0 0 6px;font-size:1.4rem}p{margin:0 0 14px;color:var(--muted)}input{width:100%;min-height:54px;border:2px solid var(--border);border-radius:14px;padding:0 14px;background:transparent;color:var(--text);font-size:1.1rem}
+.results{display:grid;gap:7px;margin:9px 0;max-height:220px;overflow:auto}.result{width:100%;text-align:left;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text)}.result b{display:block}.result span{color:var(--muted);font-size:.88rem}
+.display{min-height:58px;display:grid;place-items:center;border:2px solid var(--border);border-radius:14px;font-size:1.7rem;font-weight:800;letter-spacing:.1em;margin:12px 0}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.key{min-height:52px;border:1px solid var(--border);border-radius:13px;background:var(--sec);color:var(--text);font-size:1.35rem;font-weight:800}
+.open{width:100%;min-height:58px;margin-top:11px;border:0;border-radius:14px;background:var(--btn);color:var(--btntext);font-size:1.05rem;font-weight:800}.error{min-height:22px;color:var(--danger);font-weight:700;margin-top:7px}
+.recent-title{margin-top:15px;color:var(--muted);font-weight:700}.recent{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.chip{min-height:40px;padding:0 13px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);font-weight:700}
+</style></head><body><main><section class="card">
+<div class="lang"><button data-lang="pl">PL</button><button data-lang="no">NO</button><button data-lang="en">EN</button></div>
+<h1 id="title"></h1><p id="desc"></p>
+<input id="search" autocomplete="off" placeholder="">
+<div id="results" class="results"></div>
+<div id="display" class="display">—</div>
+<div class="keypad">
+<button class="key" data-d="1">1</button><button class="key" data-d="2">2</button><button class="key" data-d="3">3</button>
+<button class="key" data-d="4">4</button><button class="key" data-d="5">5</button><button class="key" data-d="6">6</button>
+<button class="key" data-d="7">7</button><button class="key" data-d="8">8</button><button class="key" data-d="9">9</button>
+<button class="key" id="clear">C</button><button class="key" data-d="0">0</button><button class="key" id="back">⌫</button>
+</div>
+<button id="open" class="open"></button><div id="error" class="error"></div>
+<div id="recentBlock" hidden><div id="recentTitle" class="recent-title"></div><div id="recent" class="recent"></div></div>
+</section></main>
 <script>
-(() => {
-  "use strict";
-
-  const BASE_URL = "https://events.app.fourprosolutions.com/europris/";
-  const URL_SUFFIX = "/transport";
-  const RECENT_KEY = "europris_recent_stores_v1";
-  const LANG_KEY = "europris_language_v1";
-  const MAX_RECENT = 6;
-  const MAX_LENGTH = 8;
-
-  const texts = {
-    pl: {
-      title: "Potwierdzenie dostawy Europris",
-      description: "Wpisz numer sklepu na klawiaturze.",
-      open: "Otwórz stronę dostawy",
-      recent: "Ostatnio używane",
-      error: "Najpierw wpisz prawidłowy numer sklepu.",
-      footer: "Wybrany język jest zapamiętywany na tym telefonie."
-    },
-    no: {
-      title: "Bekreftelse av levering til Europris",
-      description: "Skriv inn butikknummeret på tastaturet.",
-      open: "Åpne leveringssiden",
-      recent: "Nylig brukt",
-      error: "Skriv inn et gyldig butikknummer først.",
-      footer: "Valgt språk lagres på denne telefonen."
-    },
-    en: {
-      title: "Europris delivery confirmation",
-      description: "Enter the store number using the keypad.",
-      open: "Open delivery page",
-      recent: "Recently used",
-      error: "Enter a valid store number first.",
-      footer: "The selected language is saved on this phone."
-    }
-  };
-
-  let current = "";
-  let language = localStorage.getItem(LANG_KEY) || "pl";
-  if (!texts[language]) language = "pl";
-
-  const display = document.getElementById("display");
-  const error = document.getElementById("error");
-  const recentBlock = document.getElementById("recentBlock");
-  const recentEl = document.getElementById("recent");
-
-  function updateDisplay() {
-    display.textContent = current || "—";
-    error.textContent = "";
-  }
-
-  function applyLanguage() {
-    const t = texts[language];
-    document.documentElement.lang = language === "no" ? "nb" : language;
-    document.getElementById("title").textContent = t.title;
-    document.getElementById("description").textContent = t.description;
-    document.getElementById("openBtn").textContent = t.open;
-    document.getElementById("recentTitle").textContent = t.recent;
-    document.getElementById("footer").textContent = t.footer;
-
-    document.querySelectorAll(".lang-btn").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.lang === language);
-      btn.setAttribute("aria-pressed", btn.dataset.lang === language ? "true" : "false");
-    });
-
-    renderRecent();
-  }
-
-  function loadRecent() {
-    try {
-      const data = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
-      return Array.isArray(data)
-        ? data.filter(x => /^\d{1,8}$/.test(x)).slice(0, MAX_RECENT)
-        : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveRecent(store) {
-    const recent = loadRecent().filter(x => x !== store);
-    recent.unshift(store);
-    localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
-  }
-
-  function renderRecent() {
-    const recent = loadRecent();
-    recentEl.replaceChildren();
-    recentBlock.hidden = recent.length === 0;
-
-    for (const store of recent) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "chip";
-      btn.textContent = store;
-      btn.addEventListener("click", () => openStore(store));
-      recentEl.appendChild(btn);
-    }
-  }
-
-  function openStore(raw) {
-    const store = String(raw).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
-
-    if (!/^\d{1,8}$/.test(store)) {
-      error.textContent = texts[language].error;
-      return;
-    }
-
-    saveRecent(store);
-    renderRecent();
-    current = "";
-    updateDisplay();
-    window.location.assign(BASE_URL + encodeURIComponent(store) + URL_SUFFIX);
-  }
-
-  document.querySelectorAll("[data-digit]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (current.length < MAX_LENGTH) {
-        current += btn.dataset.digit;
-        updateDisplay();
-      }
-    });
-  });
-
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    current = "";
-    updateDisplay();
-  });
-
-  document.getElementById("backBtn").addEventListener("click", () => {
-    current = current.slice(0, -1);
-    updateDisplay();
-  });
-
-  document.getElementById("openBtn").addEventListener("click", () => openStore(current));
-
-  document.querySelectorAll(".lang-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      language = btn.dataset.lang;
-      localStorage.setItem(LANG_KEY, language);
-      applyLanguage();
-    });
-  });
-
-  updateDisplay();
-  applyLanguage();
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
-    });
-  }
+(()=>{"use strict";
+const BASE="https://events.app.fourprosolutions.com/europris/",SUFFIX="/transport",RK="europris_recent_v3",LK="europris_lang_v3";
+const T={pl:{title:"Potwierdzenie dostawy Europris",desc:"Wpisz numer sklepu albo wyszukaj po nazwie.",ph:"Numer lub nazwa sklepu",open:"Otwórz stronę dostawy",recent:"Ostatnio używane",err:"Wybierz sklep lub wpisz prawidłowy numer."},
+no:{title:"Bekreftelse av levering til Europris",desc:"Skriv inn butikknummer eller søk etter navn.",ph:"Butikknummer eller navn",open:"Åpne leveringssiden",recent:"Nylig brukt",err:"Velg en butikk eller skriv inn et gyldig nummer."},
+en:{title:"Europris delivery confirmation",desc:"Enter the store number or search by name.",ph:"Store number or name",open:"Open delivery page",recent:"Recently used",err:"Select a store or enter a valid number."}};
+let lang=localStorage.getItem(LK)||"pl",cur="",stores=[];
+const q=s=>document.querySelector(s),search=q("#search"),results=q("#results"),display=q("#display"),error=q("#error");
+function norm(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function apply(){let t=T[lang]||T.pl;q("#title").textContent=t.title;q("#desc").textContent=t.desc;search.placeholder=t.ph;q("#open").textContent=t.open;q("#recentTitle").textContent=t.recent;document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));renderRecent()}
+function show(){display.textContent=cur||"—";error.textContent=""}
+function loadRecent(){try{return JSON.parse(localStorage.getItem(RK)||"[]")}catch{return[]}}
+function saveRecent(n,name){let a=loadRecent().filter(x=>x.number!==n);a.unshift({number:n,name});localStorage.setItem(RK,JSON.stringify(a.slice(0,6)))}
+function renderRecent(){let a=loadRecent(),box=q("#recent");box.replaceChildren();q("#recentBlock").hidden=!a.length;a.forEach(x=>{let b=document.createElement("button");b.className="chip";b.textContent=x.name?`${x.number} ${x.name.replace(/^Europris\s*/i,"")}`:x.number;b.onclick=()=>openStore(x.number,x.name);box.append(b)})}
+function openStore(raw,name=""){let n=String(raw).replace(/\D/g,"").replace(/^0+(?=\d)/,"");if(!/^\d{1,8}$/.test(n)){error.textContent=T[lang].err;return}saveRecent(n,name);location.assign(BASE+encodeURIComponent(n)+SUFFIX)}
+function searchStores(){let v=search.value.trim();results.replaceChildren();if(!v)return; if(/^\d+$/.test(v)){cur=v.replace(/^0+(?=\d)/,"");show();return}cur="";show();let n=norm(v);stores.filter(s=>norm(`${s.name} ${s.address}`).includes(n)).slice(0,12).forEach(s=>{let b=document.createElement("button");b.className="result";b.innerHTML=`<b>${s.number} — ${s.name}</b><span>${s.address||""}</span>`;b.onclick=()=>{cur=String(s.number);search.value=s.name;results.replaceChildren();show()};results.append(b)})}
+document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(cur.length<8){cur+=b.dataset.d;search.value=cur;show()}});
+q("#clear").onclick=()=>{cur="";search.value="";results.replaceChildren();show()};q("#back").onclick=()=>{cur=cur.slice(0,-1);search.value=cur;show()};q("#open").onclick=()=>openStore(cur,search.value);
+document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;localStorage.setItem(LK,lang);apply()});
+search.addEventListener("input",searchStores);
+fetch("stores.json?v=1").then(r=>r.json()).then(x=>stores=Array.isArray(x)?x:[]).catch(()=>{});
+apply();show();
 })();
-</script>
-</body>
-</html>
+</script></body></html>
