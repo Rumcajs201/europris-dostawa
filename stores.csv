@@ -1,2 +1,298 @@
-number;name;address;email
-77;Europris Notodden;;ep077@europris.no
+﻿number;name;address;email;phone;latitude;longitude
+57;Europris Alta;Buktaveien 4, 9515, Alta;ep057@europris.no;78433050;69.97620000;23.32430000
+473;Europris Andenes;Industriveien 4 A, 8480, Andenes;ep473@europris.no;48053629;69.31011000;16.09885000
+647;Europris Arkaden City;Klubbgata 5, 4013, Stavanger;ep647@europris.no;90707130;58.97073000;5.73576000
+637;Europris Asker;Røykenveien 142, 1386, Asker;ep637@europris.no;90299207;59.81892000;10.44097000
+388;Europris Askim;Trøgstadveien 4 D, 1830, Askim;ep388@europris.no;95138352;59.58522000;11.16639000
+612;Europris Austevoll;Storebøvegen 201 B, 5392, Storebø;ep612@europris.no;90226950;60.09847000;5.22488000
+360;Europris Averøy;Averøyveien 10, 6530, Averøy;ep360@europris.no;48089310;63.05172000;7.63204000
+592;Europris Bardufoss;Fagerlidal 430, 9325, Bardufoss;ep592@europris.no;45904200;69.09414000;18.59034000
+463;Europris Begby;Haldenveien 6, 1639, Gamle Fredrikstad;ep463@europris.no;48040672;59.20830000;10.99089000
+644;Europris Bekkestua;Gml. Ringeriksvei 39, 1357, Bekkestua;ep644@europris.no;47682525;59.91803000;10.58714000
+317;Europris Billingstad;Billingstadsletta 11, 1396, Billingstad;ep317@europris.no;90539091;59.87702000;10.50069000
+506;Europris Bjugn;Bjugnveien 26, 7160, Bjugn;ep506@europris.no;72526767;63.76612000;9.80779000
+299;Europris Bjørkelangen;Bliksrud Næringsområde, 1940, Bjørkelangen;ep299@europris.no;63851743;59.89093000;11.56010000
+469;Europris Bodø;City Nord, Stormyra, 8008, Bodø;ep469@europris.no;91588152;67.27698000;14.42380000
+576;Europris Bogafjell;Bogafjellveien 65, 4324, Sandnes;ep576@europris.no;51620739;58.82104000;5.75326000
+323;Europris Brandbu;Storlinna 20, 2760, Brandbu;EP323@europris.no;46928430;60.41727000;10.51537000
+495;Europris Brekstad;Maren Juels Gate 1, 7130, Brekstad;ep495@europris.no;47510103;63.69235000;9.66151000
+466;Europris Brennåsen;Brennåsenmoen 1, 4647, Brennåsen;ep466@europris.no;99123865;58.13867000;7.85590000
+311;Europris Brokelandsheia;Brokelandsheia, 4993, Sundebru;ep311@europris.no;37157500;58.82414000;9.07415000
+229;Europris Brumunddal;Furnesveien 18, 2380, Brumunddal;ep229@europris.no;62344030;60.88548000;10.94124000
+238;Europris Bryn;Nils Hansens Vei 6 A, 0666, Oslo;ep238@europris.no;46816943;59.91206000;10.82484000
+345;Europris Bryne;Reevegen 13, 4340, Bryne;ep345@europris.no;51486790;58.73500000;5.65268000
+61;Europris Brønnøysund;Salhusmarka 1, 8907, Brønnøysund;ep061@europris.no;75020760;65.49199000;12.24130000
+439;Europris Bø;Valenvegen 5, 3802, Bø I Telemark;ep439@europris.no;35953748;59.41535000;9.05834000
+470;Europris Bømlo;Svortlandsvegen 79, 5430, Bremnes;ep470@europris.no;53424008;59.79601000;5.18529000
+634;Europris Cc Drammen;Tomtegata 36, 3012, Drammen;ep634@europris.no;48178745;59.74123000;10.22278000
+508;Europris Dale;Jarstadveien 22, 6963, Dale I Sunnfjord;ep508@europris.no;47707066;61.36311000;5.39812000
+580;Europris Digernes;Digernes Næringsområde 11, 6260, Skodje;ep580@europris.no;90180848;62.49156000;6.60853000
+590;Europris Dokka;Storgata 55, 2870, Dokka;ep590@europris.no;61119244;60.83624000;10.06889000
+630;Europris Dombås;Sentralplassen 1 A, 2660, Dombås;ep630@europris.no;90586933;62.07429000;9.12724000
+199;Europris Drøbak;Holterveien 4I, 1448, Drøbak;ep199@europris.no;64935705;59.67376000;10.65719000
+12;Europris Egersund;Lindøyveien 8, 4373, Egersund;ep012@europris.no;51494003;58.44094000;6.00725000
+246;Europris Eidsvoll;Nedre Vilbergsvei 4, 2080, Eidsvoll;ep246@europris.no;63957900;60.33131000;11.26554000
+339;Europris Eidsvåg;Kråkholmvegen 19, 6460, Eidsvåg I Romsdal;ep339@europris.no;90703121;62.77611000;8.06280000
+117;Europris Eiker;Eikersenteret, 3300, Hokksund;ep117@europris.no;32759640;59.76127000;9.90383000
+396;Europris Elnesvågen;Torget 6, 6440, Elnesvågen;ep396@europris.no;71262040;62.85382000;7.16111000
+249;Europris Elverum;Olav Sæters Veg 6, 2413, Elverum;ep249@europris.no;62400844;60.89516000;11.58373000
+407;Europris Enebakk;Sagstuveien 1, 1914, Ytre Enebakk;ep407@europris.no;48135311;59.72398000;11.05030000
+624;Europris Ensjø;Gladengveien 1, 0661, Oslo;ep624@europris.no;90135050;59.91456000;10.78817000
+602;Europris Etne;Haukelivegen 936, 5590, Etne;ep602@europris.no;94790097;59.66371000;5.93238000
+362;Europris Evje;Verksveien 20, 4735, Evje;ep362@europris.no;90813091;58.58013000;7.78815000
+594;Europris Falkum;Århusveien 25, 3723, Skien;ep594@europris.no;35546030;59.21306000;9.58649000
+304;Europris Farsund;Øygardsveien 2, 4550, Farsund;ep304@europris.no;38392400;58.09809000;6.77089000
+373;Europris Fauske;Terminalveien 5, 8208, Fauske;ep373@europris.no;75646418;67.27133000;15.39585000
+430;Europris Finnsnes;Ringveien 1, 9300, Finnsnes;ep430@europris.no;47905555;69.22940000;17.98739000
+623;Europris Fjellhamar;Haneborgveien 95, 1463, Fjellhamar;ep623@europris.no;48077590;59.94107000;10.97964000
+390;Europris Flatåsen;Øvre Flatåsvei 1B, 7079, Flatåsen;ep390@europris.no;95361658;63.37395000;10.34572000
+608;Europris Flekkefjord;Lasta 50, 4400, Flekkefjord;ep608@europris.no;38324410;58.29298000;6.66359000
+230;Europris Flisa;Solvesgate 2, 2270, Flisa;ep230@europris.no;62950200;60.61307000;12.00806000
+192;Europris Florø;Posthuset, 6900, Florø;ep192@europris.no;57749000;61.60052000;5.04740000
+376;Europris Flå;Svingelie 10, 3539, Flå;ep376@europris.no;97969819;60.43021000;9.46198000
+420;Europris Forus;Lagerveien 2, 4033, Stavanger;ep420@europris.no;90286462;58.89606000;5.70186000
+597;Europris Fosnavåg;Eggesbøjorda 3, 6092, Fosnavåg;ep597@europris.no;94814755;62.32411000;5.63875000
+209;Europris Fredrikstad;Dikeveien 8, 1661, Rolvsøy;ep209@europris.no;69352420;59.24484000;10.98454000
+638;Europris Fritzøe Brygge;Fritzøe Brygge 1, 3264, Larvik;ep638@europris.no;90298849;59.05019000;10.02142000
+628;Europris Froland;Bjørumsvegen 2A, 4820, Froland;ep628@europris.no;48186795;58.49697000;8.64500000
+621;Europris Frøya;Nordfrøyveien 25, 7263, Hamarvik;ep621@europris.no;47707085;63.70450000;8.81890000
+458;Europris Furuset;Trygve Liesplass 1, Furuset Senter, 1051, Oslo;ep458@europris.no;95102755;59.94216000;10.89774000
+429;Europris Fyllingsdalen;Spelhaugen 6, 5147, Fyllingsdalen;ep429@europris.no;55151128;60.35090000;5.27783000
+579;Europris Førde;Firdavegen 20, 6800, Førde;ep579@europris.no;57827005;61.45671000;5.84409000
+575;Europris Ganddal;Lundegeilen 20-22, 4323, Sandnes;ep575@europris.no;51675541;58.82024000;5.71230000
+346;Europris Gausdal;Fargerivegen 7, 2651, Østre Gausdal;ep346@europris.no;61220094;61.22638000;10.22247000
+404;Europris Geilo;Vesleslåttvegen 19, 3580, Geilo;ep404@europris.no;48170259;60.53359000;8.20665000
+464;Europris Giske;Valderøyvegen 1166, 6050, Valderøya;ep464@europris.no;47606212;62.53268000;6.12326000
+394;Europris Gjøvik;Kallerudlia 4, 2818, Gjøvik;ep394@europris.no;61179490;60.78047000;10.69246000
+415;Europris Gol;Sentrumsvegen 64, 3550, Gol;ep415@europris.no;32074505;60.70505000;8.95334000
+479;Europris Gran;Morstadvegen 2, 2750, Gran;ep479@europris.no;94134088;60.35392000;10.57601000
+432;Europris Grasmyr;Tønderveien 3, 3960, Stathelle;ep432@europris.no;47637562;59.03036000;9.70408000
+629;Europris Grensen City;Grensen 13, 0159, Oslo;ep629@europris.no;90171147;59.91394000;10.74319000
+639;Europris Grim;Setesdalveien 21, 4616, Kristiansand S;ep639@europris.no;90362271;58.14833000;7.97886000
+437;Europris Grimstad;Bergemoveien 45, 4886, Grimstad;ep437@europris.no;37041910;58.34273000;8.55371000
+353;Europris Grini Pluss;Grini Næringspark 1, 1361, Østerås;ep353@europris.no;90362945;59.94561000;10.59776000
+494;Europris Grong;Sundspetvegen 33, 7870, Grong;ep494@europris.no;94870256;64.46327000;12.30489000
+472;Europris Grorud;Grorud Senter, Bergensveien 2, 0963, Oslo;ep472@europris.no;48157070;59.95948000;10.88261000
+641;Europris Gulskogen;Guldlisten 35, 3048, Drammen;ep641@europris.no;90912828;59.74253000;10.15797000
+604;Europris Gunerius City;Storgata 32, 0184, Oslo;ep604@europris.no;90269964;59.91416000;10.75291000
+239;Europris Halden;Walkers Gate 8B, 1771, Halden;ep239@europris.no;69191400;59.12160000;11.38340000
+631;Europris Hamar;Midtstranda 97, 2321, Hamar;ep631@europris.no;94827130;60.79949000;11.11649000
+62;Europris Hammerfest;Finnmarksveien 56, 9600, Hammerfest;ep062@europris.no;78413256;70.67857000;23.66983000
+589;Europris Harstad;Verkstedveien 7 B, 9406, Harstad;ep589@europris.no;77061540;68.79191000;16.54183000
+595;Europris Herkules;Ulefossveien 48, 3730, Skien;ep595@europris.no;35595260;59.19510000;9.59715000
+277;Europris Hitra;Storhaugveien 1, 7240, Hitra;ep277@europris.no;95458178;63.60638000;8.96961000
+42;Europris Holmestrand;Bentserudveien 4, 3080, Holmestrand;ep042@europris.no;33052100;59.47355000;10.31723000
+632;Europris Holmestrand;Bentserudveien 4, 3080, Holmestrand;ep632@europris.no;33052100;59.47355000;10.31723000
+646;Europris Holmlia City;Holmliaveien 75, 1255, Oslo;ep646@europris.no;48083055;59.83425000;10.79603000
+329;Europris Hommelvik;Havnevegen 24, 7550, Hommelvik;ep329@europris.no;46863488;63.41524000;10.80752000
+395;Europris Horten;Strandparken 3-5 Lindenpark, 3187, Horten;ep395@europris.no;33040590;59.40765000;10.48450000
+363;Europris Hov;Hovlandsvegen 1, 2860, Hov;ep363@europris.no;90404731;60.69716000;10.35335000
+374;Europris Hunstad;Hunstadsenteret, Vei 1414 Nr 674, 8022, Bodø;ep374@europris.no;46905432;67.28111000;14.54527000
+47;Europris Husnes;Opsangervegen 1, 5460, Husnes;ep047@europris.no;46825757;59.85881000;5.75396000
+244;Europris Hønefoss;Hvervenmoveien 2, 3511, Hønefoss;ep244@europris.no;32130230;60.14590000;10.25245000
+364;Europris Indre Arna;Storaneset 24, 5260, Indre Arna;ep364@europris.no;90363720;60.43358000;5.46294000
+279;Europris Iseveien;Snekkerstubakken 26, 1738, Borgenhaugen;ep279@europris.no;69101235;59.26897000;11.15912000
+359;Europris Jessheim;Dampsaga Allé 3, 2050, Jessheim;ep359@europris.no;90243180;60.14256000;11.18056000
+477;Europris Jevnaker;Industrivegen 2, 3520, Jevnaker;ep477@europris.no;48021458;60.22947000;10.35494000
+369;Europris Juvik;Juvikflaten 10, 5300, Kleppestø;ep369@europris.no;95431747;60.42702000;5.19261000
+619;Europris Jåttå;Jåttåvågveien 7, 4020, Stavanger;ep619@europris.no;91398210;58.91426000;5.71905000
+25;Europris Jørpeland/strand;Ryfylke Storsenter, 4100, Jørpeland;ep025@europris.no;51749399;59.02063000;6.03994000
+642;Europris Jørpeland/strand;Ryfylke Storsenter, 4100, Jørpeland;ep642@europris.no;51749399;59.02063000;6.03994000
+58;Europris Karmøy;Vestheimveien 6, 4250, Kopervik;ep058@europris.no;52852055;59.29148000;5.28929000
+614;Europris Kilen Tønsberg;Halfdan Wilhemsens Alle 42, 3117, Tønsberg;ep614@europris.no;33317224;59.27379000;10.42929000
+460;Europris Kirkeby;Ringveien 11, 2815, Gjøvik;ep460@europris.no;97675028;60.78383000;10.69194000
+316;Europris Kirkenes;Smiveien 4, 9900, Kirkenes;ep316@europris.no;78993855;69.72569000;30.06846000
+423;Europris Kirkenær;Bruvegen 11, 2260, Kirkenær;ep423@europris.no;46929121;60.45675000;12.05717000
+572;Europris Kjørbekk;Bedriftsvegen 130, 3735, Skien;ep572@europris.no;90055862;59.18374000;9.60583000
+577;Europris Klepp;Solavegen 2, 4350, Kleppe;ep577@europris.no;91763645;58.77801000;5.62843000
+252;Europris Kløfta;Trondheimsveien 62, 2040, Kløfta;ep252@europris.no;63976230;60.07258000;11.13591000
+89;Europris Knarvik;Kvernhusmyrane 21, 5914, Isdalstø;ep089@europris.no;40638229;60.54810000;5.28661000
+500;Europris Kokstad;Kokstaddalen 18, 5257, Kokstad;ep500@europris.no;46859080;60.29431000;5.25325000
+426;Europris Kolvereid;Kolvereid Torg, 7970, Kolvereid;ep426@europris.no;74398630;64.86468000;11.59831000
+606;Europris Kongsberg Sølvparken;Sildetomta 8, 3602, Kongsberg;ep606@europris.no;32721700;59.66900000;9.65425000
+243;Europris Kongsvinger;Markensveien 3, 2212, Kongsvinger;ep243@europris.no;94156316;60.19289000;12.00053000
+385;Europris Konnerud;Pettervollveien 3, 3032, Drammen;ep385@europris.no;95091163;59.71786000;10.14890000
+76;Europris Kragerø;Dalaneveien 28-30, 3772, Kragerø;ep076@europris.no;35982535;58.87311000;9.36891000
+308;Europris Kristiansund;Rørgata 5, 6517, Kristiansund N;ep308@europris.no;71583941;63.10967000;7.80007000
+399;Europris Kråkerøy;Stadion 33, 1671, Kråkerøy;ep399@europris.no;91759420;59.21209000;10.92863000
+327;Europris Krøgenes;Kystveien 247, 4841, Arendal;ep327@europris.no;97627627;58.47355000;8.81403000
+488;Europris Kvala;Austrheimsveien 10, 5516, Haugesund;ep488@europris.no;52718140;59.43764000;5.26845000
+467;Europris Kvinesdal;Austerdalsveien 3A, 4480, Kvinesdal;ep467@europris.no;38350510;58.32051000;6.96346000
+325;Europris Kyrksæterøra;Industriveien 5, 7200, Kyrksæterøra;ep325@europris.no;90682051;63.29347000;9.08651000
+320;Europris Lade;Haakon Vii Gate 12 1.Etg, 7041, Trondheim;ep320@europris.no;97471797;63.44017000;10.46253000
+626;Europris Lagunen;Laguneveien 17, 2 Etg, 5239, Rådal;ep626@europris.no;90410385;60.29555000;5.32952000
+305;Europris Lakselv;Låtasvei, 9700, Lakselv;ep305@europris.no;78463144;70.05203000;24.97146000
+483;Europris Laksevåg;Kringsjåveien 83-89, 5163, Laksevåg;ep483@europris.no;91713530;60.38951000;5.28701000
+254;Europris Lambertseter;Cecilie Thoresensvei 28, 1153, Oslo;ep254@europris.no;22742500;59.87489000;10.80969000
+509;Europris Langevåg;Veddevegen 171, 6030, Langevåg;ep509@europris.no;47688026;62.43810000;6.23387000
+290;Europris Langnes;Ærfuglvegen 5, 9015, Tromsø;ep290@europris.no;77673730;69.67542000;18.92858000
+443;Europris Langrønningen;Langrønningen 16, 3967, Stathelle;ep443@europris.no;35976920;58.97256000;9.52422000
+269;Europris Leira;Markaveien 2, 2920, Leira I Valdres;ep269@europris.no;61 36 10 75;60.97112000;9.28952000
+627;Europris Leira;Markaveien 2, 2920, Leira I Valdres;ep627@europris.no;61361075;60.97112000;9.28952000
+20;Europris Leknes;Hotellgården, Elvegårdsveien 10, 8370, Leknes;ep020@europris.no;76082222;68.14733000;13.60656000
+620;Europris Lena;Vallevegen 16, 2850, Lena;ep620@europris.no;61162244;60.67529000;10.81152000
+471;Europris Levanger;Moafjæra 12, 7606, Levanger;ep471@europris.no;74096700;63.73383000;11.28266000
+224;Europris Lierstranda;Lierstranda 97, 3414, Lierstranda;ep224@europris.no;95865576;59.74989000;10.24926000
+438;Europris Liertoppen;Drammensveien 201, 3421, Lierskogen;ep438@europris.no;32848860;59.81129000;10.30585000
+581;Europris Lillehammer Nord;Snekkerveien 7, 2619, Lillehammer;ep581@europris.no;46941052;61.12904000;10.44675000
+228;Europris Lillehammer Strandparken;Strandpromenaden 77 , Strandtorget, 2609, Lillehammer;ep228@europris.no;94151701;61.11459000;10.45268000
+436;Europris Lillesand;Senterveien 10, 4790, Lillesand;ep436@europris.no;37272455;58.26122000;8.39377000
+383;Europris Lillestrøm;Isakvn 2, 2004, Lillestrøm;ep383@europris.no;63805390;59.94802000;11.07249000
+255;Europris Lindeberg;Lindeberg Næringsvei 28, 1068, Oslo;ep255@europris.no;22302530;59.93563000;10.88696000
+611;Europris Lindås;Kolåsvegen 7, 5955, Lindås;ep611@europris.no;90605122;60.73937000;5.16066000
+340;Europris Lom;Stupulvegen 11, 2686, Lom;ep340@europris.no;97642021;61.83923000;8.57833000
+424;Europris Lonevåg;Lonevåg Arena, 5282, Lonevåg;ep424@europris.no;91736060;60.52619000;5.49368000
+474;Europris Lund;Stadionveien 16, 4632, Kristiansand S;ep474@europris.no;38092411;58.15311000;8.02572000
+591;Europris Lura;Somaveien 2, 4313, Sandnes;ep591@europris.no;48161970;58.87353000;5.72474000
+487;Europris Lyngdal;Fiboveien 4, 4580, Lyngdal;ep487@europris.no;38341500;58.13790000;7.07044000
+615;Europris Løren City;Lørenveien 38, 0585, Oslo;ep615@europris.no;90077680;59.93141000;10.79069000
+421;Europris Lørenskog;Boecks Gate 10, 1470, Lørenskog;ep421@europris.no;95438102;59.92723000;10.95752000
+408;Europris Løten;Stasjonsveien 12 B, 2340, Løten;ep408@europris.no;47670144;60.81983000;11.34207000
+63;Europris Madla;Ragbakken 84, 4042, Hafrsfjord;ep063@europris.no;51553181;58.95202000;5.65727000
+29;Europris Mandal;Sommerkroveien 34, 4515, Mandal;ep029@europris.no;38260107;58.02436000;7.46635000
+645;Europris Mandal;Sommerkroveien 7, 4515, Mandal;ep645@europris.no;38260107;58.02436000;7.46635000
+609;Europris Melhus;Melhustorget, 7224, Melhus;ep609@europris.no;72878660;63.28613000;10.28416000
+600;Europris Meråker;Mellomrikveien 4869, 7530, Meråker;ep600@europris.no;91566280;63.41685000;11.73905000
+431;Europris Midtun;Midtunheia 20, 5224, Nesttun;ep431@europris.no;55104581;60.32143000;5.36485000
+386;Europris Mjøndalen;Orkidehøgda, 3050, Mjøndalen;ep386@europris.no;95442387;59.74887000;10.02697000
+434;Europris Mo I Rana;Verkstedveien 6, 8624, Mo I Rana;ep434@europris.no;75152680;66.30412000;14.13258000
+242;Europris Moelv;Åsmarkvegen 6, 2390, Moelv;ep242@europris.no;62366205;60.92999000;10.70080000
+335;Europris Molde;Birger Hatlebaks V 7, 6415, Molde;ep335@europris.no;71256801;62.73893000;7.18001000
+457;Europris Mortensrud;Helga Vaneks Vei 1 J, 1281, Oslo;ep457@europris.no;97687782;59.84883000;10.83064000
+435;Europris Mosjøen;Dolstadgaten 15, 8663, Mosjøen;ep435@europris.no;75170660;65.84149000;13.19153000
+295;Europris Moss Pluss;Midtveien 5, 1521, Moss;ep295@europris.no;69236690;59.41536000;10.67615000
+413;Europris Mysen;Opsahlåsveien 1, 1850, Mysen;ep413@europris.no;69891400;59.55181000;11.34179000
+306;Europris Måløy;Måløy Stormarked, 6718, Deknepollen;ep306@europris.no;57854440;61.92162000;5.15445000
+375;Europris Namsos;Sandgata 7 A, 7800, Namsos;ep375@europris.no;74271713;64.47467000;11.50992000
+593;Europris Nannestad;Ekerveien 5, 2030, Nannestad;ep593@europris.no;94876630;60.22040000;11.01514000
+441;Europris Nanset;Nansetveien 150, 3255, Larvik;ep441@europris.no;33116511;59.08085000;10.06260000
+588;Europris Narvik;Bolagsgata 18, 8516, Narvik;ep588@europris.no;76960660;68.43628000;17.41494000
+447;Europris Nedenes;Vesterveien 705, 4823, Nedenes;ep447@europris.no;48087620;58.41842000;8.70238000
+625;Europris Nittedal;Bjertnestangen 9, 1482, Nittedal;ep625@europris.no;48182105;60.05084000;10.88390000
+484;Europris Nordfjordeid;Uldegrova 4, 6770, Nordfjordeid;ep484@europris.no;57861560;61.90967000;6.00291000
+315;Europris Norheimsund;Steinsdalsvegen 39, 5600, Norheimsund;ep315@europris.no;56563060;60.37217000;6.13744000
+77;Europris Notodden;Merdevegen 12, 3676, Notodden;ep077@europris.no;35022595;59.56610000;9.21626000
+384;Europris Nærbø;Torggata 16, 4365, Nærbø;ep384@europris.no;51431335;58.66486000;5.63669000
+334;Europris Nøtterøy;Ramdalveien 2, 3128, Nøtterøy;ep334@europris.no;33407220;59.26389000;10.39329000
+135;Europris Odda;Tyssedalsveien 12, 5750, Odda;ep135@europris.no;53647400;60.06968000;6.55186000
+397;Europris Oppdal;O. Skasliens Veg 46, 7340, Oppdal;ep397@europris.no;91668401;62.59583000;9.70290000
+489;Europris Orkanger;Tverradkomsten 60, 7300, Orkanger;ep489@europris.no;72481825;63.30598000;9.83860000
+56;Europris Os;Prestegårdsskogen 2, 5210, Os;ep056@europris.no;56304450;60.20315000;5.45643000
+210;Europris Otta;Storgaten 2, 2670, Otta;ep210@europris.no;95239969;61.77119000;9.54336000
+636;Europris Otta;Storgaten 2, 2670, Otta;ep636@europris.no;61230440;61.77119000;9.54336000
+461;Europris Ottestad;Holmlundveien 1, 2312, Ottestad;ep461@europris.no;90242737;60.77028000;11.13187000
+410;Europris Pindsle;Pindsleveien 21, 3221, Sandefjord;ep410@europris.no;48129277;59.14162000;10.18001000
+442;Europris Porsgrunn;Porselensveien 14, 3920, Porsgrunn;ep442@europris.no;35554613;59.14058000;9.63716000
+237;Europris Prinsdal;Skiveien 2, 1410, Kolbotn;ep237@europris.no;90268548;59.83328000;10.80876000
+233;Europris Raglamyr Pluss;Longhammervegen 36, 5536, Haugesund;ep233@europris.no;52866761;59.39740000;5.33471000
+245;Europris Rakkestad;Storgata 18, 1890, Rakkestad;ep245@europris.no;69225990;59.42608000;11.34239000
+216;Europris Randaberg;Randabergveien 333, 4070, Randaberg;ep216@europris.no;51734450;58.99532000;5.63761000
+587;Europris Raufoss;Storgata 49, 2830, Raufoss;ep587@europris.no;61190577;60.72538000;10.61266000
+578;Europris Reknes;Gideonveien 4, 6415, Molde;ep578@europris.no;94811778;62.73401000;7.13944000
+280;Europris Rena;Lille Torggate 4, 2450, Rena;ep280@europris.no;62444257;61.13277000;11.36980000
+300;Europris Revetal;Regata 5, 3174, Revetal;ep300@europris.no;90251720;59.36940000;10.26458000
+414;Europris Ringebu;Vålerjordet, 2630, Ringebu;ep414@europris.no;90253219;61.52992000;10.14710000
+349;Europris Rissa;Badstuveien 4, 7100, Rissa;ep349@europris.no;95816312;63.58407000;9.95663000
+571;Europris Risør;Risørveien 179, 4950, Risør;ep571@europris.no;47707322;58.71516000;9.17672000
+497;Europris Rjukan;Såheimsveien 30, 3660, Rjukan;ep497@europris.no;91158730;59.87709000;8.58783000
+350;Europris Roa;Hadelandsvegen 2128, 2740, Roa;ep350@europris.no;95808454;60.28642000;10.62679000
+635;Europris Rognan;Kirkegata 51, 8250, Rognan;ep635@europris.no;47512360;67.10153000;15.41147000
+584;Europris Rykkinn;Muninsvei 1, 1348, Rykkinn;ep584@europris.no;90289430;59.92403000;10.48526000
+425;Europris Råde;Mosseveien 52, 1640, Råde;ep425@europris.no;48225054;59.35817000;10.83582000
+264;Europris Råholt;Trondheimsveien 266-288, 2070, Råholt;ep264@europris.no;63952157;60.28593000;11.17086000
+480;Europris Rælingen;Slynga 2, 2005, Rælingen;ep480@europris.no;90297028;59.94667000;11.03122000
+428;Europris Røros;Tollef Bredalsvei 11, 7374, Røros;ep428@europris.no;90571513;62.57427000;11.37851000
+411;Europris Sand;Herredsvegen 7, 2120, Sagstua;ep411@europris.no;91739144;60.39259000;11.54103000
+486;Europris Sandane;Grandavegen14, 6823, Sandane;ep486@europris.no;94780207,97717001;61.77600000;6.21320000
+427;Europris Sande I Vestfold;Revåveien 35, 3070, Sande I Vestfold;ep427@europris.no;33778906;59.58413000;10.21006000
+440;Europris Sandefjord;Haslebakken 12, 3229, Sandefjord;ep440@europris.no;33465930;59.13971000;10.23865000
+223;Europris Sandnes;Gravarsveien 7, 4306, Sandnes;ep223@europris.no;51669480;58.84829000;5.73966000
+79;Europris Sandnessjøen;Øyvind Lambesvei 6, 8800, Sandnessjøen;ep079@europris.no;75040380;66.01729000;12.64243000
+370;Europris Sandsli;Aurdalslia 12, 5253, Sandsli;ep370@europris.no;95968643;60.30552000;5.28194000
+324;Europris Sandvika;Sandviksveien 183 ( Defagården), 1337, Sandvika;ep324@europris.no;90990485;59.88717000;10.51848000
+250;Europris Sarpsborg;Hundskinnveien 100, 1711, Sarpsborg;ep250@europris.no;69101180;59.28679000;11.08066000
+449;Europris Sartor Storsenter;Sartorveien 12 ,5353 Straume, 5353, Straume;ep449@europris.no;56332406;60.35850000;5.12407000
+351;Europris Sauda;Saudavegen 7, 4200, Sauda;ep351@europris.no;47664104;59.65072000;6.35414000
+616;Europris Selbu;Selbuvegen 1687, 7580, Selbu;ep616@europris.no;94878717;63.22211000;11.03491000
+445;Europris Seljord;Steinsrudvegen 5, 3840, Seljord;ep445@europris.no;35051980;59.48082000;8.63031000
+446;Europris Sellebakk;Sorgenfri Allè 3, 1654, Sellebakk;ep446@europris.no;69345240;59.22604000;10.99514000
+393;Europris Sem;Semsbyvn 81, 3170, Sem;ep393@europris.no;33318990;59.28271000;10.33154000
+622;Europris Setermoen;Industriveien 2, 9360, Bardu;ep622@europris.no;94850375;68.87701000;18.35714000
+296;Europris Skarnes;Stasjonsveien 30   Skarnes S, 2100, Skarnes;ep296@europris.no;62961310;60.24921000;11.67615000
+387;Europris Skedsmo;Korshagan 1, 2020, Skedsmokorset;ep387@europris.no;90774170;60.00512000;11.03322000
+398;Europris Ski;Åsveien 15, 1400, Ski;ep398@europris.no;64942289;59.71336000;10.83515000
+403;Europris Skiptvet;Storveien 9, 1816, Skiptvet;ep403@europris.no;48286916;59.47257000;11.16342000
+378;Europris Skotterud;Skjørbergs Veg 8, 2230, Skotterud;ep378@europris.no;90470197;59.98619000;12.12206000
+409;Europris Skreppestad;Skreppestadveien 28, 3261, Larvik;ep409@europris.no;48250706;59.04593000;10.07235000
+248;Europris Slemmestad;Eternittvn. 4, 3470, Slemmestad;ep248@europris.no;66791740;59.78577000;10.48930000
+412;Europris Sogndal;Furuvegen 1 Kaupangsenteret, 6854, Kaupanger;ep412@europris.no;57675300;61.19165000;7.22033000
+605;Europris Sortland;Sjøgata 30, 8400, Sortland;ep605@europris.no;76122144;68.71990000;15.40116000
+391;Europris Spydeberg;Spydeberg Torg, Stasjonsgata 32, 1820, Spydeberg;ep391@europris.no;95859430;59.61917000;11.07851000
+416;Europris Stakkevoll;Stakkevollveien 33, 9010, Tromsø;ep416@europris.no;46854418;69.66598000;18.97080000
+247;Europris Stange;Romedalsveien 18, Høgmyr, 2335, Stange;ep247@europris.no;62572230;60.72157000;11.19727000
+309;Europris Steinkjer;Sjøfartsgata 5, 7714, Steinkjer;ep309@europris.no;90769735;64.01125000;11.49161000
+617;Europris Stjørdal;Innherredsv. 62 Og 64, 7503, Stjørdal;ep617@europris.no;74827710;63.46775000;10.92909000
+344;Europris Stoa;Sagvannsveien 16, 4848, Arendal;ep344@europris.no;37033030;58.46502000;8.71261000
+583;Europris Stokke;Tassebekkveien 1, 3160, Stokke;ep583@europris.no;90090220;59.22141000;10.30154000
+433;Europris Stokmarknes;Myran, 8450, Stokmarknes;ep433@europris.no;90909359;68.55797000;14.94031000
+598;Europris Stord;Rundhaugen 44, 5416, Stord;ep598@europris.no;53417900;59.76431000;5.46072000
+293;Europris Storhamar;Måsåbekkveien 2 Storhamarsenteret, 2316, Hamar;ep293@europris.no;62533115;60.80421000;11.04435000
+478;Europris Stovner;Stovner Senter, 0985, Oslo;ep478@europris.no;41405751;59.96143000;10.92658000
+476;Europris Stranda;Bankgata 16, 6200, Stranda;ep476@europris.no;90078301;62.30763000;6.94808000
+418;Europris Strusshamn;Strusshamn Senter, 5302, Strusshamn;ep418@europris.no;56147861;60.40662000;5.19456000
+485;Europris Stryn;Hegreveien 16, 6783, Stryn;ep485@europris.no;95024220;61.90259000;6.71028000
+481;Europris Strømmen;Støperiveien 5 (3 Etg.i Storsenteret), 2010, Strømmen;ep481@europris.no;47512859;59.94788000;11.00712000
+462;Europris Strømsø;Bjørnstjerne Bjørnsongate 60, 3044, Drammen;ep462@europris.no;90266455;59.73447000;10.20669000
+221;Europris Støperigaten Stavanger;Støperigt 22, 4014, Stavanger;ep221@europris.no;51891890;58.97004000;5.75388000
+333;Europris Støren;Moøya 32, 7290, Støren;ep333@europris.no;91884362;63.04166000;10.28826000
+368;Europris Sunndalsøra;Sunndalsvegen 3, 6600, Sunndalsøra;ep368@europris.no;48091883;62.67364000;8.56382000
+465;Europris Surnadal;Ørav. 4, 6650, Surnadal;ep465@europris.no;71661310;62.97002000;8.71288000
+297;Europris Svinesundparken;Svinesundparken 6B, 1789, Berg I Østfold;ep297@europris.no;69179000;59.12880000;11.27364000
+419;Europris Svolvær;Avisgata 11, 8300, Svolvær;ep419@europris.no;76070020;68.23618000;14.56416000
+330;Europris Sykkylven;Vikøyra Industriområde 2, 6230, Sykkylven;ep330@europris.no;48195828;62.38001000;6.57343000
+640;Europris Søgne;Gamle Høgskolevei 18, 4640, Søgne;ep640@europris.no;91332030;58.09773000;7.81223000
+610;Europris Sørkjosen;Industrivegen 4, 9152, Sørkjosen;ep610@europris.no;77764708;69.78637000;20.95096000
+283;Europris Sørlandsparken Pluss;Skibåsen 43, 4636, Kristiansand S;ep283@europris.no;38045188;58.17940000;8.12644000
+253;Europris Sørumsand;Noractorgården, 1920, Sørumsand;ep253@europris.no;63825640;59.98665000;11.24252000
+496;Europris Tasta;Tastatunet 1 - 3, 4027, Stavanger;ep496@europris.no;47508689;58.98400000;5.69108000
+607;Europris Tau;Fiskåvegen 2, Etg 01, 4120, Tau;ep607@europris.no;46955554;59.06513000;5.92179000
+307;Europris Tiller Pluss;Ivar Lykkesvei 5, 7075, Tiller;ep307@europris.no;72885700;63.35679000;10.37350000
+633;Europris Triaden;Gamleveien 88, 1461, Lørenskog;ep633@europris.no;47650093;59.91861000;10.95353000
+459;Europris Tromsdalen;Solstrandveien 47,Amfi Pyramiden, 9020, Tromsdalen;ep459@europris.no;97572757;69.63996000;18.97086000
+273;Europris Trysil;Mosanden, 2420, Trysil;ep273@europris.no;90868674;61.29977000;12.26551000
+291;Europris Tvedestrand;Fjærkleivene 53, 4900, Tvedestrand;ep291@europris.no;37160480;58.62440000;8.92330000
+649;Europris Tveita City;Tvetenveien 150, 0671, Oslo;ep649@europris.no;46885050;59.91384000;10.84189000
+599;Europris Tynset;Tomtegata 4, 2500, Tynset;ep599@europris.no;62482060;62.27695000;10.78023000
+499;Europris Ulsteinvik;Nesvegen 3, 6065, Ulsteinvik;ep499@europris.no;70010940;62.33976000;5.85497000
+274;Europris Vadsø;Kong Haakonsgate 2, 9800, Vadsø;ep274@europris.no;78953050;70.07999000;29.71737000
+347;Europris Vatne;Eidsvikeidet Næringspark, 6265, Vatne;ep347@europris.no;41505916;62.54451000;6.59145000
+301;Europris Vennesla;Sentrumsvegen 63, 4700, Vennesla;ep301@europris.no;38158800;58.27173000;7.96945000
+310;Europris Verdal;Jernbanegata 11, 7650, Verdal;ep310@europris.no;74070407;63.79444000;11.48063000
+227;Europris Vestby;Vestbyveien 29, 1540, Vestby;ep227@europris.no;64951690;59.60766000;10.74308000
+271;Europris Vestkanten;Lyderhornsvei 353, 5171, Loddefjord;ep271@europris.no;55266822;60.36311000;5.23496000
+596;Europris Vestnes;Sjøgata 40, 6390, Vestnes;ep596@europris.no;48087276;62.62140000;7.09363000
+226;Europris Vikersund;Vikersundgata 34, 3370, Vikersund;ep226@europris.no;32783744;59.96525000;9.99348000
+490;Europris Vinstra;Vinstragata101, 2640, Vinstra;ep490@europris.no;95936570;61.59332000;9.72765000
+422;Europris Vinterbro;Sjøskogenveien 1 B, 1407, Vinterbro;ep422@europris.no;46943840;59.73886000;10.76585000
+417;Europris Volda;Torvbanken 1, 6100, Volda;ep417@europris.no;97569354;62.14049000;6.09105000
+236;Europris Vollebekk;Brobekkveien 52, 0598, Oslo;ep236@europris.no;22656633;59.93647000;10.82697000
+482;Europris Vormsund;Kjølstadveien 1, 2160, Vormsund;ep482@europris.no;91691997;60.15059000;11.40877000
+603;Europris Voss;Brynamoen 8, 5705, Voss;ep603@europris.no;56510980;60.62790000;6.42603000
+613;Europris Vågsbygd;Lumberveien 5 - 7, 4621, Kristiansand S;ep613@europris.no;38087122;58.12493000;7.96338000
+618;Europris Xhibition City;Småstrandgaten 3, 5014, Bergen;ep618@europris.no;48119666;60.39298000;5.32626000
+475;Europris Ågotnes;Skjærgardsvegen 1368, 5363, Ågotnes;ep475@europris.no;91725888;60.40344000;5.00186000
+332;Europris Ålesund Pluss;Høgvollvegen  8 Breivikgården, 6018, Ålesund;ep332@europris.no;90761857;62.47067000;6.35431000
+574;Europris Ålgård;Rettedalen 51, 4330, Ålgård;ep574@europris.no;51613070;58.76628000;5.86231000
+355;Europris Åndalsnes;Troaveien, 6300, Åndalsnes;ep355@europris.no;71226923;62.56119000;7.67855000
+643;Europris Åndalsnes;Standgata 111, 6300, Åndalsnes;ep643@europris.no;71226923;62.56119000;7.67855000
+493;Europris Årdal;Jens Davidsons Veg 1, 6884, Øvre Årdal;ep493@europris.no;47750660;61.31012000;7.81507000
+231;Europris Årnes;Nedre Hagavei 17, 2151, Årnes;ep231@europris.no;63902794;60.11865000;11.46198000
+272;Europris Ås;Rådhusplassen 3, 1430, Ås;ep272@europris.no;64961999;59.66468000;10.79082000
+286;Europris Åsane Pluss;Liamyrane 8, 5132, Nyborg;ep286@europris.no;55180885;60.46910000;5.33926000
+573;Europris Åsen;Auglendsmyrå 2, 4017, Stavanger;ep573@europris.no;51881790;58.94323000;5.72884000
+225;Europris Åssiden Pluss;Ingeniør Rybergsgt 101, 3027, Drammen;ep225@europris.no;32890860;59.75335000;10.13038000
+585;Europris Øksnevad;Plogfabrikkvegen 2, 4353, Klepp Stasjon;ep585@europris.no;48181355;58.78550000;5.70552000
+312;Europris Ølensvåg;Bjoavegen 10, 5582, Ølensvåg;ep312@europris.no;97430151;59.60504000;5.75061000
+326;Europris Ørebekk;Mosseveien 109, 1624, Gressvik;ep326@europris.no;90654892;59.23222000;10.90533000
+492;Europris Ørnes;Lillehaugen 10, 8150, Ørnes;ep492@europris.no;90108876;66.85659000;13.72455000
+498;Europris Ørsta;Vikeøyrane 4, 6150, Ørsta;ep498@europris.no;41488767;62.20250000;6.11815000

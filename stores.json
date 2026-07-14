@@ -1,8 +1,2675 @@
 [
   {
+    "number": 57,
+    "name": "Europris Alta",
+    "address": "Buktaveien 4, 9515, Alta",
+    "email": "ep057@europris.no",
+    "phone": "78433050",
+    "latitude": "69.97620000",
+    "longitude": "23.32430000"
+  },
+  {
+    "number": 473,
+    "name": "Europris Andenes",
+    "address": "Industriveien 4 A, 8480, Andenes",
+    "email": "ep473@europris.no",
+    "phone": "48053629",
+    "latitude": "69.31011000",
+    "longitude": "16.09885000"
+  },
+  {
+    "number": 647,
+    "name": "Europris Arkaden City",
+    "address": "Klubbgata 5, 4013, Stavanger",
+    "email": "ep647@europris.no",
+    "phone": "90707130",
+    "latitude": "58.97073000",
+    "longitude": "5.73576000"
+  },
+  {
+    "number": 637,
+    "name": "Europris Asker",
+    "address": "Røykenveien 142, 1386, Asker",
+    "email": "ep637@europris.no",
+    "phone": "90299207",
+    "latitude": "59.81892000",
+    "longitude": "10.44097000"
+  },
+  {
+    "number": 388,
+    "name": "Europris Askim",
+    "address": "Trøgstadveien 4 D, 1830, Askim",
+    "email": "ep388@europris.no",
+    "phone": "95138352",
+    "latitude": "59.58522000",
+    "longitude": "11.16639000"
+  },
+  {
+    "number": 612,
+    "name": "Europris Austevoll",
+    "address": "Storebøvegen 201 B, 5392, Storebø",
+    "email": "ep612@europris.no",
+    "phone": "90226950",
+    "latitude": "60.09847000",
+    "longitude": "5.22488000"
+  },
+  {
+    "number": 360,
+    "name": "Europris Averøy",
+    "address": "Averøyveien 10, 6530, Averøy",
+    "email": "ep360@europris.no",
+    "phone": "48089310",
+    "latitude": "63.05172000",
+    "longitude": "7.63204000"
+  },
+  {
+    "number": 592,
+    "name": "Europris Bardufoss",
+    "address": "Fagerlidal 430, 9325, Bardufoss",
+    "email": "ep592@europris.no",
+    "phone": "45904200",
+    "latitude": "69.09414000",
+    "longitude": "18.59034000"
+  },
+  {
+    "number": 463,
+    "name": "Europris Begby",
+    "address": "Haldenveien 6, 1639, Gamle Fredrikstad",
+    "email": "ep463@europris.no",
+    "phone": "48040672",
+    "latitude": "59.20830000",
+    "longitude": "10.99089000"
+  },
+  {
+    "number": 644,
+    "name": "Europris Bekkestua",
+    "address": "Gml. Ringeriksvei 39, 1357, Bekkestua",
+    "email": "ep644@europris.no",
+    "phone": "47682525",
+    "latitude": "59.91803000",
+    "longitude": "10.58714000"
+  },
+  {
+    "number": 317,
+    "name": "Europris Billingstad",
+    "address": "Billingstadsletta 11, 1396, Billingstad",
+    "email": "ep317@europris.no",
+    "phone": "90539091",
+    "latitude": "59.87702000",
+    "longitude": "10.50069000"
+  },
+  {
+    "number": 506,
+    "name": "Europris Bjugn",
+    "address": "Bjugnveien 26, 7160, Bjugn",
+    "email": "ep506@europris.no",
+    "phone": "72526767",
+    "latitude": "63.76612000",
+    "longitude": "9.80779000"
+  },
+  {
+    "number": 299,
+    "name": "Europris Bjørkelangen",
+    "address": "Bliksrud Næringsområde, 1940, Bjørkelangen",
+    "email": "ep299@europris.no",
+    "phone": "63851743",
+    "latitude": "59.89093000",
+    "longitude": "11.56010000"
+  },
+  {
+    "number": 469,
+    "name": "Europris Bodø",
+    "address": "City Nord, Stormyra, 8008, Bodø",
+    "email": "ep469@europris.no",
+    "phone": "91588152",
+    "latitude": "67.27698000",
+    "longitude": "14.42380000"
+  },
+  {
+    "number": 576,
+    "name": "Europris Bogafjell",
+    "address": "Bogafjellveien 65, 4324, Sandnes",
+    "email": "ep576@europris.no",
+    "phone": "51620739",
+    "latitude": "58.82104000",
+    "longitude": "5.75326000"
+  },
+  {
+    "number": 323,
+    "name": "Europris Brandbu",
+    "address": "Storlinna 20, 2760, Brandbu",
+    "email": "EP323@europris.no",
+    "phone": "46928430",
+    "latitude": "60.41727000",
+    "longitude": "10.51537000"
+  },
+  {
+    "number": 495,
+    "name": "Europris Brekstad",
+    "address": "Maren Juels Gate 1, 7130, Brekstad",
+    "email": "ep495@europris.no",
+    "phone": "47510103",
+    "latitude": "63.69235000",
+    "longitude": "9.66151000"
+  },
+  {
+    "number": 466,
+    "name": "Europris Brennåsen",
+    "address": "Brennåsenmoen 1, 4647, Brennåsen",
+    "email": "ep466@europris.no",
+    "phone": "99123865",
+    "latitude": "58.13867000",
+    "longitude": "7.85590000"
+  },
+  {
+    "number": 311,
+    "name": "Europris Brokelandsheia",
+    "address": "Brokelandsheia, 4993, Sundebru",
+    "email": "ep311@europris.no",
+    "phone": "37157500",
+    "latitude": "58.82414000",
+    "longitude": "9.07415000"
+  },
+  {
+    "number": 229,
+    "name": "Europris Brumunddal",
+    "address": "Furnesveien 18, 2380, Brumunddal",
+    "email": "ep229@europris.no",
+    "phone": "62344030",
+    "latitude": "60.88548000",
+    "longitude": "10.94124000"
+  },
+  {
+    "number": 238,
+    "name": "Europris Bryn",
+    "address": "Nils Hansens Vei 6 A, 0666, Oslo",
+    "email": "ep238@europris.no",
+    "phone": "46816943",
+    "latitude": "59.91206000",
+    "longitude": "10.82484000"
+  },
+  {
+    "number": 345,
+    "name": "Europris Bryne",
+    "address": "Reevegen 13, 4340, Bryne",
+    "email": "ep345@europris.no",
+    "phone": "51486790",
+    "latitude": "58.73500000",
+    "longitude": "5.65268000"
+  },
+  {
+    "number": 61,
+    "name": "Europris Brønnøysund",
+    "address": "Salhusmarka 1, 8907, Brønnøysund",
+    "email": "ep061@europris.no",
+    "phone": "75020760",
+    "latitude": "65.49199000",
+    "longitude": "12.24130000"
+  },
+  {
+    "number": 439,
+    "name": "Europris Bø",
+    "address": "Valenvegen 5, 3802, Bø I Telemark",
+    "email": "ep439@europris.no",
+    "phone": "35953748",
+    "latitude": "59.41535000",
+    "longitude": "9.05834000"
+  },
+  {
+    "number": 470,
+    "name": "Europris Bømlo",
+    "address": "Svortlandsvegen 79, 5430, Bremnes",
+    "email": "ep470@europris.no",
+    "phone": "53424008",
+    "latitude": "59.79601000",
+    "longitude": "5.18529000"
+  },
+  {
+    "number": 634,
+    "name": "Europris Cc Drammen",
+    "address": "Tomtegata 36, 3012, Drammen",
+    "email": "ep634@europris.no",
+    "phone": "48178745",
+    "latitude": "59.74123000",
+    "longitude": "10.22278000"
+  },
+  {
+    "number": 508,
+    "name": "Europris Dale",
+    "address": "Jarstadveien 22, 6963, Dale I Sunnfjord",
+    "email": "ep508@europris.no",
+    "phone": "47707066",
+    "latitude": "61.36311000",
+    "longitude": "5.39812000"
+  },
+  {
+    "number": 580,
+    "name": "Europris Digernes",
+    "address": "Digernes Næringsområde 11, 6260, Skodje",
+    "email": "ep580@europris.no",
+    "phone": "90180848",
+    "latitude": "62.49156000",
+    "longitude": "6.60853000"
+  },
+  {
+    "number": 590,
+    "name": "Europris Dokka",
+    "address": "Storgata 55, 2870, Dokka",
+    "email": "ep590@europris.no",
+    "phone": "61119244",
+    "latitude": "60.83624000",
+    "longitude": "10.06889000"
+  },
+  {
+    "number": 630,
+    "name": "Europris Dombås",
+    "address": "Sentralplassen 1 A, 2660, Dombås",
+    "email": "ep630@europris.no",
+    "phone": "90586933",
+    "latitude": "62.07429000",
+    "longitude": "9.12724000"
+  },
+  {
+    "number": 199,
+    "name": "Europris Drøbak",
+    "address": "Holterveien 4I, 1448, Drøbak",
+    "email": "ep199@europris.no",
+    "phone": "64935705",
+    "latitude": "59.67376000",
+    "longitude": "10.65719000"
+  },
+  {
+    "number": 12,
+    "name": "Europris Egersund",
+    "address": "Lindøyveien 8, 4373, Egersund",
+    "email": "ep012@europris.no",
+    "phone": "51494003",
+    "latitude": "58.44094000",
+    "longitude": "6.00725000"
+  },
+  {
+    "number": 246,
+    "name": "Europris Eidsvoll",
+    "address": "Nedre Vilbergsvei 4, 2080, Eidsvoll",
+    "email": "ep246@europris.no",
+    "phone": "63957900",
+    "latitude": "60.33131000",
+    "longitude": "11.26554000"
+  },
+  {
+    "number": 339,
+    "name": "Europris Eidsvåg",
+    "address": "Kråkholmvegen 19, 6460, Eidsvåg I Romsdal",
+    "email": "ep339@europris.no",
+    "phone": "90703121",
+    "latitude": "62.77611000",
+    "longitude": "8.06280000"
+  },
+  {
+    "number": 117,
+    "name": "Europris Eiker",
+    "address": "Eikersenteret, 3300, Hokksund",
+    "email": "ep117@europris.no",
+    "phone": "32759640",
+    "latitude": "59.76127000",
+    "longitude": "9.90383000"
+  },
+  {
+    "number": 396,
+    "name": "Europris Elnesvågen",
+    "address": "Torget 6, 6440, Elnesvågen",
+    "email": "ep396@europris.no",
+    "phone": "71262040",
+    "latitude": "62.85382000",
+    "longitude": "7.16111000"
+  },
+  {
+    "number": 249,
+    "name": "Europris Elverum",
+    "address": "Olav Sæters Veg 6, 2413, Elverum",
+    "email": "ep249@europris.no",
+    "phone": "62400844",
+    "latitude": "60.89516000",
+    "longitude": "11.58373000"
+  },
+  {
+    "number": 407,
+    "name": "Europris Enebakk",
+    "address": "Sagstuveien 1, 1914, Ytre Enebakk",
+    "email": "ep407@europris.no",
+    "phone": "48135311",
+    "latitude": "59.72398000",
+    "longitude": "11.05030000"
+  },
+  {
+    "number": 624,
+    "name": "Europris Ensjø",
+    "address": "Gladengveien 1, 0661, Oslo",
+    "email": "ep624@europris.no",
+    "phone": "90135050",
+    "latitude": "59.91456000",
+    "longitude": "10.78817000"
+  },
+  {
+    "number": 602,
+    "name": "Europris Etne",
+    "address": "Haukelivegen 936, 5590, Etne",
+    "email": "ep602@europris.no",
+    "phone": "94790097",
+    "latitude": "59.66371000",
+    "longitude": "5.93238000"
+  },
+  {
+    "number": 362,
+    "name": "Europris Evje",
+    "address": "Verksveien 20, 4735, Evje",
+    "email": "ep362@europris.no",
+    "phone": "90813091",
+    "latitude": "58.58013000",
+    "longitude": "7.78815000"
+  },
+  {
+    "number": 594,
+    "name": "Europris Falkum",
+    "address": "Århusveien 25, 3723, Skien",
+    "email": "ep594@europris.no",
+    "phone": "35546030",
+    "latitude": "59.21306000",
+    "longitude": "9.58649000"
+  },
+  {
+    "number": 304,
+    "name": "Europris Farsund",
+    "address": "Øygardsveien 2, 4550, Farsund",
+    "email": "ep304@europris.no",
+    "phone": "38392400",
+    "latitude": "58.09809000",
+    "longitude": "6.77089000"
+  },
+  {
+    "number": 373,
+    "name": "Europris Fauske",
+    "address": "Terminalveien 5, 8208, Fauske",
+    "email": "ep373@europris.no",
+    "phone": "75646418",
+    "latitude": "67.27133000",
+    "longitude": "15.39585000"
+  },
+  {
+    "number": 430,
+    "name": "Europris Finnsnes",
+    "address": "Ringveien 1, 9300, Finnsnes",
+    "email": "ep430@europris.no",
+    "phone": "47905555",
+    "latitude": "69.22940000",
+    "longitude": "17.98739000"
+  },
+  {
+    "number": 623,
+    "name": "Europris Fjellhamar",
+    "address": "Haneborgveien 95, 1463, Fjellhamar",
+    "email": "ep623@europris.no",
+    "phone": "48077590",
+    "latitude": "59.94107000",
+    "longitude": "10.97964000"
+  },
+  {
+    "number": 390,
+    "name": "Europris Flatåsen",
+    "address": "Øvre Flatåsvei 1B, 7079, Flatåsen",
+    "email": "ep390@europris.no",
+    "phone": "95361658",
+    "latitude": "63.37395000",
+    "longitude": "10.34572000"
+  },
+  {
+    "number": 608,
+    "name": "Europris Flekkefjord",
+    "address": "Lasta 50, 4400, Flekkefjord",
+    "email": "ep608@europris.no",
+    "phone": "38324410",
+    "latitude": "58.29298000",
+    "longitude": "6.66359000"
+  },
+  {
+    "number": 230,
+    "name": "Europris Flisa",
+    "address": "Solvesgate 2, 2270, Flisa",
+    "email": "ep230@europris.no",
+    "phone": "62950200",
+    "latitude": "60.61307000",
+    "longitude": "12.00806000"
+  },
+  {
+    "number": 192,
+    "name": "Europris Florø",
+    "address": "Posthuset, 6900, Florø",
+    "email": "ep192@europris.no",
+    "phone": "57749000",
+    "latitude": "61.60052000",
+    "longitude": "5.04740000"
+  },
+  {
+    "number": 376,
+    "name": "Europris Flå",
+    "address": "Svingelie 10, 3539, Flå",
+    "email": "ep376@europris.no",
+    "phone": "97969819",
+    "latitude": "60.43021000",
+    "longitude": "9.46198000"
+  },
+  {
+    "number": 420,
+    "name": "Europris Forus",
+    "address": "Lagerveien 2, 4033, Stavanger",
+    "email": "ep420@europris.no",
+    "phone": "90286462",
+    "latitude": "58.89606000",
+    "longitude": "5.70186000"
+  },
+  {
+    "number": 597,
+    "name": "Europris Fosnavåg",
+    "address": "Eggesbøjorda 3, 6092, Fosnavåg",
+    "email": "ep597@europris.no",
+    "phone": "94814755",
+    "latitude": "62.32411000",
+    "longitude": "5.63875000"
+  },
+  {
+    "number": 209,
+    "name": "Europris Fredrikstad",
+    "address": "Dikeveien 8, 1661, Rolvsøy",
+    "email": "ep209@europris.no",
+    "phone": "69352420",
+    "latitude": "59.24484000",
+    "longitude": "10.98454000"
+  },
+  {
+    "number": 638,
+    "name": "Europris Fritzøe Brygge",
+    "address": "Fritzøe Brygge 1, 3264, Larvik",
+    "email": "ep638@europris.no",
+    "phone": "90298849",
+    "latitude": "59.05019000",
+    "longitude": "10.02142000"
+  },
+  {
+    "number": 628,
+    "name": "Europris Froland",
+    "address": "Bjørumsvegen 2A, 4820, Froland",
+    "email": "ep628@europris.no",
+    "phone": "48186795",
+    "latitude": "58.49697000",
+    "longitude": "8.64500000"
+  },
+  {
+    "number": 621,
+    "name": "Europris Frøya",
+    "address": "Nordfrøyveien 25, 7263, Hamarvik",
+    "email": "ep621@europris.no",
+    "phone": "47707085",
+    "latitude": "63.70450000",
+    "longitude": "8.81890000"
+  },
+  {
+    "number": 458,
+    "name": "Europris Furuset",
+    "address": "Trygve Liesplass 1, Furuset Senter, 1051, Oslo",
+    "email": "ep458@europris.no",
+    "phone": "95102755",
+    "latitude": "59.94216000",
+    "longitude": "10.89774000"
+  },
+  {
+    "number": 429,
+    "name": "Europris Fyllingsdalen",
+    "address": "Spelhaugen 6, 5147, Fyllingsdalen",
+    "email": "ep429@europris.no",
+    "phone": "55151128",
+    "latitude": "60.35090000",
+    "longitude": "5.27783000"
+  },
+  {
+    "number": 579,
+    "name": "Europris Førde",
+    "address": "Firdavegen 20, 6800, Førde",
+    "email": "ep579@europris.no",
+    "phone": "57827005",
+    "latitude": "61.45671000",
+    "longitude": "5.84409000"
+  },
+  {
+    "number": 575,
+    "name": "Europris Ganddal",
+    "address": "Lundegeilen 20-22, 4323, Sandnes",
+    "email": "ep575@europris.no",
+    "phone": "51675541",
+    "latitude": "58.82024000",
+    "longitude": "5.71230000"
+  },
+  {
+    "number": 346,
+    "name": "Europris Gausdal",
+    "address": "Fargerivegen 7, 2651, Østre Gausdal",
+    "email": "ep346@europris.no",
+    "phone": "61220094",
+    "latitude": "61.22638000",
+    "longitude": "10.22247000"
+  },
+  {
+    "number": 404,
+    "name": "Europris Geilo",
+    "address": "Vesleslåttvegen 19, 3580, Geilo",
+    "email": "ep404@europris.no",
+    "phone": "48170259",
+    "latitude": "60.53359000",
+    "longitude": "8.20665000"
+  },
+  {
+    "number": 464,
+    "name": "Europris Giske",
+    "address": "Valderøyvegen 1166, 6050, Valderøya",
+    "email": "ep464@europris.no",
+    "phone": "47606212",
+    "latitude": "62.53268000",
+    "longitude": "6.12326000"
+  },
+  {
+    "number": 394,
+    "name": "Europris Gjøvik",
+    "address": "Kallerudlia 4, 2818, Gjøvik",
+    "email": "ep394@europris.no",
+    "phone": "61179490",
+    "latitude": "60.78047000",
+    "longitude": "10.69246000"
+  },
+  {
+    "number": 415,
+    "name": "Europris Gol",
+    "address": "Sentrumsvegen 64, 3550, Gol",
+    "email": "ep415@europris.no",
+    "phone": "32074505",
+    "latitude": "60.70505000",
+    "longitude": "8.95334000"
+  },
+  {
+    "number": 479,
+    "name": "Europris Gran",
+    "address": "Morstadvegen 2, 2750, Gran",
+    "email": "ep479@europris.no",
+    "phone": "94134088",
+    "latitude": "60.35392000",
+    "longitude": "10.57601000"
+  },
+  {
+    "number": 432,
+    "name": "Europris Grasmyr",
+    "address": "Tønderveien 3, 3960, Stathelle",
+    "email": "ep432@europris.no",
+    "phone": "47637562",
+    "latitude": "59.03036000",
+    "longitude": "9.70408000"
+  },
+  {
+    "number": 629,
+    "name": "Europris Grensen City",
+    "address": "Grensen 13, 0159, Oslo",
+    "email": "ep629@europris.no",
+    "phone": "90171147",
+    "latitude": "59.91394000",
+    "longitude": "10.74319000"
+  },
+  {
+    "number": 639,
+    "name": "Europris Grim",
+    "address": "Setesdalveien 21, 4616, Kristiansand S",
+    "email": "ep639@europris.no",
+    "phone": "90362271",
+    "latitude": "58.14833000",
+    "longitude": "7.97886000"
+  },
+  {
+    "number": 437,
+    "name": "Europris Grimstad",
+    "address": "Bergemoveien 45, 4886, Grimstad",
+    "email": "ep437@europris.no",
+    "phone": "37041910",
+    "latitude": "58.34273000",
+    "longitude": "8.55371000"
+  },
+  {
+    "number": 353,
+    "name": "Europris Grini Pluss",
+    "address": "Grini Næringspark 1, 1361, Østerås",
+    "email": "ep353@europris.no",
+    "phone": "90362945",
+    "latitude": "59.94561000",
+    "longitude": "10.59776000"
+  },
+  {
+    "number": 494,
+    "name": "Europris Grong",
+    "address": "Sundspetvegen 33, 7870, Grong",
+    "email": "ep494@europris.no",
+    "phone": "94870256",
+    "latitude": "64.46327000",
+    "longitude": "12.30489000"
+  },
+  {
+    "number": 472,
+    "name": "Europris Grorud",
+    "address": "Grorud Senter, Bergensveien 2, 0963, Oslo",
+    "email": "ep472@europris.no",
+    "phone": "48157070",
+    "latitude": "59.95948000",
+    "longitude": "10.88261000"
+  },
+  {
+    "number": 641,
+    "name": "Europris Gulskogen",
+    "address": "Guldlisten 35, 3048, Drammen",
+    "email": "ep641@europris.no",
+    "phone": "90912828",
+    "latitude": "59.74253000",
+    "longitude": "10.15797000"
+  },
+  {
+    "number": 604,
+    "name": "Europris Gunerius City",
+    "address": "Storgata 32, 0184, Oslo",
+    "email": "ep604@europris.no",
+    "phone": "90269964",
+    "latitude": "59.91416000",
+    "longitude": "10.75291000"
+  },
+  {
+    "number": 239,
+    "name": "Europris Halden",
+    "address": "Walkers Gate 8B, 1771, Halden",
+    "email": "ep239@europris.no",
+    "phone": "69191400",
+    "latitude": "59.12160000",
+    "longitude": "11.38340000"
+  },
+  {
+    "number": 631,
+    "name": "Europris Hamar",
+    "address": "Midtstranda 97, 2321, Hamar",
+    "email": "ep631@europris.no",
+    "phone": "94827130",
+    "latitude": "60.79949000",
+    "longitude": "11.11649000"
+  },
+  {
+    "number": 62,
+    "name": "Europris Hammerfest",
+    "address": "Finnmarksveien 56, 9600, Hammerfest",
+    "email": "ep062@europris.no",
+    "phone": "78413256",
+    "latitude": "70.67857000",
+    "longitude": "23.66983000"
+  },
+  {
+    "number": 589,
+    "name": "Europris Harstad",
+    "address": "Verkstedveien 7 B, 9406, Harstad",
+    "email": "ep589@europris.no",
+    "phone": "77061540",
+    "latitude": "68.79191000",
+    "longitude": "16.54183000"
+  },
+  {
+    "number": 595,
+    "name": "Europris Herkules",
+    "address": "Ulefossveien 48, 3730, Skien",
+    "email": "ep595@europris.no",
+    "phone": "35595260",
+    "latitude": "59.19510000",
+    "longitude": "9.59715000"
+  },
+  {
+    "number": 277,
+    "name": "Europris Hitra",
+    "address": "Storhaugveien 1, 7240, Hitra",
+    "email": "ep277@europris.no",
+    "phone": "95458178",
+    "latitude": "63.60638000",
+    "longitude": "8.96961000"
+  },
+  {
+    "number": 42,
+    "name": "Europris Holmestrand",
+    "address": "Bentserudveien 4, 3080, Holmestrand",
+    "email": "ep042@europris.no",
+    "phone": "33052100",
+    "latitude": "59.47355000",
+    "longitude": "10.31723000"
+  },
+  {
+    "number": 632,
+    "name": "Europris Holmestrand",
+    "address": "Bentserudveien 4, 3080, Holmestrand",
+    "email": "ep632@europris.no",
+    "phone": "33052100",
+    "latitude": "59.47355000",
+    "longitude": "10.31723000"
+  },
+  {
+    "number": 646,
+    "name": "Europris Holmlia City",
+    "address": "Holmliaveien 75, 1255, Oslo",
+    "email": "ep646@europris.no",
+    "phone": "48083055",
+    "latitude": "59.83425000",
+    "longitude": "10.79603000"
+  },
+  {
+    "number": 329,
+    "name": "Europris Hommelvik",
+    "address": "Havnevegen 24, 7550, Hommelvik",
+    "email": "ep329@europris.no",
+    "phone": "46863488",
+    "latitude": "63.41524000",
+    "longitude": "10.80752000"
+  },
+  {
+    "number": 395,
+    "name": "Europris Horten",
+    "address": "Strandparken 3-5 Lindenpark, 3187, Horten",
+    "email": "ep395@europris.no",
+    "phone": "33040590",
+    "latitude": "59.40765000",
+    "longitude": "10.48450000"
+  },
+  {
+    "number": 363,
+    "name": "Europris Hov",
+    "address": "Hovlandsvegen 1, 2860, Hov",
+    "email": "ep363@europris.no",
+    "phone": "90404731",
+    "latitude": "60.69716000",
+    "longitude": "10.35335000"
+  },
+  {
+    "number": 374,
+    "name": "Europris Hunstad",
+    "address": "Hunstadsenteret, Vei 1414 Nr 674, 8022, Bodø",
+    "email": "ep374@europris.no",
+    "phone": "46905432",
+    "latitude": "67.28111000",
+    "longitude": "14.54527000"
+  },
+  {
+    "number": 47,
+    "name": "Europris Husnes",
+    "address": "Opsangervegen 1, 5460, Husnes",
+    "email": "ep047@europris.no",
+    "phone": "46825757",
+    "latitude": "59.85881000",
+    "longitude": "5.75396000"
+  },
+  {
+    "number": 244,
+    "name": "Europris Hønefoss",
+    "address": "Hvervenmoveien 2, 3511, Hønefoss",
+    "email": "ep244@europris.no",
+    "phone": "32130230",
+    "latitude": "60.14590000",
+    "longitude": "10.25245000"
+  },
+  {
+    "number": 364,
+    "name": "Europris Indre Arna",
+    "address": "Storaneset 24, 5260, Indre Arna",
+    "email": "ep364@europris.no",
+    "phone": "90363720",
+    "latitude": "60.43358000",
+    "longitude": "5.46294000"
+  },
+  {
+    "number": 279,
+    "name": "Europris Iseveien",
+    "address": "Snekkerstubakken 26, 1738, Borgenhaugen",
+    "email": "ep279@europris.no",
+    "phone": "69101235",
+    "latitude": "59.26897000",
+    "longitude": "11.15912000"
+  },
+  {
+    "number": 359,
+    "name": "Europris Jessheim",
+    "address": "Dampsaga Allé 3, 2050, Jessheim",
+    "email": "ep359@europris.no",
+    "phone": "90243180",
+    "latitude": "60.14256000",
+    "longitude": "11.18056000"
+  },
+  {
+    "number": 477,
+    "name": "Europris Jevnaker",
+    "address": "Industrivegen 2, 3520, Jevnaker",
+    "email": "ep477@europris.no",
+    "phone": "48021458",
+    "latitude": "60.22947000",
+    "longitude": "10.35494000"
+  },
+  {
+    "number": 369,
+    "name": "Europris Juvik",
+    "address": "Juvikflaten 10, 5300, Kleppestø",
+    "email": "ep369@europris.no",
+    "phone": "95431747",
+    "latitude": "60.42702000",
+    "longitude": "5.19261000"
+  },
+  {
+    "number": 619,
+    "name": "Europris Jåttå",
+    "address": "Jåttåvågveien 7, 4020, Stavanger",
+    "email": "ep619@europris.no",
+    "phone": "91398210",
+    "latitude": "58.91426000",
+    "longitude": "5.71905000"
+  },
+  {
+    "number": 25,
+    "name": "Europris Jørpeland/strand",
+    "address": "Ryfylke Storsenter, 4100, Jørpeland",
+    "email": "ep025@europris.no",
+    "phone": "51749399",
+    "latitude": "59.02063000",
+    "longitude": "6.03994000"
+  },
+  {
+    "number": 642,
+    "name": "Europris Jørpeland/strand",
+    "address": "Ryfylke Storsenter, 4100, Jørpeland",
+    "email": "ep642@europris.no",
+    "phone": "51749399",
+    "latitude": "59.02063000",
+    "longitude": "6.03994000"
+  },
+  {
+    "number": 58,
+    "name": "Europris Karmøy",
+    "address": "Vestheimveien 6, 4250, Kopervik",
+    "email": "ep058@europris.no",
+    "phone": "52852055",
+    "latitude": "59.29148000",
+    "longitude": "5.28929000"
+  },
+  {
+    "number": 614,
+    "name": "Europris Kilen Tønsberg",
+    "address": "Halfdan Wilhemsens Alle 42, 3117, Tønsberg",
+    "email": "ep614@europris.no",
+    "phone": "33317224",
+    "latitude": "59.27379000",
+    "longitude": "10.42929000"
+  },
+  {
+    "number": 460,
+    "name": "Europris Kirkeby",
+    "address": "Ringveien 11, 2815, Gjøvik",
+    "email": "ep460@europris.no",
+    "phone": "97675028",
+    "latitude": "60.78383000",
+    "longitude": "10.69194000"
+  },
+  {
+    "number": 316,
+    "name": "Europris Kirkenes",
+    "address": "Smiveien 4, 9900, Kirkenes",
+    "email": "ep316@europris.no",
+    "phone": "78993855",
+    "latitude": "69.72569000",
+    "longitude": "30.06846000"
+  },
+  {
+    "number": 423,
+    "name": "Europris Kirkenær",
+    "address": "Bruvegen 11, 2260, Kirkenær",
+    "email": "ep423@europris.no",
+    "phone": "46929121",
+    "latitude": "60.45675000",
+    "longitude": "12.05717000"
+  },
+  {
+    "number": 572,
+    "name": "Europris Kjørbekk",
+    "address": "Bedriftsvegen 130, 3735, Skien",
+    "email": "ep572@europris.no",
+    "phone": "90055862",
+    "latitude": "59.18374000",
+    "longitude": "9.60583000"
+  },
+  {
+    "number": 577,
+    "name": "Europris Klepp",
+    "address": "Solavegen 2, 4350, Kleppe",
+    "email": "ep577@europris.no",
+    "phone": "91763645",
+    "latitude": "58.77801000",
+    "longitude": "5.62843000"
+  },
+  {
+    "number": 252,
+    "name": "Europris Kløfta",
+    "address": "Trondheimsveien 62, 2040, Kløfta",
+    "email": "ep252@europris.no",
+    "phone": "63976230",
+    "latitude": "60.07258000",
+    "longitude": "11.13591000"
+  },
+  {
+    "number": 89,
+    "name": "Europris Knarvik",
+    "address": "Kvernhusmyrane 21, 5914, Isdalstø",
+    "email": "ep089@europris.no",
+    "phone": "40638229",
+    "latitude": "60.54810000",
+    "longitude": "5.28661000"
+  },
+  {
+    "number": 500,
+    "name": "Europris Kokstad",
+    "address": "Kokstaddalen 18, 5257, Kokstad",
+    "email": "ep500@europris.no",
+    "phone": "46859080",
+    "latitude": "60.29431000",
+    "longitude": "5.25325000"
+  },
+  {
+    "number": 426,
+    "name": "Europris Kolvereid",
+    "address": "Kolvereid Torg, 7970, Kolvereid",
+    "email": "ep426@europris.no",
+    "phone": "74398630",
+    "latitude": "64.86468000",
+    "longitude": "11.59831000"
+  },
+  {
+    "number": 606,
+    "name": "Europris Kongsberg Sølvparken",
+    "address": "Sildetomta 8, 3602, Kongsberg",
+    "email": "ep606@europris.no",
+    "phone": "32721700",
+    "latitude": "59.66900000",
+    "longitude": "9.65425000"
+  },
+  {
+    "number": 243,
+    "name": "Europris Kongsvinger",
+    "address": "Markensveien 3, 2212, Kongsvinger",
+    "email": "ep243@europris.no",
+    "phone": "94156316",
+    "latitude": "60.19289000",
+    "longitude": "12.00053000"
+  },
+  {
+    "number": 385,
+    "name": "Europris Konnerud",
+    "address": "Pettervollveien 3, 3032, Drammen",
+    "email": "ep385@europris.no",
+    "phone": "95091163",
+    "latitude": "59.71786000",
+    "longitude": "10.14890000"
+  },
+  {
+    "number": 76,
+    "name": "Europris Kragerø",
+    "address": "Dalaneveien 28-30, 3772, Kragerø",
+    "email": "ep076@europris.no",
+    "phone": "35982535",
+    "latitude": "58.87311000",
+    "longitude": "9.36891000"
+  },
+  {
+    "number": 308,
+    "name": "Europris Kristiansund",
+    "address": "Rørgata 5, 6517, Kristiansund N",
+    "email": "ep308@europris.no",
+    "phone": "71583941",
+    "latitude": "63.10967000",
+    "longitude": "7.80007000"
+  },
+  {
+    "number": 399,
+    "name": "Europris Kråkerøy",
+    "address": "Stadion 33, 1671, Kråkerøy",
+    "email": "ep399@europris.no",
+    "phone": "91759420",
+    "latitude": "59.21209000",
+    "longitude": "10.92863000"
+  },
+  {
+    "number": 327,
+    "name": "Europris Krøgenes",
+    "address": "Kystveien 247, 4841, Arendal",
+    "email": "ep327@europris.no",
+    "phone": "97627627",
+    "latitude": "58.47355000",
+    "longitude": "8.81403000"
+  },
+  {
+    "number": 488,
+    "name": "Europris Kvala",
+    "address": "Austrheimsveien 10, 5516, Haugesund",
+    "email": "ep488@europris.no",
+    "phone": "52718140",
+    "latitude": "59.43764000",
+    "longitude": "5.26845000"
+  },
+  {
+    "number": 467,
+    "name": "Europris Kvinesdal",
+    "address": "Austerdalsveien 3A, 4480, Kvinesdal",
+    "email": "ep467@europris.no",
+    "phone": "38350510",
+    "latitude": "58.32051000",
+    "longitude": "6.96346000"
+  },
+  {
+    "number": 325,
+    "name": "Europris Kyrksæterøra",
+    "address": "Industriveien 5, 7200, Kyrksæterøra",
+    "email": "ep325@europris.no",
+    "phone": "90682051",
+    "latitude": "63.29347000",
+    "longitude": "9.08651000"
+  },
+  {
+    "number": 320,
+    "name": "Europris Lade",
+    "address": "Haakon Vii Gate 12 1.Etg, 7041, Trondheim",
+    "email": "ep320@europris.no",
+    "phone": "97471797",
+    "latitude": "63.44017000",
+    "longitude": "10.46253000"
+  },
+  {
+    "number": 626,
+    "name": "Europris Lagunen",
+    "address": "Laguneveien 17, 2 Etg, 5239, Rådal",
+    "email": "ep626@europris.no",
+    "phone": "90410385",
+    "latitude": "60.29555000",
+    "longitude": "5.32952000"
+  },
+  {
+    "number": 305,
+    "name": "Europris Lakselv",
+    "address": "Låtasvei, 9700, Lakselv",
+    "email": "ep305@europris.no",
+    "phone": "78463144",
+    "latitude": "70.05203000",
+    "longitude": "24.97146000"
+  },
+  {
+    "number": 483,
+    "name": "Europris Laksevåg",
+    "address": "Kringsjåveien 83-89, 5163, Laksevåg",
+    "email": "ep483@europris.no",
+    "phone": "91713530",
+    "latitude": "60.38951000",
+    "longitude": "5.28701000"
+  },
+  {
+    "number": 254,
+    "name": "Europris Lambertseter",
+    "address": "Cecilie Thoresensvei 28, 1153, Oslo",
+    "email": "ep254@europris.no",
+    "phone": "22742500",
+    "latitude": "59.87489000",
+    "longitude": "10.80969000"
+  },
+  {
+    "number": 509,
+    "name": "Europris Langevåg",
+    "address": "Veddevegen 171, 6030, Langevåg",
+    "email": "ep509@europris.no",
+    "phone": "47688026",
+    "latitude": "62.43810000",
+    "longitude": "6.23387000"
+  },
+  {
+    "number": 290,
+    "name": "Europris Langnes",
+    "address": "Ærfuglvegen 5, 9015, Tromsø",
+    "email": "ep290@europris.no",
+    "phone": "77673730",
+    "latitude": "69.67542000",
+    "longitude": "18.92858000"
+  },
+  {
+    "number": 443,
+    "name": "Europris Langrønningen",
+    "address": "Langrønningen 16, 3967, Stathelle",
+    "email": "ep443@europris.no",
+    "phone": "35976920",
+    "latitude": "58.97256000",
+    "longitude": "9.52422000"
+  },
+  {
+    "number": 269,
+    "name": "Europris Leira",
+    "address": "Markaveien 2, 2920, Leira I Valdres",
+    "email": "ep269@europris.no",
+    "phone": "61 36 10 75",
+    "latitude": "60.97112000",
+    "longitude": "9.28952000"
+  },
+  {
+    "number": 627,
+    "name": "Europris Leira",
+    "address": "Markaveien 2, 2920, Leira I Valdres",
+    "email": "ep627@europris.no",
+    "phone": "61361075",
+    "latitude": "60.97112000",
+    "longitude": "9.28952000"
+  },
+  {
+    "number": 20,
+    "name": "Europris Leknes",
+    "address": "Hotellgården, Elvegårdsveien 10, 8370, Leknes",
+    "email": "ep020@europris.no",
+    "phone": "76082222",
+    "latitude": "68.14733000",
+    "longitude": "13.60656000"
+  },
+  {
+    "number": 620,
+    "name": "Europris Lena",
+    "address": "Vallevegen 16, 2850, Lena",
+    "email": "ep620@europris.no",
+    "phone": "61162244",
+    "latitude": "60.67529000",
+    "longitude": "10.81152000"
+  },
+  {
+    "number": 471,
+    "name": "Europris Levanger",
+    "address": "Moafjæra 12, 7606, Levanger",
+    "email": "ep471@europris.no",
+    "phone": "74096700",
+    "latitude": "63.73383000",
+    "longitude": "11.28266000"
+  },
+  {
+    "number": 224,
+    "name": "Europris Lierstranda",
+    "address": "Lierstranda 97, 3414, Lierstranda",
+    "email": "ep224@europris.no",
+    "phone": "95865576",
+    "latitude": "59.74989000",
+    "longitude": "10.24926000"
+  },
+  {
+    "number": 438,
+    "name": "Europris Liertoppen",
+    "address": "Drammensveien 201, 3421, Lierskogen",
+    "email": "ep438@europris.no",
+    "phone": "32848860",
+    "latitude": "59.81129000",
+    "longitude": "10.30585000"
+  },
+  {
+    "number": 581,
+    "name": "Europris Lillehammer Nord",
+    "address": "Snekkerveien 7, 2619, Lillehammer",
+    "email": "ep581@europris.no",
+    "phone": "46941052",
+    "latitude": "61.12904000",
+    "longitude": "10.44675000"
+  },
+  {
+    "number": 228,
+    "name": "Europris Lillehammer Strandparken",
+    "address": "Strandpromenaden 77 , Strandtorget, 2609, Lillehammer",
+    "email": "ep228@europris.no",
+    "phone": "94151701",
+    "latitude": "61.11459000",
+    "longitude": "10.45268000"
+  },
+  {
+    "number": 436,
+    "name": "Europris Lillesand",
+    "address": "Senterveien 10, 4790, Lillesand",
+    "email": "ep436@europris.no",
+    "phone": "37272455",
+    "latitude": "58.26122000",
+    "longitude": "8.39377000"
+  },
+  {
+    "number": 383,
+    "name": "Europris Lillestrøm",
+    "address": "Isakvn 2, 2004, Lillestrøm",
+    "email": "ep383@europris.no",
+    "phone": "63805390",
+    "latitude": "59.94802000",
+    "longitude": "11.07249000"
+  },
+  {
+    "number": 255,
+    "name": "Europris Lindeberg",
+    "address": "Lindeberg Næringsvei 28, 1068, Oslo",
+    "email": "ep255@europris.no",
+    "phone": "22302530",
+    "latitude": "59.93563000",
+    "longitude": "10.88696000"
+  },
+  {
+    "number": 611,
+    "name": "Europris Lindås",
+    "address": "Kolåsvegen 7, 5955, Lindås",
+    "email": "ep611@europris.no",
+    "phone": "90605122",
+    "latitude": "60.73937000",
+    "longitude": "5.16066000"
+  },
+  {
+    "number": 340,
+    "name": "Europris Lom",
+    "address": "Stupulvegen 11, 2686, Lom",
+    "email": "ep340@europris.no",
+    "phone": "97642021",
+    "latitude": "61.83923000",
+    "longitude": "8.57833000"
+  },
+  {
+    "number": 424,
+    "name": "Europris Lonevåg",
+    "address": "Lonevåg Arena, 5282, Lonevåg",
+    "email": "ep424@europris.no",
+    "phone": "91736060",
+    "latitude": "60.52619000",
+    "longitude": "5.49368000"
+  },
+  {
+    "number": 474,
+    "name": "Europris Lund",
+    "address": "Stadionveien 16, 4632, Kristiansand S",
+    "email": "ep474@europris.no",
+    "phone": "38092411",
+    "latitude": "58.15311000",
+    "longitude": "8.02572000"
+  },
+  {
+    "number": 591,
+    "name": "Europris Lura",
+    "address": "Somaveien 2, 4313, Sandnes",
+    "email": "ep591@europris.no",
+    "phone": "48161970",
+    "latitude": "58.87353000",
+    "longitude": "5.72474000"
+  },
+  {
+    "number": 487,
+    "name": "Europris Lyngdal",
+    "address": "Fiboveien 4, 4580, Lyngdal",
+    "email": "ep487@europris.no",
+    "phone": "38341500",
+    "latitude": "58.13790000",
+    "longitude": "7.07044000"
+  },
+  {
+    "number": 615,
+    "name": "Europris Løren City",
+    "address": "Lørenveien 38, 0585, Oslo",
+    "email": "ep615@europris.no",
+    "phone": "90077680",
+    "latitude": "59.93141000",
+    "longitude": "10.79069000"
+  },
+  {
+    "number": 421,
+    "name": "Europris Lørenskog",
+    "address": "Boecks Gate 10, 1470, Lørenskog",
+    "email": "ep421@europris.no",
+    "phone": "95438102",
+    "latitude": "59.92723000",
+    "longitude": "10.95752000"
+  },
+  {
+    "number": 408,
+    "name": "Europris Løten",
+    "address": "Stasjonsveien 12 B, 2340, Løten",
+    "email": "ep408@europris.no",
+    "phone": "47670144",
+    "latitude": "60.81983000",
+    "longitude": "11.34207000"
+  },
+  {
+    "number": 63,
+    "name": "Europris Madla",
+    "address": "Ragbakken 84, 4042, Hafrsfjord",
+    "email": "ep063@europris.no",
+    "phone": "51553181",
+    "latitude": "58.95202000",
+    "longitude": "5.65727000"
+  },
+  {
+    "number": 29,
+    "name": "Europris Mandal",
+    "address": "Sommerkroveien 34, 4515, Mandal",
+    "email": "ep029@europris.no",
+    "phone": "38260107",
+    "latitude": "58.02436000",
+    "longitude": "7.46635000"
+  },
+  {
+    "number": 645,
+    "name": "Europris Mandal",
+    "address": "Sommerkroveien 7, 4515, Mandal",
+    "email": "ep645@europris.no",
+    "phone": "38260107",
+    "latitude": "58.02436000",
+    "longitude": "7.46635000"
+  },
+  {
+    "number": 609,
+    "name": "Europris Melhus",
+    "address": "Melhustorget, 7224, Melhus",
+    "email": "ep609@europris.no",
+    "phone": "72878660",
+    "latitude": "63.28613000",
+    "longitude": "10.28416000"
+  },
+  {
+    "number": 600,
+    "name": "Europris Meråker",
+    "address": "Mellomrikveien 4869, 7530, Meråker",
+    "email": "ep600@europris.no",
+    "phone": "91566280",
+    "latitude": "63.41685000",
+    "longitude": "11.73905000"
+  },
+  {
+    "number": 431,
+    "name": "Europris Midtun",
+    "address": "Midtunheia 20, 5224, Nesttun",
+    "email": "ep431@europris.no",
+    "phone": "55104581",
+    "latitude": "60.32143000",
+    "longitude": "5.36485000"
+  },
+  {
+    "number": 386,
+    "name": "Europris Mjøndalen",
+    "address": "Orkidehøgda, 3050, Mjøndalen",
+    "email": "ep386@europris.no",
+    "phone": "95442387",
+    "latitude": "59.74887000",
+    "longitude": "10.02697000"
+  },
+  {
+    "number": 434,
+    "name": "Europris Mo I Rana",
+    "address": "Verkstedveien 6, 8624, Mo I Rana",
+    "email": "ep434@europris.no",
+    "phone": "75152680",
+    "latitude": "66.30412000",
+    "longitude": "14.13258000"
+  },
+  {
+    "number": 242,
+    "name": "Europris Moelv",
+    "address": "Åsmarkvegen 6, 2390, Moelv",
+    "email": "ep242@europris.no",
+    "phone": "62366205",
+    "latitude": "60.92999000",
+    "longitude": "10.70080000"
+  },
+  {
+    "number": 335,
+    "name": "Europris Molde",
+    "address": "Birger Hatlebaks V 7, 6415, Molde",
+    "email": "ep335@europris.no",
+    "phone": "71256801",
+    "latitude": "62.73893000",
+    "longitude": "7.18001000"
+  },
+  {
+    "number": 457,
+    "name": "Europris Mortensrud",
+    "address": "Helga Vaneks Vei 1 J, 1281, Oslo",
+    "email": "ep457@europris.no",
+    "phone": "97687782",
+    "latitude": "59.84883000",
+    "longitude": "10.83064000"
+  },
+  {
+    "number": 435,
+    "name": "Europris Mosjøen",
+    "address": "Dolstadgaten 15, 8663, Mosjøen",
+    "email": "ep435@europris.no",
+    "phone": "75170660",
+    "latitude": "65.84149000",
+    "longitude": "13.19153000"
+  },
+  {
+    "number": 295,
+    "name": "Europris Moss Pluss",
+    "address": "Midtveien 5, 1521, Moss",
+    "email": "ep295@europris.no",
+    "phone": "69236690",
+    "latitude": "59.41536000",
+    "longitude": "10.67615000"
+  },
+  {
+    "number": 413,
+    "name": "Europris Mysen",
+    "address": "Opsahlåsveien 1, 1850, Mysen",
+    "email": "ep413@europris.no",
+    "phone": "69891400",
+    "latitude": "59.55181000",
+    "longitude": "11.34179000"
+  },
+  {
+    "number": 306,
+    "name": "Europris Måløy",
+    "address": "Måløy Stormarked, 6718, Deknepollen",
+    "email": "ep306@europris.no",
+    "phone": "57854440",
+    "latitude": "61.92162000",
+    "longitude": "5.15445000"
+  },
+  {
+    "number": 375,
+    "name": "Europris Namsos",
+    "address": "Sandgata 7 A, 7800, Namsos",
+    "email": "ep375@europris.no",
+    "phone": "74271713",
+    "latitude": "64.47467000",
+    "longitude": "11.50992000"
+  },
+  {
+    "number": 593,
+    "name": "Europris Nannestad",
+    "address": "Ekerveien 5, 2030, Nannestad",
+    "email": "ep593@europris.no",
+    "phone": "94876630",
+    "latitude": "60.22040000",
+    "longitude": "11.01514000"
+  },
+  {
+    "number": 441,
+    "name": "Europris Nanset",
+    "address": "Nansetveien 150, 3255, Larvik",
+    "email": "ep441@europris.no",
+    "phone": "33116511",
+    "latitude": "59.08085000",
+    "longitude": "10.06260000"
+  },
+  {
+    "number": 588,
+    "name": "Europris Narvik",
+    "address": "Bolagsgata 18, 8516, Narvik",
+    "email": "ep588@europris.no",
+    "phone": "76960660",
+    "latitude": "68.43628000",
+    "longitude": "17.41494000"
+  },
+  {
+    "number": 447,
+    "name": "Europris Nedenes",
+    "address": "Vesterveien 705, 4823, Nedenes",
+    "email": "ep447@europris.no",
+    "phone": "48087620",
+    "latitude": "58.41842000",
+    "longitude": "8.70238000"
+  },
+  {
+    "number": 625,
+    "name": "Europris Nittedal",
+    "address": "Bjertnestangen 9, 1482, Nittedal",
+    "email": "ep625@europris.no",
+    "phone": "48182105",
+    "latitude": "60.05084000",
+    "longitude": "10.88390000"
+  },
+  {
+    "number": 484,
+    "name": "Europris Nordfjordeid",
+    "address": "Uldegrova 4, 6770, Nordfjordeid",
+    "email": "ep484@europris.no",
+    "phone": "57861560",
+    "latitude": "61.90967000",
+    "longitude": "6.00291000"
+  },
+  {
+    "number": 315,
+    "name": "Europris Norheimsund",
+    "address": "Steinsdalsvegen 39, 5600, Norheimsund",
+    "email": "ep315@europris.no",
+    "phone": "56563060",
+    "latitude": "60.37217000",
+    "longitude": "6.13744000"
+  },
+  {
     "number": 77,
     "name": "Europris Notodden",
-    "address": "",
-    "email": "ep077@europris.no"
+    "address": "Merdevegen 12, 3676, Notodden",
+    "email": "ep077@europris.no",
+    "phone": "35022595",
+    "latitude": "59.56610000",
+    "longitude": "9.21626000"
+  },
+  {
+    "number": 384,
+    "name": "Europris Nærbø",
+    "address": "Torggata 16, 4365, Nærbø",
+    "email": "ep384@europris.no",
+    "phone": "51431335",
+    "latitude": "58.66486000",
+    "longitude": "5.63669000"
+  },
+  {
+    "number": 334,
+    "name": "Europris Nøtterøy",
+    "address": "Ramdalveien 2, 3128, Nøtterøy",
+    "email": "ep334@europris.no",
+    "phone": "33407220",
+    "latitude": "59.26389000",
+    "longitude": "10.39329000"
+  },
+  {
+    "number": 135,
+    "name": "Europris Odda",
+    "address": "Tyssedalsveien 12, 5750, Odda",
+    "email": "ep135@europris.no",
+    "phone": "53647400",
+    "latitude": "60.06968000",
+    "longitude": "6.55186000"
+  },
+  {
+    "number": 397,
+    "name": "Europris Oppdal",
+    "address": "O. Skasliens Veg 46, 7340, Oppdal",
+    "email": "ep397@europris.no",
+    "phone": "91668401",
+    "latitude": "62.59583000",
+    "longitude": "9.70290000"
+  },
+  {
+    "number": 489,
+    "name": "Europris Orkanger",
+    "address": "Tverradkomsten 60, 7300, Orkanger",
+    "email": "ep489@europris.no",
+    "phone": "72481825",
+    "latitude": "63.30598000",
+    "longitude": "9.83860000"
+  },
+  {
+    "number": 56,
+    "name": "Europris Os",
+    "address": "Prestegårdsskogen 2, 5210, Os",
+    "email": "ep056@europris.no",
+    "phone": "56304450",
+    "latitude": "60.20315000",
+    "longitude": "5.45643000"
+  },
+  {
+    "number": 210,
+    "name": "Europris Otta",
+    "address": "Storgaten 2, 2670, Otta",
+    "email": "ep210@europris.no",
+    "phone": "95239969",
+    "latitude": "61.77119000",
+    "longitude": "9.54336000"
+  },
+  {
+    "number": 636,
+    "name": "Europris Otta",
+    "address": "Storgaten 2, 2670, Otta",
+    "email": "ep636@europris.no",
+    "phone": "61230440",
+    "latitude": "61.77119000",
+    "longitude": "9.54336000"
+  },
+  {
+    "number": 461,
+    "name": "Europris Ottestad",
+    "address": "Holmlundveien 1, 2312, Ottestad",
+    "email": "ep461@europris.no",
+    "phone": "90242737",
+    "latitude": "60.77028000",
+    "longitude": "11.13187000"
+  },
+  {
+    "number": 410,
+    "name": "Europris Pindsle",
+    "address": "Pindsleveien 21, 3221, Sandefjord",
+    "email": "ep410@europris.no",
+    "phone": "48129277",
+    "latitude": "59.14162000",
+    "longitude": "10.18001000"
+  },
+  {
+    "number": 442,
+    "name": "Europris Porsgrunn",
+    "address": "Porselensveien 14, 3920, Porsgrunn",
+    "email": "ep442@europris.no",
+    "phone": "35554613",
+    "latitude": "59.14058000",
+    "longitude": "9.63716000"
+  },
+  {
+    "number": 237,
+    "name": "Europris Prinsdal",
+    "address": "Skiveien 2, 1410, Kolbotn",
+    "email": "ep237@europris.no",
+    "phone": "90268548",
+    "latitude": "59.83328000",
+    "longitude": "10.80876000"
+  },
+  {
+    "number": 233,
+    "name": "Europris Raglamyr Pluss",
+    "address": "Longhammervegen 36, 5536, Haugesund",
+    "email": "ep233@europris.no",
+    "phone": "52866761",
+    "latitude": "59.39740000",
+    "longitude": "5.33471000"
+  },
+  {
+    "number": 245,
+    "name": "Europris Rakkestad",
+    "address": "Storgata 18, 1890, Rakkestad",
+    "email": "ep245@europris.no",
+    "phone": "69225990",
+    "latitude": "59.42608000",
+    "longitude": "11.34239000"
+  },
+  {
+    "number": 216,
+    "name": "Europris Randaberg",
+    "address": "Randabergveien 333, 4070, Randaberg",
+    "email": "ep216@europris.no",
+    "phone": "51734450",
+    "latitude": "58.99532000",
+    "longitude": "5.63761000"
+  },
+  {
+    "number": 587,
+    "name": "Europris Raufoss",
+    "address": "Storgata 49, 2830, Raufoss",
+    "email": "ep587@europris.no",
+    "phone": "61190577",
+    "latitude": "60.72538000",
+    "longitude": "10.61266000"
+  },
+  {
+    "number": 578,
+    "name": "Europris Reknes",
+    "address": "Gideonveien 4, 6415, Molde",
+    "email": "ep578@europris.no",
+    "phone": "94811778",
+    "latitude": "62.73401000",
+    "longitude": "7.13944000"
+  },
+  {
+    "number": 280,
+    "name": "Europris Rena",
+    "address": "Lille Torggate 4, 2450, Rena",
+    "email": "ep280@europris.no",
+    "phone": "62444257",
+    "latitude": "61.13277000",
+    "longitude": "11.36980000"
+  },
+  {
+    "number": 300,
+    "name": "Europris Revetal",
+    "address": "Regata 5, 3174, Revetal",
+    "email": "ep300@europris.no",
+    "phone": "90251720",
+    "latitude": "59.36940000",
+    "longitude": "10.26458000"
+  },
+  {
+    "number": 414,
+    "name": "Europris Ringebu",
+    "address": "Vålerjordet, 2630, Ringebu",
+    "email": "ep414@europris.no",
+    "phone": "90253219",
+    "latitude": "61.52992000",
+    "longitude": "10.14710000"
+  },
+  {
+    "number": 349,
+    "name": "Europris Rissa",
+    "address": "Badstuveien 4, 7100, Rissa",
+    "email": "ep349@europris.no",
+    "phone": "95816312",
+    "latitude": "63.58407000",
+    "longitude": "9.95663000"
+  },
+  {
+    "number": 571,
+    "name": "Europris Risør",
+    "address": "Risørveien 179, 4950, Risør",
+    "email": "ep571@europris.no",
+    "phone": "47707322",
+    "latitude": "58.71516000",
+    "longitude": "9.17672000"
+  },
+  {
+    "number": 497,
+    "name": "Europris Rjukan",
+    "address": "Såheimsveien 30, 3660, Rjukan",
+    "email": "ep497@europris.no",
+    "phone": "91158730",
+    "latitude": "59.87709000",
+    "longitude": "8.58783000"
+  },
+  {
+    "number": 350,
+    "name": "Europris Roa",
+    "address": "Hadelandsvegen 2128, 2740, Roa",
+    "email": "ep350@europris.no",
+    "phone": "95808454",
+    "latitude": "60.28642000",
+    "longitude": "10.62679000"
+  },
+  {
+    "number": 635,
+    "name": "Europris Rognan",
+    "address": "Kirkegata 51, 8250, Rognan",
+    "email": "ep635@europris.no",
+    "phone": "47512360",
+    "latitude": "67.10153000",
+    "longitude": "15.41147000"
+  },
+  {
+    "number": 584,
+    "name": "Europris Rykkinn",
+    "address": "Muninsvei 1, 1348, Rykkinn",
+    "email": "ep584@europris.no",
+    "phone": "90289430",
+    "latitude": "59.92403000",
+    "longitude": "10.48526000"
+  },
+  {
+    "number": 425,
+    "name": "Europris Råde",
+    "address": "Mosseveien 52, 1640, Råde",
+    "email": "ep425@europris.no",
+    "phone": "48225054",
+    "latitude": "59.35817000",
+    "longitude": "10.83582000"
+  },
+  {
+    "number": 264,
+    "name": "Europris Råholt",
+    "address": "Trondheimsveien 266-288, 2070, Råholt",
+    "email": "ep264@europris.no",
+    "phone": "63952157",
+    "latitude": "60.28593000",
+    "longitude": "11.17086000"
+  },
+  {
+    "number": 480,
+    "name": "Europris Rælingen",
+    "address": "Slynga 2, 2005, Rælingen",
+    "email": "ep480@europris.no",
+    "phone": "90297028",
+    "latitude": "59.94667000",
+    "longitude": "11.03122000"
+  },
+  {
+    "number": 428,
+    "name": "Europris Røros",
+    "address": "Tollef Bredalsvei 11, 7374, Røros",
+    "email": "ep428@europris.no",
+    "phone": "90571513",
+    "latitude": "62.57427000",
+    "longitude": "11.37851000"
+  },
+  {
+    "number": 411,
+    "name": "Europris Sand",
+    "address": "Herredsvegen 7, 2120, Sagstua",
+    "email": "ep411@europris.no",
+    "phone": "91739144",
+    "latitude": "60.39259000",
+    "longitude": "11.54103000"
+  },
+  {
+    "number": 486,
+    "name": "Europris Sandane",
+    "address": "Grandavegen14, 6823, Sandane",
+    "email": "ep486@europris.no",
+    "phone": "94780207,97717001",
+    "latitude": "61.77600000",
+    "longitude": "6.21320000"
+  },
+  {
+    "number": 427,
+    "name": "Europris Sande I Vestfold",
+    "address": "Revåveien 35, 3070, Sande I Vestfold",
+    "email": "ep427@europris.no",
+    "phone": "33778906",
+    "latitude": "59.58413000",
+    "longitude": "10.21006000"
+  },
+  {
+    "number": 440,
+    "name": "Europris Sandefjord",
+    "address": "Haslebakken 12, 3229, Sandefjord",
+    "email": "ep440@europris.no",
+    "phone": "33465930",
+    "latitude": "59.13971000",
+    "longitude": "10.23865000"
+  },
+  {
+    "number": 223,
+    "name": "Europris Sandnes",
+    "address": "Gravarsveien 7, 4306, Sandnes",
+    "email": "ep223@europris.no",
+    "phone": "51669480",
+    "latitude": "58.84829000",
+    "longitude": "5.73966000"
+  },
+  {
+    "number": 79,
+    "name": "Europris Sandnessjøen",
+    "address": "Øyvind Lambesvei 6, 8800, Sandnessjøen",
+    "email": "ep079@europris.no",
+    "phone": "75040380",
+    "latitude": "66.01729000",
+    "longitude": "12.64243000"
+  },
+  {
+    "number": 370,
+    "name": "Europris Sandsli",
+    "address": "Aurdalslia 12, 5253, Sandsli",
+    "email": "ep370@europris.no",
+    "phone": "95968643",
+    "latitude": "60.30552000",
+    "longitude": "5.28194000"
+  },
+  {
+    "number": 324,
+    "name": "Europris Sandvika",
+    "address": "Sandviksveien 183 ( Defagården), 1337, Sandvika",
+    "email": "ep324@europris.no",
+    "phone": "90990485",
+    "latitude": "59.88717000",
+    "longitude": "10.51848000"
+  },
+  {
+    "number": 250,
+    "name": "Europris Sarpsborg",
+    "address": "Hundskinnveien 100, 1711, Sarpsborg",
+    "email": "ep250@europris.no",
+    "phone": "69101180",
+    "latitude": "59.28679000",
+    "longitude": "11.08066000"
+  },
+  {
+    "number": 449,
+    "name": "Europris Sartor Storsenter",
+    "address": "Sartorveien 12 ,5353 Straume, 5353, Straume",
+    "email": "ep449@europris.no",
+    "phone": "56332406",
+    "latitude": "60.35850000",
+    "longitude": "5.12407000"
+  },
+  {
+    "number": 351,
+    "name": "Europris Sauda",
+    "address": "Saudavegen 7, 4200, Sauda",
+    "email": "ep351@europris.no",
+    "phone": "47664104",
+    "latitude": "59.65072000",
+    "longitude": "6.35414000"
+  },
+  {
+    "number": 616,
+    "name": "Europris Selbu",
+    "address": "Selbuvegen 1687, 7580, Selbu",
+    "email": "ep616@europris.no",
+    "phone": "94878717",
+    "latitude": "63.22211000",
+    "longitude": "11.03491000"
+  },
+  {
+    "number": 445,
+    "name": "Europris Seljord",
+    "address": "Steinsrudvegen 5, 3840, Seljord",
+    "email": "ep445@europris.no",
+    "phone": "35051980",
+    "latitude": "59.48082000",
+    "longitude": "8.63031000"
+  },
+  {
+    "number": 446,
+    "name": "Europris Sellebakk",
+    "address": "Sorgenfri Allè 3, 1654, Sellebakk",
+    "email": "ep446@europris.no",
+    "phone": "69345240",
+    "latitude": "59.22604000",
+    "longitude": "10.99514000"
+  },
+  {
+    "number": 393,
+    "name": "Europris Sem",
+    "address": "Semsbyvn 81, 3170, Sem",
+    "email": "ep393@europris.no",
+    "phone": "33318990",
+    "latitude": "59.28271000",
+    "longitude": "10.33154000"
+  },
+  {
+    "number": 622,
+    "name": "Europris Setermoen",
+    "address": "Industriveien 2, 9360, Bardu",
+    "email": "ep622@europris.no",
+    "phone": "94850375",
+    "latitude": "68.87701000",
+    "longitude": "18.35714000"
+  },
+  {
+    "number": 296,
+    "name": "Europris Skarnes",
+    "address": "Stasjonsveien 30   Skarnes S, 2100, Skarnes",
+    "email": "ep296@europris.no",
+    "phone": "62961310",
+    "latitude": "60.24921000",
+    "longitude": "11.67615000"
+  },
+  {
+    "number": 387,
+    "name": "Europris Skedsmo",
+    "address": "Korshagan 1, 2020, Skedsmokorset",
+    "email": "ep387@europris.no",
+    "phone": "90774170",
+    "latitude": "60.00512000",
+    "longitude": "11.03322000"
+  },
+  {
+    "number": 398,
+    "name": "Europris Ski",
+    "address": "Åsveien 15, 1400, Ski",
+    "email": "ep398@europris.no",
+    "phone": "64942289",
+    "latitude": "59.71336000",
+    "longitude": "10.83515000"
+  },
+  {
+    "number": 403,
+    "name": "Europris Skiptvet",
+    "address": "Storveien 9, 1816, Skiptvet",
+    "email": "ep403@europris.no",
+    "phone": "48286916",
+    "latitude": "59.47257000",
+    "longitude": "11.16342000"
+  },
+  {
+    "number": 378,
+    "name": "Europris Skotterud",
+    "address": "Skjørbergs Veg 8, 2230, Skotterud",
+    "email": "ep378@europris.no",
+    "phone": "90470197",
+    "latitude": "59.98619000",
+    "longitude": "12.12206000"
+  },
+  {
+    "number": 409,
+    "name": "Europris Skreppestad",
+    "address": "Skreppestadveien 28, 3261, Larvik",
+    "email": "ep409@europris.no",
+    "phone": "48250706",
+    "latitude": "59.04593000",
+    "longitude": "10.07235000"
+  },
+  {
+    "number": 248,
+    "name": "Europris Slemmestad",
+    "address": "Eternittvn. 4, 3470, Slemmestad",
+    "email": "ep248@europris.no",
+    "phone": "66791740",
+    "latitude": "59.78577000",
+    "longitude": "10.48930000"
+  },
+  {
+    "number": 412,
+    "name": "Europris Sogndal",
+    "address": "Furuvegen 1 Kaupangsenteret, 6854, Kaupanger",
+    "email": "ep412@europris.no",
+    "phone": "57675300",
+    "latitude": "61.19165000",
+    "longitude": "7.22033000"
+  },
+  {
+    "number": 605,
+    "name": "Europris Sortland",
+    "address": "Sjøgata 30, 8400, Sortland",
+    "email": "ep605@europris.no",
+    "phone": "76122144",
+    "latitude": "68.71990000",
+    "longitude": "15.40116000"
+  },
+  {
+    "number": 391,
+    "name": "Europris Spydeberg",
+    "address": "Spydeberg Torg, Stasjonsgata 32, 1820, Spydeberg",
+    "email": "ep391@europris.no",
+    "phone": "95859430",
+    "latitude": "59.61917000",
+    "longitude": "11.07851000"
+  },
+  {
+    "number": 416,
+    "name": "Europris Stakkevoll",
+    "address": "Stakkevollveien 33, 9010, Tromsø",
+    "email": "ep416@europris.no",
+    "phone": "46854418",
+    "latitude": "69.66598000",
+    "longitude": "18.97080000"
+  },
+  {
+    "number": 247,
+    "name": "Europris Stange",
+    "address": "Romedalsveien 18, Høgmyr, 2335, Stange",
+    "email": "ep247@europris.no",
+    "phone": "62572230",
+    "latitude": "60.72157000",
+    "longitude": "11.19727000"
+  },
+  {
+    "number": 309,
+    "name": "Europris Steinkjer",
+    "address": "Sjøfartsgata 5, 7714, Steinkjer",
+    "email": "ep309@europris.no",
+    "phone": "90769735",
+    "latitude": "64.01125000",
+    "longitude": "11.49161000"
+  },
+  {
+    "number": 617,
+    "name": "Europris Stjørdal",
+    "address": "Innherredsv. 62 Og 64, 7503, Stjørdal",
+    "email": "ep617@europris.no",
+    "phone": "74827710",
+    "latitude": "63.46775000",
+    "longitude": "10.92909000"
+  },
+  {
+    "number": 344,
+    "name": "Europris Stoa",
+    "address": "Sagvannsveien 16, 4848, Arendal",
+    "email": "ep344@europris.no",
+    "phone": "37033030",
+    "latitude": "58.46502000",
+    "longitude": "8.71261000"
+  },
+  {
+    "number": 583,
+    "name": "Europris Stokke",
+    "address": "Tassebekkveien 1, 3160, Stokke",
+    "email": "ep583@europris.no",
+    "phone": "90090220",
+    "latitude": "59.22141000",
+    "longitude": "10.30154000"
+  },
+  {
+    "number": 433,
+    "name": "Europris Stokmarknes",
+    "address": "Myran, 8450, Stokmarknes",
+    "email": "ep433@europris.no",
+    "phone": "90909359",
+    "latitude": "68.55797000",
+    "longitude": "14.94031000"
+  },
+  {
+    "number": 598,
+    "name": "Europris Stord",
+    "address": "Rundhaugen 44, 5416, Stord",
+    "email": "ep598@europris.no",
+    "phone": "53417900",
+    "latitude": "59.76431000",
+    "longitude": "5.46072000"
+  },
+  {
+    "number": 293,
+    "name": "Europris Storhamar",
+    "address": "Måsåbekkveien 2 Storhamarsenteret, 2316, Hamar",
+    "email": "ep293@europris.no",
+    "phone": "62533115",
+    "latitude": "60.80421000",
+    "longitude": "11.04435000"
+  },
+  {
+    "number": 478,
+    "name": "Europris Stovner",
+    "address": "Stovner Senter, 0985, Oslo",
+    "email": "ep478@europris.no",
+    "phone": "41405751",
+    "latitude": "59.96143000",
+    "longitude": "10.92658000"
+  },
+  {
+    "number": 476,
+    "name": "Europris Stranda",
+    "address": "Bankgata 16, 6200, Stranda",
+    "email": "ep476@europris.no",
+    "phone": "90078301",
+    "latitude": "62.30763000",
+    "longitude": "6.94808000"
+  },
+  {
+    "number": 418,
+    "name": "Europris Strusshamn",
+    "address": "Strusshamn Senter, 5302, Strusshamn",
+    "email": "ep418@europris.no",
+    "phone": "56147861",
+    "latitude": "60.40662000",
+    "longitude": "5.19456000"
+  },
+  {
+    "number": 485,
+    "name": "Europris Stryn",
+    "address": "Hegreveien 16, 6783, Stryn",
+    "email": "ep485@europris.no",
+    "phone": "95024220",
+    "latitude": "61.90259000",
+    "longitude": "6.71028000"
+  },
+  {
+    "number": 481,
+    "name": "Europris Strømmen",
+    "address": "Støperiveien 5 (3 Etg.i Storsenteret), 2010, Strømmen",
+    "email": "ep481@europris.no",
+    "phone": "47512859",
+    "latitude": "59.94788000",
+    "longitude": "11.00712000"
+  },
+  {
+    "number": 462,
+    "name": "Europris Strømsø",
+    "address": "Bjørnstjerne Bjørnsongate 60, 3044, Drammen",
+    "email": "ep462@europris.no",
+    "phone": "90266455",
+    "latitude": "59.73447000",
+    "longitude": "10.20669000"
+  },
+  {
+    "number": 221,
+    "name": "Europris Støperigaten Stavanger",
+    "address": "Støperigt 22, 4014, Stavanger",
+    "email": "ep221@europris.no",
+    "phone": "51891890",
+    "latitude": "58.97004000",
+    "longitude": "5.75388000"
+  },
+  {
+    "number": 333,
+    "name": "Europris Støren",
+    "address": "Moøya 32, 7290, Støren",
+    "email": "ep333@europris.no",
+    "phone": "91884362",
+    "latitude": "63.04166000",
+    "longitude": "10.28826000"
+  },
+  {
+    "number": 368,
+    "name": "Europris Sunndalsøra",
+    "address": "Sunndalsvegen 3, 6600, Sunndalsøra",
+    "email": "ep368@europris.no",
+    "phone": "48091883",
+    "latitude": "62.67364000",
+    "longitude": "8.56382000"
+  },
+  {
+    "number": 465,
+    "name": "Europris Surnadal",
+    "address": "Ørav. 4, 6650, Surnadal",
+    "email": "ep465@europris.no",
+    "phone": "71661310",
+    "latitude": "62.97002000",
+    "longitude": "8.71288000"
+  },
+  {
+    "number": 297,
+    "name": "Europris Svinesundparken",
+    "address": "Svinesundparken 6B, 1789, Berg I Østfold",
+    "email": "ep297@europris.no",
+    "phone": "69179000",
+    "latitude": "59.12880000",
+    "longitude": "11.27364000"
+  },
+  {
+    "number": 419,
+    "name": "Europris Svolvær",
+    "address": "Avisgata 11, 8300, Svolvær",
+    "email": "ep419@europris.no",
+    "phone": "76070020",
+    "latitude": "68.23618000",
+    "longitude": "14.56416000"
+  },
+  {
+    "number": 330,
+    "name": "Europris Sykkylven",
+    "address": "Vikøyra Industriområde 2, 6230, Sykkylven",
+    "email": "ep330@europris.no",
+    "phone": "48195828",
+    "latitude": "62.38001000",
+    "longitude": "6.57343000"
+  },
+  {
+    "number": 640,
+    "name": "Europris Søgne",
+    "address": "Gamle Høgskolevei 18, 4640, Søgne",
+    "email": "ep640@europris.no",
+    "phone": "91332030",
+    "latitude": "58.09773000",
+    "longitude": "7.81223000"
+  },
+  {
+    "number": 610,
+    "name": "Europris Sørkjosen",
+    "address": "Industrivegen 4, 9152, Sørkjosen",
+    "email": "ep610@europris.no",
+    "phone": "77764708",
+    "latitude": "69.78637000",
+    "longitude": "20.95096000"
+  },
+  {
+    "number": 283,
+    "name": "Europris Sørlandsparken Pluss",
+    "address": "Skibåsen 43, 4636, Kristiansand S",
+    "email": "ep283@europris.no",
+    "phone": "38045188",
+    "latitude": "58.17940000",
+    "longitude": "8.12644000"
+  },
+  {
+    "number": 253,
+    "name": "Europris Sørumsand",
+    "address": "Noractorgården, 1920, Sørumsand",
+    "email": "ep253@europris.no",
+    "phone": "63825640",
+    "latitude": "59.98665000",
+    "longitude": "11.24252000"
+  },
+  {
+    "number": 496,
+    "name": "Europris Tasta",
+    "address": "Tastatunet 1 - 3, 4027, Stavanger",
+    "email": "ep496@europris.no",
+    "phone": "47508689",
+    "latitude": "58.98400000",
+    "longitude": "5.69108000"
+  },
+  {
+    "number": 607,
+    "name": "Europris Tau",
+    "address": "Fiskåvegen 2, Etg 01, 4120, Tau",
+    "email": "ep607@europris.no",
+    "phone": "46955554",
+    "latitude": "59.06513000",
+    "longitude": "5.92179000"
+  },
+  {
+    "number": 307,
+    "name": "Europris Tiller Pluss",
+    "address": "Ivar Lykkesvei 5, 7075, Tiller",
+    "email": "ep307@europris.no",
+    "phone": "72885700",
+    "latitude": "63.35679000",
+    "longitude": "10.37350000"
+  },
+  {
+    "number": 633,
+    "name": "Europris Triaden",
+    "address": "Gamleveien 88, 1461, Lørenskog",
+    "email": "ep633@europris.no",
+    "phone": "47650093",
+    "latitude": "59.91861000",
+    "longitude": "10.95353000"
+  },
+  {
+    "number": 459,
+    "name": "Europris Tromsdalen",
+    "address": "Solstrandveien 47,Amfi Pyramiden, 9020, Tromsdalen",
+    "email": "ep459@europris.no",
+    "phone": "97572757",
+    "latitude": "69.63996000",
+    "longitude": "18.97086000"
+  },
+  {
+    "number": 273,
+    "name": "Europris Trysil",
+    "address": "Mosanden, 2420, Trysil",
+    "email": "ep273@europris.no",
+    "phone": "90868674",
+    "latitude": "61.29977000",
+    "longitude": "12.26551000"
+  },
+  {
+    "number": 291,
+    "name": "Europris Tvedestrand",
+    "address": "Fjærkleivene 53, 4900, Tvedestrand",
+    "email": "ep291@europris.no",
+    "phone": "37160480",
+    "latitude": "58.62440000",
+    "longitude": "8.92330000"
+  },
+  {
+    "number": 649,
+    "name": "Europris Tveita City",
+    "address": "Tvetenveien 150, 0671, Oslo",
+    "email": "ep649@europris.no",
+    "phone": "46885050",
+    "latitude": "59.91384000",
+    "longitude": "10.84189000"
+  },
+  {
+    "number": 599,
+    "name": "Europris Tynset",
+    "address": "Tomtegata 4, 2500, Tynset",
+    "email": "ep599@europris.no",
+    "phone": "62482060",
+    "latitude": "62.27695000",
+    "longitude": "10.78023000"
+  },
+  {
+    "number": 499,
+    "name": "Europris Ulsteinvik",
+    "address": "Nesvegen 3, 6065, Ulsteinvik",
+    "email": "ep499@europris.no",
+    "phone": "70010940",
+    "latitude": "62.33976000",
+    "longitude": "5.85497000"
+  },
+  {
+    "number": 274,
+    "name": "Europris Vadsø",
+    "address": "Kong Haakonsgate 2, 9800, Vadsø",
+    "email": "ep274@europris.no",
+    "phone": "78953050",
+    "latitude": "70.07999000",
+    "longitude": "29.71737000"
+  },
+  {
+    "number": 347,
+    "name": "Europris Vatne",
+    "address": "Eidsvikeidet Næringspark, 6265, Vatne",
+    "email": "ep347@europris.no",
+    "phone": "41505916",
+    "latitude": "62.54451000",
+    "longitude": "6.59145000"
+  },
+  {
+    "number": 301,
+    "name": "Europris Vennesla",
+    "address": "Sentrumsvegen 63, 4700, Vennesla",
+    "email": "ep301@europris.no",
+    "phone": "38158800",
+    "latitude": "58.27173000",
+    "longitude": "7.96945000"
+  },
+  {
+    "number": 310,
+    "name": "Europris Verdal",
+    "address": "Jernbanegata 11, 7650, Verdal",
+    "email": "ep310@europris.no",
+    "phone": "74070407",
+    "latitude": "63.79444000",
+    "longitude": "11.48063000"
+  },
+  {
+    "number": 227,
+    "name": "Europris Vestby",
+    "address": "Vestbyveien 29, 1540, Vestby",
+    "email": "ep227@europris.no",
+    "phone": "64951690",
+    "latitude": "59.60766000",
+    "longitude": "10.74308000"
+  },
+  {
+    "number": 271,
+    "name": "Europris Vestkanten",
+    "address": "Lyderhornsvei 353, 5171, Loddefjord",
+    "email": "ep271@europris.no",
+    "phone": "55266822",
+    "latitude": "60.36311000",
+    "longitude": "5.23496000"
+  },
+  {
+    "number": 596,
+    "name": "Europris Vestnes",
+    "address": "Sjøgata 40, 6390, Vestnes",
+    "email": "ep596@europris.no",
+    "phone": "48087276",
+    "latitude": "62.62140000",
+    "longitude": "7.09363000"
+  },
+  {
+    "number": 226,
+    "name": "Europris Vikersund",
+    "address": "Vikersundgata 34, 3370, Vikersund",
+    "email": "ep226@europris.no",
+    "phone": "32783744",
+    "latitude": "59.96525000",
+    "longitude": "9.99348000"
+  },
+  {
+    "number": 490,
+    "name": "Europris Vinstra",
+    "address": "Vinstragata101, 2640, Vinstra",
+    "email": "ep490@europris.no",
+    "phone": "95936570",
+    "latitude": "61.59332000",
+    "longitude": "9.72765000"
+  },
+  {
+    "number": 422,
+    "name": "Europris Vinterbro",
+    "address": "Sjøskogenveien 1 B, 1407, Vinterbro",
+    "email": "ep422@europris.no",
+    "phone": "46943840",
+    "latitude": "59.73886000",
+    "longitude": "10.76585000"
+  },
+  {
+    "number": 417,
+    "name": "Europris Volda",
+    "address": "Torvbanken 1, 6100, Volda",
+    "email": "ep417@europris.no",
+    "phone": "97569354",
+    "latitude": "62.14049000",
+    "longitude": "6.09105000"
+  },
+  {
+    "number": 236,
+    "name": "Europris Vollebekk",
+    "address": "Brobekkveien 52, 0598, Oslo",
+    "email": "ep236@europris.no",
+    "phone": "22656633",
+    "latitude": "59.93647000",
+    "longitude": "10.82697000"
+  },
+  {
+    "number": 482,
+    "name": "Europris Vormsund",
+    "address": "Kjølstadveien 1, 2160, Vormsund",
+    "email": "ep482@europris.no",
+    "phone": "91691997",
+    "latitude": "60.15059000",
+    "longitude": "11.40877000"
+  },
+  {
+    "number": 603,
+    "name": "Europris Voss",
+    "address": "Brynamoen 8, 5705, Voss",
+    "email": "ep603@europris.no",
+    "phone": "56510980",
+    "latitude": "60.62790000",
+    "longitude": "6.42603000"
+  },
+  {
+    "number": 613,
+    "name": "Europris Vågsbygd",
+    "address": "Lumberveien 5 - 7, 4621, Kristiansand S",
+    "email": "ep613@europris.no",
+    "phone": "38087122",
+    "latitude": "58.12493000",
+    "longitude": "7.96338000"
+  },
+  {
+    "number": 618,
+    "name": "Europris Xhibition City",
+    "address": "Småstrandgaten 3, 5014, Bergen",
+    "email": "ep618@europris.no",
+    "phone": "48119666",
+    "latitude": "60.39298000",
+    "longitude": "5.32626000"
+  },
+  {
+    "number": 475,
+    "name": "Europris Ågotnes",
+    "address": "Skjærgardsvegen 1368, 5363, Ågotnes",
+    "email": "ep475@europris.no",
+    "phone": "91725888",
+    "latitude": "60.40344000",
+    "longitude": "5.00186000"
+  },
+  {
+    "number": 332,
+    "name": "Europris Ålesund Pluss",
+    "address": "Høgvollvegen  8 Breivikgården, 6018, Ålesund",
+    "email": "ep332@europris.no",
+    "phone": "90761857",
+    "latitude": "62.47067000",
+    "longitude": "6.35431000"
+  },
+  {
+    "number": 574,
+    "name": "Europris Ålgård",
+    "address": "Rettedalen 51, 4330, Ålgård",
+    "email": "ep574@europris.no",
+    "phone": "51613070",
+    "latitude": "58.76628000",
+    "longitude": "5.86231000"
+  },
+  {
+    "number": 355,
+    "name": "Europris Åndalsnes",
+    "address": "Troaveien, 6300, Åndalsnes",
+    "email": "ep355@europris.no",
+    "phone": "71226923",
+    "latitude": "62.56119000",
+    "longitude": "7.67855000"
+  },
+  {
+    "number": 643,
+    "name": "Europris Åndalsnes",
+    "address": "Standgata 111, 6300, Åndalsnes",
+    "email": "ep643@europris.no",
+    "phone": "71226923",
+    "latitude": "62.56119000",
+    "longitude": "7.67855000"
+  },
+  {
+    "number": 493,
+    "name": "Europris Årdal",
+    "address": "Jens Davidsons Veg 1, 6884, Øvre Årdal",
+    "email": "ep493@europris.no",
+    "phone": "47750660",
+    "latitude": "61.31012000",
+    "longitude": "7.81507000"
+  },
+  {
+    "number": 231,
+    "name": "Europris Årnes",
+    "address": "Nedre Hagavei 17, 2151, Årnes",
+    "email": "ep231@europris.no",
+    "phone": "63902794",
+    "latitude": "60.11865000",
+    "longitude": "11.46198000"
+  },
+  {
+    "number": 272,
+    "name": "Europris Ås",
+    "address": "Rådhusplassen 3, 1430, Ås",
+    "email": "ep272@europris.no",
+    "phone": "64961999",
+    "latitude": "59.66468000",
+    "longitude": "10.79082000"
+  },
+  {
+    "number": 286,
+    "name": "Europris Åsane Pluss",
+    "address": "Liamyrane 8, 5132, Nyborg",
+    "email": "ep286@europris.no",
+    "phone": "55180885",
+    "latitude": "60.46910000",
+    "longitude": "5.33926000"
+  },
+  {
+    "number": 573,
+    "name": "Europris Åsen",
+    "address": "Auglendsmyrå 2, 4017, Stavanger",
+    "email": "ep573@europris.no",
+    "phone": "51881790",
+    "latitude": "58.94323000",
+    "longitude": "5.72884000"
+  },
+  {
+    "number": 225,
+    "name": "Europris Åssiden Pluss",
+    "address": "Ingeniør Rybergsgt 101, 3027, Drammen",
+    "email": "ep225@europris.no",
+    "phone": "32890860",
+    "latitude": "59.75335000",
+    "longitude": "10.13038000"
+  },
+  {
+    "number": 585,
+    "name": "Europris Øksnevad",
+    "address": "Plogfabrikkvegen 2, 4353, Klepp Stasjon",
+    "email": "ep585@europris.no",
+    "phone": "48181355",
+    "latitude": "58.78550000",
+    "longitude": "5.70552000"
+  },
+  {
+    "number": 312,
+    "name": "Europris Ølensvåg",
+    "address": "Bjoavegen 10, 5582, Ølensvåg",
+    "email": "ep312@europris.no",
+    "phone": "97430151",
+    "latitude": "59.60504000",
+    "longitude": "5.75061000"
+  },
+  {
+    "number": 326,
+    "name": "Europris Ørebekk",
+    "address": "Mosseveien 109, 1624, Gressvik",
+    "email": "ep326@europris.no",
+    "phone": "90654892",
+    "latitude": "59.23222000",
+    "longitude": "10.90533000"
+  },
+  {
+    "number": 492,
+    "name": "Europris Ørnes",
+    "address": "Lillehaugen 10, 8150, Ørnes",
+    "email": "ep492@europris.no",
+    "phone": "90108876",
+    "latitude": "66.85659000",
+    "longitude": "13.72455000"
+  },
+  {
+    "number": 498,
+    "name": "Europris Ørsta",
+    "address": "Vikeøyrane 4, 6150, Ørsta",
+    "email": "ep498@europris.no",
+    "phone": "41488767",
+    "latitude": "62.20250000",
+    "longitude": "6.11815000"
   }
 ]
