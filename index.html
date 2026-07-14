@@ -338,8 +338,8 @@
   const DELIVERY_BASE = "https://events.app.fourprosolutions.com/europris/";
   const DELIVERY_SUFFIX = "/transport";
 
-  const RECENT_KEY = "europris_recent_stores_v5";
-  const LANGUAGE_KEY = "europris_language_v5";
+  const RECENT_KEY = "europris_recent_stores_v6";
+  const LANGUAGE_KEY = "europris_language_v6";
   const MAX_RECENT = 6;
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
@@ -418,6 +418,7 @@
   let currentName = "";
   let nearestStore = null;
   let nearestDistanceMeters = null;
+  let nearestWasAutoSelected = false;
   let locationRequestedThisLaunch = false;
 
   const search = document.getElementById("search");
@@ -474,6 +475,17 @@
     status.textContent = stores.length
       ? text.loaded(stores.length)
       : text.loading;
+
+    if (nearestStore && Number.isFinite(nearestDistanceMeters)) {
+      const name = cleanStoreName(nearestStore.name);
+      const distance = formatDistance(nearestDistanceMeters);
+
+      locationResult.textContent = nearestWasAutoSelected
+        ? text.locationAuto(nearestStore.number, name, distance)
+        : text.locationSuggestion(nearestStore.number, name, distance);
+
+      useNearest.hidden = nearestWasAutoSelected;
+    }
 
     renderRecent();
   }
@@ -642,7 +654,9 @@
     const name = cleanStoreName(best.store.name);
     const distance = formatDistance(best.distance);
 
-    if (best.distance <= 1000) {
+    nearestWasAutoSelected = best.distance <= 1000;
+
+    if (nearestWasAutoSelected) {
       selectStore(best.store);
       locationMessage.textContent = "";
       locationResult.textContent = text.locationAuto(best.store.number, name, distance);
@@ -661,6 +675,7 @@
     useNearest.hidden = true;
     nearestStore = null;
     nearestDistanceMeters = null;
+    nearestWasAutoSelected = false;
     locationResult.textContent = "";
     locationMessage.textContent = text.locationChecking;
 
@@ -769,6 +784,7 @@
         cleanStoreName(nearestStore.name),
         formatDistance(nearestDistanceMeters)
       );
+      nearestWasAutoSelected = true;
       useNearest.hidden = true;
     }
   });
@@ -788,7 +804,7 @@
   applyLanguage();
   updateSelected();
 
-  fetch("stores.json?v=3", { cache: "no-store" })
+  fetch("stores.json?v=4", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
