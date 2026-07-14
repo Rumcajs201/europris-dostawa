@@ -278,6 +278,129 @@
       font-weight: 750;
     }
 
+
+    .history-toggle {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .history-panel {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .history-title { margin: 0; font-size: 1.05rem; }
+
+    .history-close {
+      min-width: 42px;
+      min-height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .history-controls {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .history-controls input,
+    .history-controls button {
+      min-height: 44px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 0 10px;
+      font-weight: 750;
+    }
+
+    .history-controls button {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .history-summary {
+      margin: 8px 0 10px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .history-list { display: grid; gap: 8px; }
+
+    .history-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .history-item-main { display: grid; gap: 3px; }
+    .history-item-number { color: var(--green); font-weight: 900; }
+    .history-item-date { color: var(--muted); font-size: .86rem; }
+
+    .history-item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .history-item-actions button {
+      min-height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text);
+      padding: 0 9px;
+      font-weight: 750;
+      font-size: .86rem;
+    }
+
+    .history-item-actions .delete {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .history-empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 14px 6px;
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+
+      .languages, .location-panel, .search, .results, .selected, .keypad,
+      .main-actions, #error, #historyToggle, .history-close,
+      .history-controls, .status, .footer {
+        display: none !important;
+      }
+
+      .card { border: 0; box-shadow: none; padding: 0; }
+      .history-panel { display: block !important; border: 0; margin: 0; padding: 0; }
+      .history-item { break-inside: avoid; border-color: #bbb; }
+      .history-item-actions { display: none !important; }
+    }
+
     .status {
       margin-top: 12px;
       color: var(--muted);
@@ -351,15 +474,34 @@
 
     <div class="main-actions">
       <button id="open" class="action-button open"></button>
+      <button id="openSave" class="action-button open"></button>
       <button id="navigate" class="action-button navigate" disabled></button>
+      <button id="call" class="action-button navigate" disabled></button>
     </div>
 
     <div id="error" class="error" role="alert" aria-live="polite"></div>
 
-    <div id="recentBlock" hidden>
-      <div id="recentTitle" class="recent-title"></div>
-      <div id="recent" class="recent"></div>
-    </div>
+    <button id="historyToggle" class="history-toggle"></button>
+
+    <section id="historyPanel" class="history-panel" hidden>
+      <div class="history-header">
+        <h2 id="historyTitle" class="history-title"></h2>
+        <button id="historyClose" class="history-close" type="button">×</button>
+      </div>
+
+      <div class="history-controls">
+        <input id="historyMonth" type="month">
+        <button id="historyPrint" type="button"></button>
+        <button id="historyCsv" type="button"></button>
+        <button id="historyJson" type="button"></button>
+        <button id="historyImport" type="button"></button>
+        <button id="historyClear" type="button"></button>
+        <input id="historyImportFile" type="file" accept="application/json,.json" hidden>
+      </div>
+
+      <div id="historySummary" class="history-summary"></div>
+      <div id="historyList" class="history-list"></div>
+    </section>
 
     <div id="status" class="status"></div>
   </section>
@@ -375,9 +517,10 @@
   const DELIVERY_SUFFIX = "/transport";
   const GOOGLE_MAPS_DIRECTIONS = "https://www.google.com/maps/dir/?api=1";
 
-  const RECENT_KEY = "europris_recent_stores_v7";
+  const DB_NAME = "europris_delivery_history";
+  const DB_VERSION = 1;
+  const DB_STORE = "deliveries";
   const LANGUAGE_KEY = "europris_language_v6";
-  const MAX_RECENT = 6;
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
 
@@ -387,7 +530,26 @@
       description: "Wpisz numer sklepu albo zacznij wpisywać jego nazwę.",
       placeholder: "Numer lub nazwa sklepu",
       open: "Otwórz stronę dostawy",
+      openSave: "Otwórz i zapisz dostawę",
       navigate: "Nawiguj w Google Maps",
+      call: "Zadzwoń do sklepu",
+      history: "Historia dostaw",
+      historyTitle: "Historia dostaw",
+      historyPrint: "Drukuj zestawienie miesiąca",
+      historyCsv: "Eksport CSV",
+      historyJson: "Kopia JSON",
+      historyImport: "Importuj kopię",
+      historyClear: "Wyczyść wybrany miesiąc",
+      historyEmpty: "Brak zapisanych dostaw w wybranym miesiącu.",
+      historySummary: count => `Liczba dostaw: ${count}`,
+      historyDelete: "Usuń",
+      historyOpen: "Strona",
+      historyMap: "Mapa",
+      historyCall: "Zadzwoń",
+      historySaved: "Dostawa została zapisana.",
+      historyImportOk: "Historia została zaimportowana.",
+      historyImportError: "Nie udało się zapisać lub zaimportować historii.",
+      historyClearConfirm: "Usunąć wszystkie dostawy z wybranego miesiąca?",
       recent: "Ostatnio używane",
       error: "Wybierz sklep albo wpisz prawidłowy numer.",
       navigationError: "Ten sklep nie ma poprawnych współrzędnych GPS w bazie.",
@@ -410,7 +572,26 @@
       description: "Skriv inn butikknummeret eller begynn å skrive butikknavnet.",
       placeholder: "Butikknummer eller butikknavn",
       open: "Åpne leveringssiden",
+      openSave: "Åpne og lagre levering",
       navigate: "Naviger i Google Maps",
+      call: "Ring butikken",
+      history: "Leveringshistorikk",
+      historyTitle: "Leveringshistorikk",
+      historyPrint: "Skriv ut månedsoversikt",
+      historyCsv: "Eksporter CSV",
+      historyJson: "JSON-sikkerhetskopi",
+      historyImport: "Importer sikkerhetskopi",
+      historyClear: "Tøm valgt måned",
+      historyEmpty: "Ingen lagrede leveringer i valgt måned.",
+      historySummary: count => `Antall leveringer: ${count}`,
+      historyDelete: "Slett",
+      historyOpen: "Side",
+      historyMap: "Kart",
+      historyCall: "Ring",
+      historySaved: "Leveringen er lagret.",
+      historyImportOk: "Historikken er importert.",
+      historyImportError: "Historikken kunne ikke lagres eller importeres.",
+      historyClearConfirm: "Slette alle leveringer i valgt måned?",
       recent: "Nylig brukt",
       error: "Velg en butikk eller skriv inn et gyldig nummer.",
       navigationError: "Denne butikken har ikke gyldige GPS-koordinater i databasen.",
@@ -433,7 +614,26 @@
       description: "Enter the store number or start typing the store name.",
       placeholder: "Store number or store name",
       open: "Open delivery page",
+      openSave: "Open and save delivery",
       navigate: "Navigate in Google Maps",
+      call: "Call store",
+      history: "Delivery history",
+      historyTitle: "Delivery history",
+      historyPrint: "Print monthly report",
+      historyCsv: "Export CSV",
+      historyJson: "JSON backup",
+      historyImport: "Import backup",
+      historyClear: "Clear selected month",
+      historyEmpty: "No saved deliveries in the selected month.",
+      historySummary: count => `Deliveries: ${count}`,
+      historyDelete: "Delete",
+      historyOpen: "Page",
+      historyMap: "Map",
+      historyCall: "Call",
+      historySaved: "Delivery saved.",
+      historyImportOk: "History imported.",
+      historyImportError: "History could not be saved or imported.",
+      historyClearConfirm: "Delete all deliveries in the selected month?",
       recent: "Recently used",
       error: "Select a store or enter a valid number.",
       navigationError: "This store has no valid GPS coordinates in the database.",
@@ -470,7 +670,21 @@
   const selectedNumber = document.getElementById("selectedNumber");
   const selectedName = document.getElementById("selectedName");
   const openButton = document.getElementById("open");
+  const openSaveButton = document.getElementById("openSave");
   const navigateButton = document.getElementById("navigate");
+  const callButton = document.getElementById("call");
+  const historyToggle = document.getElementById("historyToggle");
+  const historyPanel = document.getElementById("historyPanel");
+  const historyClose = document.getElementById("historyClose");
+  const historyMonth = document.getElementById("historyMonth");
+  const historyList = document.getElementById("historyList");
+  const historySummary = document.getElementById("historySummary");
+  const historyPrint = document.getElementById("historyPrint");
+  const historyCsv = document.getElementById("historyCsv");
+  const historyJson = document.getElementById("historyJson");
+  const historyImport = document.getElementById("historyImport");
+  const historyImportFile = document.getElementById("historyImportFile");
+  const historyClear = document.getElementById("historyClear");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const locationHeading = document.getElementById("locationHeading");
@@ -514,6 +728,8 @@
   function syncCurrentStore() {
     currentStore = findStoreByNumber(currentNumber);
     navigateButton.disabled = !hasValidCoordinates(currentStore);
+    const phoneDigits = String(currentStore?.phone || "").replace(/\D/g, "");
+    callButton.disabled = !/^\d{8}$/.test(phoneDigits);
   }
 
   function applyLanguage() {
@@ -523,8 +739,16 @@
     document.getElementById("title").textContent = text.title;
     document.getElementById("description").textContent = text.description;
     openButton.textContent = text.open;
+    openSaveButton.textContent = text.openSave;
     navigateButton.textContent = text.navigate;
-    document.getElementById("recentTitle").textContent = text.recent;
+    callButton.textContent = text.call;
+    historyToggle.textContent = text.history;
+    document.getElementById("historyTitle").textContent = text.historyTitle;
+    historyPrint.textContent = text.historyPrint;
+    historyCsv.textContent = text.historyCsv;
+    historyJson.textContent = text.historyJson;
+    historyImport.textContent = text.historyImport;
+    historyClear.textContent = text.historyClear;
     search.placeholder = text.placeholder;
     locationHeading.textContent = text.locationHeading;
     retryLocation.textContent = text.locationRetry;
@@ -547,7 +771,7 @@
       useNearest.hidden = nearestWasAutoSelected;
     }
 
-    renderRecent();
+    if (!historyPanel.hidden) renderHistory();
   }
 
   function updateSelected() {
@@ -571,57 +795,6 @@
     currentName = "";
     currentStore = null;
     updateSelected();
-  }
-
-  function loadRecent() {
-    try {
-      const current = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
-      if (Array.isArray(current) && current.length) return current;
-
-      const old = JSON.parse(localStorage.getItem("europris_recent_stores_v6") || "[]");
-      return Array.isArray(old) ? old : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveRecent(number, name) {
-    const recent = loadRecent().filter(item => String(item.number) !== String(number));
-    recent.unshift({ number: String(number), name: cleanStoreName(name) });
-    localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
-  }
-
-  function renderRecent() {
-    const recent = loadRecent();
-    const block = document.getElementById("recentBlock");
-    const container = document.getElementById("recent");
-
-    container.replaceChildren();
-    block.hidden = recent.length === 0;
-
-    for (const item of recent) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "chip";
-      button.textContent = item.name ? `${item.number} ${item.name}` : item.number;
-
-      button.addEventListener("click", () => {
-        const store = findStoreByNumber(item.number);
-        if (store) {
-          selectStore(store);
-          return;
-        }
-
-        currentNumber = String(item.number);
-        currentName = item.name || "";
-        currentStore = null;
-        search.value = item.name || item.number;
-        results.replaceChildren();
-        updateSelected();
-      });
-
-      container.appendChild(button);
-    }
   }
 
   function renderSearchResults(query) {
@@ -772,6 +945,282 @@
     );
   }
 
+
+  function openDatabase() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(DB_STORE)) {
+          const store = db.createObjectStore(DB_STORE, { keyPath: "id" });
+          store.createIndex("createdAt", "createdAt");
+          store.createIndex("month", "month");
+        }
+      };
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function addDelivery(store) {
+    const now = new Date();
+    const entry = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      storeNumber: String(store.number),
+      storeName: cleanStoreName(store.name),
+      address: String(store.address || ""),
+      phone: String(store.phone || ""),
+      latitude: Number(store.latitude),
+      longitude: Number(store.longitude),
+      createdAt: now.toISOString(),
+      month: now.toISOString().slice(0, 7)
+    };
+
+    const db = await openDatabase();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, "readwrite");
+      tx.objectStore(DB_STORE).add(entry);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function getAllDeliveries() {
+    const db = await openDatabase();
+    const result = await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, "readonly");
+      const request = tx.objectStore(DB_STORE).getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return result.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  }
+
+  async function deleteDelivery(id) {
+    const db = await openDatabase();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, "readwrite");
+      tx.objectStore(DB_STORE).delete(id);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  async function clearMonth(month) {
+    const ids = (await getAllDeliveries())
+      .filter(item => item.month === month)
+      .map(item => item.id);
+
+    if (!ids.length) return;
+
+    const db = await openDatabase();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, "readwrite");
+      const store = tx.objectStore(DB_STORE);
+      ids.forEach(id => store.delete(id));
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  }
+
+  function formatDateTime(value) {
+    return new Intl.DateTimeFormat(language === "no" ? "nb-NO" : language, {
+      dateStyle: "medium",
+      timeStyle: "short"
+    }).format(new Date(value));
+  }
+
+  function deliveryUrl(number) {
+    return DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX;
+  }
+
+  function mapsUrl(item) {
+    const destination = encodeURIComponent(`${Number(item.latitude)},${Number(item.longitude)}`);
+    return `${GOOGLE_MAPS_DIRECTIONS}&destination=${destination}&travelmode=driving`;
+  }
+
+  async function renderHistory() {
+    const text = translations[language];
+    const entries = (await getAllDeliveries())
+      .filter(item => item.month === historyMonth.value);
+
+    historyList.replaceChildren();
+    historySummary.textContent = text.historySummary(entries.length);
+
+    if (!entries.length) {
+      const empty = document.createElement("div");
+      empty.className = "history-empty";
+      empty.textContent = text.historyEmpty;
+      historyList.appendChild(empty);
+      return;
+    }
+
+    for (const item of entries) {
+      const card = document.createElement("article");
+      card.className = "history-item";
+
+      const main = document.createElement("div");
+      main.className = "history-item-main";
+
+      const store = document.createElement("div");
+      store.className = "history-item-number";
+      store.textContent = `${item.storeNumber} — ${item.storeName}`;
+
+      const date = document.createElement("div");
+      date.className = "history-item-date";
+      date.textContent = formatDateTime(item.createdAt);
+
+      const address = document.createElement("div");
+      address.textContent = item.address || "";
+
+      const actions = document.createElement("div");
+      actions.className = "history-item-actions";
+
+      const page = document.createElement("button");
+      page.type = "button";
+      page.textContent = text.historyOpen;
+      page.addEventListener("click", () => {
+        window.open(deliveryUrl(item.storeNumber), "_blank", "noopener,noreferrer");
+      });
+
+      const map = document.createElement("button");
+      map.type = "button";
+      map.textContent = text.historyMap;
+      map.disabled = !Number.isFinite(Number(item.latitude)) || !Number.isFinite(Number(item.longitude));
+      map.addEventListener("click", () => {
+        if (!map.disabled) window.open(mapsUrl(item), "_blank", "noopener,noreferrer");
+      });
+
+      const call = document.createElement("button");
+      call.type = "button";
+      call.textContent = text.historyCall;
+      const digits = String(item.phone || "").replace(/\D/g, "");
+      call.disabled = !/^\d{8}$/.test(digits);
+      call.addEventListener("click", () => {
+        if (!call.disabled) window.location.href = `tel:+47${digits}`;
+      });
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "delete";
+      remove.textContent = text.historyDelete;
+      remove.addEventListener("click", async () => {
+        await deleteDelivery(item.id);
+        await renderHistory();
+      });
+
+      actions.append(page, map, call, remove);
+      main.append(store, date, address);
+      card.append(main, actions);
+      historyList.appendChild(card);
+    }
+  }
+
+  function downloadFile(filename, content, type) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportCsv() {
+    const month = historyMonth.value;
+    const entries = (await getAllDeliveries()).filter(item => item.month === month);
+    const rows = [["Data", "Godzina", "Numer sklepu", "Nazwa sklepu", "Adres", "Telefon"]];
+
+    for (const item of entries) {
+      const date = new Date(item.createdAt);
+      rows.push([
+        date.toLocaleDateString("pl-PL"),
+        date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+        item.storeNumber,
+        item.storeName,
+        item.address,
+        item.phone
+      ]);
+    }
+
+    const csv = rows
+      .map(row => row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(";"))
+      .join("\r\n");
+
+    downloadFile(`europris-dostawy-${month}.csv`, "\ufeff" + csv, "text/csv;charset=utf-8");
+  }
+
+  async function exportJson() {
+    const entries = await getAllDeliveries();
+    downloadFile(
+      `europris-historia-${new Date().toISOString().slice(0, 10)}.json`,
+      JSON.stringify(entries, null, 2),
+      "application/json"
+    );
+  }
+
+  async function importJson(file) {
+    const text = translations[language];
+
+    try {
+      const data = JSON.parse(await file.text());
+      if (!Array.isArray(data)) throw new Error("Invalid history");
+
+      const db = await openDatabase();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        const store = tx.objectStore(DB_STORE);
+
+        for (const item of data) {
+          if (item && item.id && item.createdAt && item.storeNumber) store.put(item);
+        }
+
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+
+      error.textContent = text.historyImportOk;
+      await renderHistory();
+    } catch {
+      error.textContent = text.historyImportError;
+    }
+  }
+
+  async function openAndSaveDelivery() {
+    const number = cleanNumber(currentNumber);
+
+    if (!/^\d{1,8}$/.test(number) || !currentStore) {
+      error.textContent = translations[language].error;
+      return;
+    }
+
+    try {
+      await addDelivery(currentStore);
+      error.textContent = translations[language].historySaved;
+      if (!historyPanel.hidden) await renderHistory();
+    } catch {
+      error.textContent = translations[language].historyImportError;
+      return;
+    }
+
+    window.location.assign(deliveryUrl(number));
+  }
+
+  function callStore() {
+    syncCurrentStore();
+    const digits = String(currentStore?.phone || "").replace(/\D/g, "");
+    if (/^\d{8}$/.test(digits)) window.location.href = `tel:+47${digits}`;
+  }
+
   function openDelivery() {
     const number = cleanNumber(currentNumber);
 
@@ -780,7 +1229,6 @@
       return;
     }
 
-    saveRecent(number, currentName);
     window.location.assign(
       DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX
     );
@@ -793,8 +1241,6 @@
       error.textContent = translations[language].navigationError;
       return;
     }
-
-    saveRecent(currentStore.number, currentStore.name);
 
     const latitude = Number(currentStore.latitude);
     const longitude = Number(currentStore.longitude);
@@ -847,7 +1293,34 @@
   });
 
   openButton.addEventListener("click", openDelivery);
+  openSaveButton.addEventListener("click", openAndSaveDelivery);
   navigateButton.addEventListener("click", openNavigation);
+  callButton.addEventListener("click", callStore);
+
+  historyToggle.addEventListener("click", async () => {
+    historyPanel.hidden = false;
+    await renderHistory();
+    historyPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  historyClose.addEventListener("click", () => { historyPanel.hidden = true; });
+  historyMonth.addEventListener("change", renderHistory);
+  historyPrint.addEventListener("click", () => window.print());
+  historyCsv.addEventListener("click", exportCsv);
+  historyJson.addEventListener("click", exportJson);
+  historyImport.addEventListener("click", () => historyImportFile.click());
+
+  historyImportFile.addEventListener("change", async () => {
+    const file = historyImportFile.files?.[0];
+    if (file) await importJson(file);
+    historyImportFile.value = "";
+  });
+
+  historyClear.addEventListener("click", async () => {
+    if (!confirm(translations[language].historyClearConfirm)) return;
+    await clearMonth(historyMonth.value);
+    await renderHistory();
+  });
 
   useNearest.addEventListener("click", () => {
     if (nearestStore) {
@@ -873,11 +1346,12 @@
     });
   });
 
+  historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
   updateSelected();
 
-  fetch("stores.json?v=7", { cache: "no-store" })
+  fetch("stores.json?v=8", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -888,13 +1362,13 @@
       // Usuń stary, błędny duplikat Holmestrand.
       // Prawidłowy sklep pozostaje pod numerem 632.
       stores = stores.filter(store => !(
-        Number(store.number) === 42 &&
-        normalized(store.name).includes("holmestrand")
+        (Number(store.number) === 42 && normalized(store.name).includes("holmestrand")) ||
+        (Number(store.number) === 269 && normalized(store.name).includes("leira"))
       ));
 
       status.textContent = translations[language].loaded(stores.length);
       handleSearchInput();
-      renderRecent();
+      if (!historyPanel.hidden) renderHistory();
 
       if (!locationRequestedThisLaunch) {
         locationRequestedThisLaunch = true;
