@@ -1,5 +1,12 @@
-const CACHE="europris-delivery-v3";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg"];
+const CACHE="europris-delivery-v4-icon";
+const ASSETS=[
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./europris-icon-180.png",
+  "./europris-icon-192.png",
+  "./europris-icon-512.png"
+];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
