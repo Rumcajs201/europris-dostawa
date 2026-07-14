@@ -447,7 +447,8 @@
   }
 
   function cleanNumber(value) {
-    return String(value).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+    const number = String(value).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+    return number === "42" ? "632" : number;
   }
 
   function applyLanguage() {
@@ -804,13 +805,20 @@
   applyLanguage();
   updateSelected();
 
-  fetch("stores.json?v=4", { cache: "no-store" })
+  fetch("stores.json?v=6", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
     })
     .then(data => {
       stores = Array.isArray(data) ? data : [];
+
+      // Usuń stary, błędny duplikat Holmestrand.
+      // Prawidłowy sklep pozostaje pod numerem 632.
+      stores = stores.filter(store => !(
+        Number(store.number) === 42 &&
+        normalized(store.name).includes("holmestrand")
+      ));
       status.textContent = translations[language].loaded(stores.length);
       handleSearchInput();
 
