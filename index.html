@@ -232,11 +232,34 @@
       font-weight: 750;
     }
 
+    .location-panel {
+      margin-bottom: 13px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--green) 7%, transparent);
+    }
+    .location-heading { margin: 0 0 6px; font-size: 1rem; font-weight: 850; }
+    .location-message { color: var(--muted); line-height: 1.35; font-size: .92rem; }
+    .location-result { margin-top: 9px; font-weight: 800; line-height: 1.35; }
+    .location-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .location-button {
+      flex: 1; min-height: 43px; border: 1px solid var(--green);
+      border-radius: 11px; background: var(--green); color: #fff; font-weight: 800;
+    }
+    .location-button.secondary { background: transparent; color: var(--green); }
     .status {
       margin-top: 12px;
       color: var(--muted);
       font-size: .78rem;
       text-align: center;
+    }
+    .footer {
+      margin: 16px 4px 4px;
+      color: var(--muted);
+      font-size: .78rem;
+      text-align: center;
+      line-height: 1.35;
     }
   </style>
 </head>
@@ -252,6 +275,16 @@
 
     <h1 id="title"></h1>
     <p id="description" class="description"></p>
+
+    <div class="location-panel">
+      <div id="locationHeading" class="location-heading"></div>
+      <div id="locationMessage" class="location-message"></div>
+      <div id="locationResult" class="location-result"></div>
+      <div class="location-actions">
+        <button id="useNearest" class="location-button" hidden></button>
+        <button id="retryLocation" class="location-button secondary"></button>
+      </div>
+    </div>
 
     <input
       id="search"
@@ -295,6 +328,7 @@
 
     <div id="status" class="status"></div>
   </section>
+  <div id="footer" class="footer"></div>
 </main>
 
 <script>
@@ -304,8 +338,8 @@
   const DELIVERY_BASE = "https://events.app.fourprosolutions.com/europris/";
   const DELIVERY_SUFFIX = "/transport";
 
-  const RECENT_KEY = "europris_recent_stores_v4";
-  const LANGUAGE_KEY = "europris_language_v4";
+  const RECENT_KEY = "europris_recent_stores_v5";
+  const LANGUAGE_KEY = "europris_language_v5";
   const MAX_RECENT = 6;
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
@@ -320,7 +354,17 @@
       error: "Wybierz sklep albo wpisz prawidłowy numer.",
       loading: "Wczytywanie bazy sklepów…",
       loaded: count => `Baza sklepów: ${count}`,
-      loadError: "Nie udało się wczytać bazy sklepów. Nadal możesz wpisać numer."
+      loadError: "Nie udało się wczytać bazy sklepów. Nadal możesz wpisać numer.",
+      locationHeading: "Najbliższy sklep",
+      locationChecking: "Sprawdzam Twoją lokalizację…",
+      locationRetry: "Sprawdź ponownie",
+      locationUse: "Wybierz ten sklep",
+      locationAuto: (number, name, distance) => `Automatycznie wybrano: ${number} — ${name} (${distance}).`,
+      locationSuggestion: (number, name, distance) => `Najbliżej jest: ${number} — ${name} (${distance}). Potwierdź wybór.`,
+      locationDenied: "Brak dostępu do lokalizacji. Możesz wyszukać sklep ręcznie albo spróbować ponownie.",
+      locationUnavailable: "Nie udało się ustalić lokalizacji. Spróbuj ponownie.",
+      locationNoCoordinates: "W bazie nie znaleziono sklepów ze współrzędnymi.",
+      footer: "Zbudowane przez Rumcajsa przy pomocy sztucznej inteligencji."
     },
     no: {
       title: "Bekreftelse av levering til Europris",
@@ -331,7 +375,17 @@
       error: "Velg en butikk eller skriv inn et gyldig nummer.",
       loading: "Laster butikklisten…",
       loaded: count => `Butikkdatabase: ${count}`,
-      loadError: "Butikklisten kunne ikke lastes. Du kan fortsatt skrive inn nummeret."
+      loadError: "Butikklisten kunne ikke lastes. Du kan fortsatt skrive inn nummeret.",
+      locationHeading: "Nærmeste butikk",
+      locationChecking: "Finner posisjonen din…",
+      locationRetry: "Prøv igjen",
+      locationUse: "Velg denne butikken",
+      locationAuto: (number, name, distance) => `Automatisk valgt: ${number} — ${name} (${distance}).`,
+      locationSuggestion: (number, name, distance) => `Nærmeste butikk er: ${number} — ${name} (${distance}). Bekreft valget.`,
+      locationDenied: "Ingen tilgang til posisjon. Du kan søke manuelt eller prøve igjen.",
+      locationUnavailable: "Posisjonen kunne ikke bestemmes. Prøv igjen.",
+      locationNoCoordinates: "Ingen butikker med koordinater ble funnet i databasen.",
+      footer: "Bygget av Rumcajs med hjelp av kunstig intelligens."
     },
     en: {
       title: "Europris delivery confirmation",
@@ -342,7 +396,17 @@
       error: "Select a store or enter a valid number.",
       loading: "Loading store database…",
       loaded: count => `Store database: ${count}`,
-      loadError: "The store database could not be loaded. You can still enter a number."
+      loadError: "The store database could not be loaded. You can still enter a number.",
+      locationHeading: "Nearest store",
+      locationChecking: "Checking your location…",
+      locationRetry: "Check again",
+      locationUse: "Select this store",
+      locationAuto: (number, name, distance) => `Automatically selected: ${number} — ${name} (${distance}).`,
+      locationSuggestion: (number, name, distance) => `Nearest store: ${number} — ${name} (${distance}). Confirm the selection.`,
+      locationDenied: "Location access is unavailable. Search manually or try again.",
+      locationUnavailable: "Your location could not be determined. Try again.",
+      locationNoCoordinates: "No stores with coordinates were found in the database.",
+      footer: "Built by Rumcajs with the help of artificial intelligence."
     }
   };
 
@@ -352,6 +416,9 @@
   let stores = [];
   let currentNumber = "";
   let currentName = "";
+  let nearestStore = null;
+  let nearestDistanceMeters = null;
+  let locationRequestedThisLaunch = false;
 
   const search = document.getElementById("search");
   const results = document.getElementById("results");
@@ -359,6 +426,12 @@
   const selectedName = document.getElementById("selectedName");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
+  const locationHeading = document.getElementById("locationHeading");
+  const locationMessage = document.getElementById("locationMessage");
+  const locationResult = document.getElementById("locationResult");
+  const useNearest = document.getElementById("useNearest");
+  const retryLocation = document.getElementById("retryLocation");
+  const footer = document.getElementById("footer");
 
   function normalized(value) {
     return String(value)
@@ -385,6 +458,10 @@
     document.getElementById("open").textContent = text.open;
     document.getElementById("recentTitle").textContent = text.recent;
     search.placeholder = text.placeholder;
+    locationHeading.textContent = text.locationHeading;
+    retryLocation.textContent = text.locationRetry;
+    useNearest.textContent = text.locationUse;
+    footer.textContent = text.footer;
 
     document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);
@@ -515,6 +592,111 @@
     renderSearchResults(value);
   }
 
+  function toRadians(value) {
+    return value * Math.PI / 180;
+  }
+
+  function distanceMeters(lat1, lon1, lat2, lon2) {
+    const earthRadius = 6371000;
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+    return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatDistance(meters) {
+    if (meters < 1000) return `${Math.round(meters)} m`;
+    return `${(meters / 1000).toFixed(meters < 10000 ? 1 : 0)} km`;
+  }
+
+  function findNearestStore(latitude, longitude) {
+    const valid = stores.filter(store =>
+      Number.isFinite(Number(store.latitude)) &&
+      Number.isFinite(Number(store.longitude))
+    );
+
+    if (!valid.length) return null;
+
+    let best = null;
+    for (const store of valid) {
+      const distance = distanceMeters(
+        latitude,
+        longitude,
+        Number(store.latitude),
+        Number(store.longitude)
+      );
+      if (!best || distance < best.distance) best = { store, distance };
+    }
+    return best;
+  }
+
+  function showNearestResult(best) {
+    const text = translations[language];
+    nearestStore = best.store;
+    nearestDistanceMeters = best.distance;
+
+    const name = cleanStoreName(best.store.name);
+    const distance = formatDistance(best.distance);
+
+    if (best.distance <= 1000) {
+      selectStore(best.store);
+      locationMessage.textContent = "";
+      locationResult.textContent = text.locationAuto(best.store.number, name, distance);
+      useNearest.hidden = true;
+      return;
+    }
+
+    locationMessage.textContent = "";
+    locationResult.textContent = text.locationSuggestion(best.store.number, name, distance);
+    useNearest.hidden = false;
+  }
+
+  function requestNearestStore() {
+    const text = translations[language];
+
+    useNearest.hidden = true;
+    nearestStore = null;
+    nearestDistanceMeters = null;
+    locationResult.textContent = "";
+    locationMessage.textContent = text.locationChecking;
+
+    if (!navigator.geolocation) {
+      locationMessage.textContent = text.locationUnavailable;
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const best = findNearestStore(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+
+        if (!best) {
+          locationMessage.textContent = text.locationNoCoordinates;
+          return;
+        }
+
+        showNearestResult(best);
+      },
+      geolocationError => {
+        locationMessage.textContent =
+          geolocationError.code === geolocationError.PERMISSION_DENIED
+            ? text.locationDenied
+            : text.locationUnavailable;
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
+  }
+
   function openDelivery() {
     const number = cleanNumber(currentNumber);
 
@@ -578,6 +760,20 @@
   });
 
   document.getElementById("open").addEventListener("click", openDelivery);
+
+  useNearest.addEventListener("click", () => {
+    if (nearestStore) {
+      selectStore(nearestStore);
+      locationResult.textContent = translations[language].locationAuto(
+        nearestStore.number,
+        cleanStoreName(nearestStore.name),
+        formatDistance(nearestDistanceMeters)
+      );
+      useNearest.hidden = true;
+    }
+  });
+
+  retryLocation.addEventListener("click", requestNearestStore);
   search.addEventListener("input", handleSearchInput);
 
   document.querySelectorAll("[data-lang]").forEach(button => {
@@ -592,7 +788,7 @@
   applyLanguage();
   updateSelected();
 
-  fetch("stores.json?v=2", { cache: "no-store" })
+  fetch("stores.json?v=3", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -601,10 +797,16 @@
       stores = Array.isArray(data) ? data : [];
       status.textContent = translations[language].loaded(stores.length);
       handleSearchInput();
+
+      if (!locationRequestedThisLaunch) {
+        locationRequestedThisLaunch = true;
+        requestNearestStore();
+      }
     })
     .catch(() => {
       stores = [];
       status.textContent = translations[language].loadError;
+      locationMessage.textContent = translations[language].locationNoCoordinates;
     });
 
   if ("serviceWorker" in navigator) {
