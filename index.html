@@ -1,59 +1,618 @@
 <!doctype html>
-<html lang="pl"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff"><meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" sizes="180x180" href="europris-icon-180.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="europris-icon-192.png?v=2">
-<title>Europris</title>
-<style>
-:root{color-scheme:light dark;--bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--border:#d1d5db;--btn:#126b31;--btntext:#fff;--sec:#e5e7eb;--danger:#b91c1c}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#111827;--text:#f9fafb;--muted:#9ca3af;--border:#374151;--sec:#1f2937}}
-*{box-sizing:border-box}body{margin:0;min-height:100svh;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;padding:14px}
-main{width:min(100%,460px);margin:auto}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 10px 28px rgba(0,0,0,.1)}
-.lang{display:flex;justify-content:flex-end;gap:7px;margin-bottom:10px}.lang button{min-width:48px;min-height:38px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--text);font-weight:800}.lang button.active{background:var(--btn);color:#fff}
-h1{margin:0 0 6px;font-size:1.4rem}p{margin:0 0 14px;color:var(--muted)}input{width:100%;min-height:54px;border:2px solid var(--border);border-radius:14px;padding:0 14px;background:transparent;color:var(--text);font-size:1.1rem}
-.results{display:grid;gap:7px;margin:9px 0;max-height:220px;overflow:auto}.result{width:100%;text-align:left;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text)}.result b{display:block}.result span{color:var(--muted);font-size:.88rem}
-.display{min-height:58px;display:grid;place-items:center;border:2px solid var(--border);border-radius:14px;font-size:1.7rem;font-weight:800;letter-spacing:.1em;margin:12px 0}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.key{min-height:52px;border:1px solid var(--border);border-radius:13px;background:var(--sec);color:var(--text);font-size:1.35rem;font-weight:800}
-.open{width:100%;min-height:58px;margin-top:11px;border:0;border-radius:14px;background:var(--btn);color:var(--btntext);font-size:1.05rem;font-weight:800}.error{min-height:22px;color:var(--danger);font-weight:700;margin-top:7px}
-.recent-title{margin-top:15px;color:var(--muted);font-weight:700}.recent{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.chip{min-height:40px;padding:0 13px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);font-weight:700}
-</style></head><body><main><section class="card">
-<div class="lang"><button data-lang="pl">PL</button><button data-lang="no">NO</button><button data-lang="en">EN</button></div>
-<h1 id="title"></h1><p id="desc"></p>
-<input id="search" autocomplete="off" placeholder="">
-<div id="results" class="results"></div>
-<div id="display" class="display">—</div>
-<div class="keypad">
-<button class="key" data-d="1">1</button><button class="key" data-d="2">2</button><button class="key" data-d="3">3</button>
-<button class="key" data-d="4">4</button><button class="key" data-d="5">5</button><button class="key" data-d="6">6</button>
-<button class="key" data-d="7">7</button><button class="key" data-d="8">8</button><button class="key" data-d="9">9</button>
-<button class="key" id="clear">C</button><button class="key" data-d="0">0</button><button class="key" id="back">⌫</button>
-</div>
-<button id="open" class="open"></button><div id="error" class="error"></div>
-<div id="recentBlock" hidden><div id="recentTitle" class="recent-title"></div><div id="recent" class="recent"></div></div>
-</section></main>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Europris">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="europris-icon-180.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="europris-icon-192.png?v=3">
+  <link rel="icon" type="image/png" sizes="512x512" href="europris-icon-512.png?v=3">
+
+  <title>Europris</title>
+
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --green: #08783e;
+      --green-text: #ffffff;
+      --key: #e5e7eb;
+      --danger: #b91c1c;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1220;
+        --card: #111827;
+        --text: #f9fafb;
+        --muted: #9ca3af;
+        --border: #374151;
+        --key: #1f2937;
+        --danger: #fca5a5;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      padding: 14px;
+    }
+
+    main {
+      width: min(100%, 460px);
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .10);
+    }
+
+    .languages {
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .language {
+      min-width: 48px;
+      min-height: 38px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .language.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    h1 {
+      margin: 0 0 7px;
+      font-size: 1.4rem;
+    }
+
+    .description {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .search {
+      width: 100%;
+      min-height: 56px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 0 14px;
+      background: transparent;
+      color: var(--text);
+      font-size: 1.08rem;
+      outline: none;
+    }
+
+    .search:focus {
+      border-color: var(--green);
+    }
+
+    .results {
+      display: grid;
+      gap: 8px;
+      margin-top: 9px;
+      max-height: 245px;
+      overflow-y: auto;
+    }
+
+    .result {
+      width: 100%;
+      min-height: 54px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .result-number {
+      display: inline-block;
+      min-width: 50px;
+      color: var(--green);
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
+    .result-name {
+      font-weight: 750;
+      font-size: 1rem;
+    }
+
+    .selected {
+      margin-top: 12px;
+      min-height: 62px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 12px;
+    }
+
+    .selected-number {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: var(--green);
+    }
+
+    .selected-name {
+      color: var(--muted);
+      font-size: .92rem;
+      margin-top: 3px;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .key {
+      min-height: 52px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--key);
+      color: var(--text);
+      font-size: 1.35rem;
+      font-weight: 850;
+      touch-action: manipulation;
+    }
+
+    .open {
+      width: 100%;
+      min-height: 58px;
+      margin-top: 11px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--green);
+      color: var(--green-text);
+      font-size: 1.05rem;
+      font-weight: 850;
+    }
+
+    .error {
+      min-height: 23px;
+      margin-top: 8px;
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .recent-title {
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 750;
+    }
+
+    .recent {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      min-height: 40px;
+      padding: 0 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 750;
+    }
+
+    .status {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: .78rem;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <section class="card">
+    <div class="languages">
+      <button class="language" data-lang="pl">PL</button>
+      <button class="language" data-lang="no">NO</button>
+      <button class="language" data-lang="en">EN</button>
+    </div>
+
+    <h1 id="title"></h1>
+    <p id="description" class="description"></p>
+
+    <input
+      id="search"
+      class="search"
+      type="search"
+      autocomplete="off"
+      enterkeyhint="search"
+    >
+
+    <div id="results" class="results"></div>
+
+    <div id="selected" class="selected">
+      <div>
+        <div id="selectedNumber" class="selected-number">—</div>
+        <div id="selectedName" class="selected-name"></div>
+      </div>
+    </div>
+
+    <div class="keypad">
+      <button class="key" data-digit="1">1</button>
+      <button class="key" data-digit="2">2</button>
+      <button class="key" data-digit="3">3</button>
+      <button class="key" data-digit="4">4</button>
+      <button class="key" data-digit="5">5</button>
+      <button class="key" data-digit="6">6</button>
+      <button class="key" data-digit="7">7</button>
+      <button class="key" data-digit="8">8</button>
+      <button class="key" data-digit="9">9</button>
+      <button class="key" id="clear">C</button>
+      <button class="key" data-digit="0">0</button>
+      <button class="key" id="back">⌫</button>
+    </div>
+
+    <button id="open" class="open"></button>
+    <div id="error" class="error" role="alert" aria-live="polite"></div>
+
+    <div id="recentBlock" hidden>
+      <div id="recentTitle" class="recent-title"></div>
+      <div id="recent" class="recent"></div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </section>
+</main>
+
 <script>
-(()=>{"use strict";
-const BASE="https://events.app.fourprosolutions.com/europris/",SUFFIX="/transport",RK="europris_recent_v3",LK="europris_lang_v3";
-const T={pl:{title:"Potwierdzenie dostawy Europris",desc:"Wpisz numer sklepu albo wyszukaj po nazwie.",ph:"Numer lub nazwa sklepu",open:"Otwórz stronę dostawy",recent:"Ostatnio używane",err:"Wybierz sklep lub wpisz prawidłowy numer."},
-no:{title:"Bekreftelse av levering til Europris",desc:"Skriv inn butikknummer eller søk etter navn.",ph:"Butikknummer eller navn",open:"Åpne leveringssiden",recent:"Nylig brukt",err:"Velg en butikk eller skriv inn et gyldig nummer."},
-en:{title:"Europris delivery confirmation",desc:"Enter the store number or search by name.",ph:"Store number or name",open:"Open delivery page",recent:"Recently used",err:"Select a store or enter a valid number."}};
-let lang=localStorage.getItem(LK)||"pl",cur="",stores=[];
-const q=s=>document.querySelector(s),search=q("#search"),results=q("#results"),display=q("#display"),error=q("#error");
-function norm(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
-function apply(){let t=T[lang]||T.pl;q("#title").textContent=t.title;q("#desc").textContent=t.desc;search.placeholder=t.ph;q("#open").textContent=t.open;q("#recentTitle").textContent=t.recent;document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));renderRecent()}
-function show(){display.textContent=cur||"—";error.textContent=""}
-function loadRecent(){try{return JSON.parse(localStorage.getItem(RK)||"[]")}catch{return[]}}
-function saveRecent(n,name){let a=loadRecent().filter(x=>x.number!==n);a.unshift({number:n,name});localStorage.setItem(RK,JSON.stringify(a.slice(0,6)))}
-function renderRecent(){let a=loadRecent(),box=q("#recent");box.replaceChildren();q("#recentBlock").hidden=!a.length;a.forEach(x=>{let b=document.createElement("button");b.className="chip";b.textContent=x.name?`${x.number} ${x.name.replace(/^Europris\s*/i,"")}`:x.number;b.onclick=()=>openStore(x.number,x.name);box.append(b)})}
-function openStore(raw,name=""){let n=String(raw).replace(/\D/g,"").replace(/^0+(?=\d)/,"");if(!/^\d{1,8}$/.test(n)){error.textContent=T[lang].err;return}saveRecent(n,name);location.assign(BASE+encodeURIComponent(n)+SUFFIX)}
-function searchStores(){let v=search.value.trim();results.replaceChildren();if(!v)return; if(/^\d+$/.test(v)){cur=v.replace(/^0+(?=\d)/,"");show();return}cur="";show();let n=norm(v);stores.filter(s=>norm(`${s.name} ${s.address}`).includes(n)).slice(0,12).forEach(s=>{let b=document.createElement("button");b.className="result";b.innerHTML=`<b>${s.number} — ${s.name}</b><span>${s.address||""}</span>`;b.onclick=()=>{cur=String(s.number);search.value=s.name;results.replaceChildren();show()};results.append(b)})}
-document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(cur.length<8){cur+=b.dataset.d;search.value=cur;show()}});
-q("#clear").onclick=()=>{cur="";search.value="";results.replaceChildren();show()};q("#back").onclick=()=>{cur=cur.slice(0,-1);search.value=cur;show()};q("#open").onclick=()=>openStore(cur,search.value);
-document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;localStorage.setItem(LK,lang);apply()});
-search.addEventListener("input",searchStores);
-fetch("stores.json?v=1").then(r=>r.json()).then(x=>stores=Array.isArray(x)?x:[]).catch(()=>{});
-apply();show();
+(() => {
+  "use strict";
+
+  const DELIVERY_BASE = "https://events.app.fourprosolutions.com/europris/";
+  const DELIVERY_SUFFIX = "/transport";
+
+  const RECENT_KEY = "europris_recent_stores_v4";
+  const LANGUAGE_KEY = "europris_language_v4";
+  const MAX_RECENT = 6;
+  const MAX_RESULTS = 15;
+  const MAX_NUMBER_LENGTH = 8;
+
+  const translations = {
+    pl: {
+      title: "Potwierdzenie dostawy Europris",
+      description: "Wpisz numer sklepu albo zacznij wpisywać jego nazwę.",
+      placeholder: "Numer lub nazwa sklepu",
+      open: "Otwórz stronę dostawy",
+      recent: "Ostatnio używane",
+      error: "Wybierz sklep albo wpisz prawidłowy numer.",
+      loading: "Wczytywanie bazy sklepów…",
+      loaded: count => `Baza sklepów: ${count}`,
+      loadError: "Nie udało się wczytać bazy sklepów. Nadal możesz wpisać numer."
+    },
+    no: {
+      title: "Bekreftelse av levering til Europris",
+      description: "Skriv inn butikknummeret eller begynn å skrive butikknavnet.",
+      placeholder: "Butikknummer eller butikknavn",
+      open: "Åpne leveringssiden",
+      recent: "Nylig brukt",
+      error: "Velg en butikk eller skriv inn et gyldig nummer.",
+      loading: "Laster butikklisten…",
+      loaded: count => `Butikkdatabase: ${count}`,
+      loadError: "Butikklisten kunne ikke lastes. Du kan fortsatt skrive inn nummeret."
+    },
+    en: {
+      title: "Europris delivery confirmation",
+      description: "Enter the store number or start typing the store name.",
+      placeholder: "Store number or store name",
+      open: "Open delivery page",
+      recent: "Recently used",
+      error: "Select a store or enter a valid number.",
+      loading: "Loading store database…",
+      loaded: count => `Store database: ${count}`,
+      loadError: "The store database could not be loaded. You can still enter a number."
+    }
+  };
+
+  let language = localStorage.getItem(LANGUAGE_KEY) || "pl";
+  if (!translations[language]) language = "pl";
+
+  let stores = [];
+  let currentNumber = "";
+  let currentName = "";
+
+  const search = document.getElementById("search");
+  const results = document.getElementById("results");
+  const selectedNumber = document.getElementById("selectedNumber");
+  const selectedName = document.getElementById("selectedName");
+  const error = document.getElementById("error");
+  const status = document.getElementById("status");
+
+  function normalized(value) {
+    return String(value)
+      .toLocaleLowerCase("nb-NO")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
+
+  function cleanStoreName(name) {
+    return String(name || "").replace(/^Europris\s*/i, "").trim();
+  }
+
+  function cleanNumber(value) {
+    return String(value).replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  }
+
+  function applyLanguage() {
+    const text = translations[language];
+
+    document.documentElement.lang = language === "no" ? "nb" : language;
+    document.getElementById("title").textContent = text.title;
+    document.getElementById("description").textContent = text.description;
+    document.getElementById("open").textContent = text.open;
+    document.getElementById("recentTitle").textContent = text.recent;
+    search.placeholder = text.placeholder;
+
+    document.querySelectorAll("[data-lang]").forEach(button => {
+      button.classList.toggle("active", button.dataset.lang === language);
+      button.setAttribute(
+        "aria-pressed",
+        button.dataset.lang === language ? "true" : "false"
+      );
+    });
+
+    status.textContent = stores.length
+      ? text.loaded(stores.length)
+      : text.loading;
+
+    renderRecent();
+  }
+
+  function updateSelected() {
+    selectedNumber.textContent = currentNumber || "—";
+    selectedName.textContent = currentName || "";
+    error.textContent = "";
+  }
+
+  function selectStore(store) {
+    currentNumber = String(store.number);
+    currentName = cleanStoreName(store.name);
+    search.value = currentName || currentNumber;
+    results.replaceChildren();
+    updateSelected();
+  }
+
+  function clearSelection() {
+    currentNumber = "";
+    currentName = "";
+    updateSelected();
+  }
+
+  function loadRecent() {
+    try {
+      const value = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveRecent(number, name) {
+    const recent = loadRecent().filter(item => String(item.number) !== String(number));
+    recent.unshift({ number: String(number), name: cleanStoreName(name) });
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+  }
+
+  function renderRecent() {
+    const recent = loadRecent();
+    const block = document.getElementById("recentBlock");
+    const container = document.getElementById("recent");
+
+    container.replaceChildren();
+    block.hidden = recent.length === 0;
+
+    for (const item of recent) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chip";
+      button.textContent = item.name
+        ? `${item.number} ${item.name}`
+        : item.number;
+
+      button.addEventListener("click", () => {
+        currentNumber = String(item.number);
+        currentName = item.name || "";
+        search.value = item.name || item.number;
+        results.replaceChildren();
+        updateSelected();
+      });
+
+      container.appendChild(button);
+    }
+  }
+
+  function renderSearchResults(query) {
+    results.replaceChildren();
+
+    const text = normalized(query);
+    if (!text || /^\d+$/.test(text)) return;
+
+    const matches = stores
+      .filter(store => normalized(cleanStoreName(store.name)).includes(text))
+      .slice(0, MAX_RESULTS);
+
+    for (const store of matches) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "result";
+
+      const number = document.createElement("span");
+      number.className = "result-number";
+      number.textContent = store.number;
+
+      const name = document.createElement("span");
+      name.className = "result-name";
+      name.textContent = cleanStoreName(store.name);
+
+      button.append(number, name);
+      button.addEventListener("click", () => selectStore(store));
+      results.appendChild(button);
+    }
+  }
+
+  function handleSearchInput() {
+    const value = search.value.trim();
+
+    if (/^\d+$/.test(value)) {
+      currentNumber = cleanNumber(value);
+      currentName = "";
+
+      const exactStore = stores.find(
+        store => String(store.number) === currentNumber
+      );
+
+      if (exactStore) currentName = cleanStoreName(exactStore.name);
+
+      results.replaceChildren();
+      updateSelected();
+      return;
+    }
+
+    clearSelection();
+    renderSearchResults(value);
+  }
+
+  function openDelivery() {
+    const number = cleanNumber(currentNumber);
+
+    if (!/^\d{1,8}$/.test(number)) {
+      error.textContent = translations[language].error;
+      return;
+    }
+
+    saveRecent(number, currentName);
+    window.location.assign(
+      DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX
+    );
+  }
+
+  document.querySelectorAll("[data-digit]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (!/^\d*$/.test(search.value)) {
+        search.value = "";
+        clearSelection();
+      }
+
+      if (currentNumber.length >= MAX_NUMBER_LENGTH) return;
+
+      currentNumber += button.dataset.digit;
+      currentNumber = cleanNumber(currentNumber);
+      search.value = currentNumber;
+
+      const exactStore = stores.find(
+        store => String(store.number) === currentNumber
+      );
+
+      currentName = exactStore ? cleanStoreName(exactStore.name) : "";
+      results.replaceChildren();
+      updateSelected();
+    });
+  });
+
+  document.getElementById("clear").addEventListener("click", () => {
+    search.value = "";
+    results.replaceChildren();
+    clearSelection();
+  });
+
+  document.getElementById("back").addEventListener("click", () => {
+    if (!/^\d*$/.test(search.value)) {
+      search.value = "";
+      results.replaceChildren();
+      clearSelection();
+      return;
+    }
+
+    currentNumber = currentNumber.slice(0, -1);
+    search.value = currentNumber;
+
+    const exactStore = stores.find(
+      store => String(store.number) === currentNumber
+    );
+
+    currentName = exactStore ? cleanStoreName(exactStore.name) : "";
+    updateSelected();
+  });
+
+  document.getElementById("open").addEventListener("click", openDelivery);
+  search.addEventListener("input", handleSearchInput);
+
+  document.querySelectorAll("[data-lang]").forEach(button => {
+    button.addEventListener("click", () => {
+      language = button.dataset.lang;
+      localStorage.setItem(LANGUAGE_KEY, language);
+      applyLanguage();
+    });
+  });
+
+  status.textContent = translations[language].loading;
+  applyLanguage();
+  updateSelected();
+
+  fetch("stores.json?v=2", { cache: "no-store" })
+    .then(response => {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    })
+    .then(data => {
+      stores = Array.isArray(data) ? data : [];
+      status.textContent = translations[language].loaded(stores.length);
+      handleSearchInput();
+    })
+    .catch(() => {
+      stores = [];
+      status.textContent = translations[language].loadError;
+    });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
 })();
-</script></body></html>
+</script>
+</body>
+</html>
