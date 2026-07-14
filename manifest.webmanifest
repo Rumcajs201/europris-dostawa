@@ -1,22 +1,20 @@
 {
   "name": "Europris delivery",
   "short_name": "Europris",
-  "start_url": "./",
   "display": "standalone",
+  "start_url": "./",
   "background_color": "#ffffff",
-  "theme_color": "#111827",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "europris-icon-192.png?v=1",
+      "src": "europris-icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "europris-icon-512.png?v=1",
+      "src": "europris-icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }
