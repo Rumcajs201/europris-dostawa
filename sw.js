@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v13-private-contacts";
+const CACHE_NAME = "europris-app-v14-private-panel-hidden";
 
 const STATIC_FILES = [
   "./",

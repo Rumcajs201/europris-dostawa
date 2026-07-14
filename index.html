@@ -286,14 +286,10 @@
       gap: 9px;
     }
 
-    .private-edit {
-      width: 100%;
-      min-height: 44px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: transparent;
-      color: var(--text);
-      font-weight: 800;
+
+
+    .private-panel[hidden] {
+      display: none !important;
     }
 
     .private-panel {
@@ -545,7 +541,7 @@
         <button id="callPrivate" class="action-button navigate" disabled></button>
       </div>
 
-      <button id="editPrivate" class="private-edit" disabled></button>
+      <button id="editPrivate" class="action-button navigate" disabled></button>
 
       <section id="privatePanel" class="private-panel" hidden>
         <input id="privateName" type="text" autocomplete="off">
@@ -1626,7 +1622,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=9", { cache: "no-store" })
+  fetch("stores.json?v=10", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
