@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v11-google-maps";
+const CACHE_NAME = "europris-app-v12-delivery-history";
 
 const STATIC_FILES = [
   "./",
