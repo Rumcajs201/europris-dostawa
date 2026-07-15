@@ -1,9 +1,10 @@
-const CACHE_NAME = "europris-app-v24-exact-v18-speech-engine";
+const CACHE_NAME = "europris-app-v25-voice-startup-logo";
 
 const STATIC_FILES = [
   "./",
   "./index.html",
   "./xlsx.full.min.js",
+  "./rumcajs-logo.png",
   "./manifest.webmanifest",
   "./stores.json",
   "./europris-icon-180.png",

@@ -87,18 +87,13 @@
       overflow: hidden;
     }
 
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      flex: 0 0 42px;
-      display: grid;
-      place-items: center;
-      border: 2px solid var(--green);
-      border-radius: 13px;
-      color: var(--green);
-      font-size: 1.35rem;
-      font-weight: 950;
-      box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--green) 10%, transparent);
+    .brand-character {
+      width: 54px;
+      height: 68px;
+      flex: 0 0 54px;
+      object-fit: contain;
+      object-position: center;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .22));
     }
 
     .brand-copy {
@@ -623,7 +618,7 @@
   <section class="card">
     <div class="topbar">
       <div class="brand-mark" aria-label="Created by Rumcajs and AI">
-        <div class="brand-icon">R</div>
+        <img class="brand-character" src="rumcajs-logo.png?v=25" alt="Rumcajs">
         <div class="brand-copy">
           <div class="brand-name">RUMCAJS</div>
           <div class="brand-tagline">Created with AI</div>
@@ -953,6 +948,7 @@
   let currentPrivateContact = null;
   let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let lastNumberAnnounced = "";
+  let voiceStartupPromise = null;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1077,6 +1073,56 @@
 
     voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
     voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
+  }
+
+  function initializeVoiceAtStartup() {
+    if (voiceStartupPromise) return voiceStartupPromise;
+
+    voiceStartupPromise = new Promise(resolve => {
+      if (!voiceEnabled || !speechSupported()) {
+        resolve();
+        return;
+      }
+
+      const synthesis = window.speechSynthesis;
+      const storedState = voiceEnabled;
+
+      // Programowo wykonujemy tę samą sekwencję stanu,
+      // która ręcznie przywraca głos: WYŁ. -> WŁ.
+      voiceEnabled = false;
+      updateVoiceButton();
+      synthesis.cancel();
+
+      window.setTimeout(() => {
+        voiceEnabled = storedState;
+        updateVoiceButton();
+
+        const primer = new SpeechSynthesisUtterance(".");
+        primer.lang = speechLanguage();
+        primer.rate = 2;
+        primer.pitch = 1;
+        primer.volume = 0.01;
+
+        const selectedVoice = selectVoice(primer.lang);
+        if (selectedVoice) primer.voice = selectedVoice;
+
+        let completed = false;
+        const finish = () => {
+          if (completed) return;
+          completed = true;
+          synthesis.cancel();
+          resolve();
+        };
+
+        primer.onend = finish;
+        primer.onerror = finish;
+
+        synthesis.speak(primer);
+        window.setTimeout(finish, 900);
+      }, 80);
+    });
+
+    return voiceStartupPromise;
   }
 
   function normalized(value) {
@@ -1962,6 +2008,7 @@
     if (!speechSupported()) return;
 
     voiceEnabled = !voiceEnabled;
+    voiceStartupPromise = null;
     localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
     updateVoiceButton();
 
@@ -2043,12 +2090,12 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=24", { cache: "no-store" })
+  fetch("stores.json?v=25", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
     })
-    .then(data => {
+    .then(async data => {
       stores = Array.isArray(data) ? data : [];
 
       // Usuń stary, błędny duplikat Holmestrand.
@@ -2064,6 +2111,10 @@
 
       if (!locationRequestedThisLaunch) {
         locationRequestedThisLaunch = true;
+
+        // Najpierw uruchamiamy silnik mowy, dopiero później GPS.
+        // Dzięki temu pierwszy komunikat nie trafia do nieaktywnego syntezatora.
+        await initializeVoiceAtStartup();
         requestNearestStore();
       }
     })
