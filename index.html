@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Europris">
 
-  <link rel="manifest" href="manifest-v27.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v27.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v27.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v27.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="europris-icon-180.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="europris-icon-192.png?v=3">
+  <link rel="icon" type="image/png" sizes="512x512" href="europris-icon-512.png?v=3">
 
   <title>Europris</title>
 
@@ -70,63 +70,11 @@
       box-shadow: 0 10px 28px rgba(0, 0, 0, .10);
     }
 
-    .topbar {
-      display: grid;
-      grid-template-columns: minmax(112px, 1fr) auto;
-      gap: 10px;
-      align-items: start;
-      margin-bottom: 12px;
-    }
-
-    .brand-mark {
-      min-height: 80px;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 8px 6px 8px 0;
-      overflow: hidden;
-    }
-
-    .brand-character {
-      width: 54px;
-      height: 68px;
-      flex: 0 0 54px;
-      object-fit: contain;
-      object-position: center;
-      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .22));
-    }
-
-    .brand-copy {
-      min-width: 0;
-      line-height: 1.05;
-    }
-
-    .brand-name {
-      color: var(--green);
-      font-weight: 950;
-      letter-spacing: .05em;
-      font-size: .92rem;
-    }
-
-    .brand-tagline {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: .68rem;
-      font-weight: 750;
-      white-space: nowrap;
-    }
-
-    .topbar-controls {
-      width: 158px;
-      display: grid;
-      gap: 7px;
-    }
-
     .languages {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
+      justify-content: flex-end;
       gap: 7px;
-      margin: 0;
+      margin-bottom: 12px;
     }
 
     .language {
@@ -149,16 +97,13 @@
 
     .voice-toggle {
       width: 100%;
-      min-height: 38px;
-      margin: 0;
-      padding: 0 8px;
+      min-height: 42px;
+      margin: -3px 0 12px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 11px;
       background: transparent;
       color: var(--text);
-      font-size: .78rem;
-      font-weight: 850;
-      line-height: 1.15;
+      font-weight: 800;
     }
 
     .voice-toggle.enabled {
@@ -566,21 +511,6 @@
       padding: 14px 6px;
     }
 
-
-    @media (max-width: 360px) {
-      .topbar {
-        grid-template-columns: 1fr;
-      }
-
-      .brand-mark {
-        min-height: auto;
-      }
-
-      .topbar-controls {
-        width: 100%;
-      }
-    }
-
     @media print {
       body { background: #fff; color: #000; padding: 0; }
 
@@ -616,25 +546,13 @@
 <body>
 <main>
   <section class="card">
-    <div class="topbar">
-      <div class="brand-mark" aria-label="Created by Rumcajs and AI">
-        <img class="brand-character" src="rumcajs-logo.png?v=25" alt="Rumcajs">
-        <div class="brand-copy">
-          <div class="brand-name">RUMCAJS</div>
-          <div class="brand-tagline">Created with AI</div>
-        </div>
-      </div>
-
-      <div class="topbar-controls">
-        <div class="languages">
-          <button class="language" data-lang="pl">PL</button>
-          <button class="language" data-lang="no">NO</button>
-          <button class="language" data-lang="en">EN</button>
-        </div>
-
-        <button id="voiceToggle" class="voice-toggle" type="button"></button>
-      </div>
+    <div class="languages">
+      <button class="language" data-lang="pl">PL</button>
+      <button class="language" data-lang="no">NO</button>
+      <button class="language" data-lang="en">EN</button>
     </div>
+
+    <button id="voiceToggle" class="voice-toggle" type="button"></button>
 
     <h1 id="title"></h1>
     <p id="description" class="description"></p>
@@ -774,7 +692,6 @@
       voiceOff: "🔇 Komunikaty głosowe: WYŁ.",
       voiceUnavailable: "Syntezator mowy nie jest dostępny na tym urządzeniu.",
       voiceEnabledMessage: "Komunikaty głosowe zostały włączone.",
-      voiceLanguageSelected: "Język polski aktywny.",
       voiceStoreSelected: (number, name) => `Wybrano sklep Europris ${name}, numer ${number}.`,
       voiceNearest: (number, name, distance) => `W odległości ${distance} znajduje się sklep Europris ${name}, numer ${number}.`,
       voiceOpening: name => `Otwieram stronę dostawy dla sklepu Europris ${name}.`,
@@ -835,7 +752,6 @@
       voiceOff: "🔇 Talemeldinger: AV",
       voiceUnavailable: "Talesyntese er ikke tilgjengelig på denne enheten.",
       voiceEnabledMessage: "Talemeldinger er slått på.",
-      voiceLanguageSelected: "Norsk språk aktivt.",
       voiceStoreSelected: (number, name) => `Europris ${name}, butikk nummer ${number}, er valgt.`,
       voiceNearest: (number, name, distance) => `Europris ${name}, butikk nummer ${number}, ligger ${distance} unna.`,
       voiceOpening: name => `Åpner leveringssiden for Europris ${name}.`,
@@ -896,7 +812,6 @@
       voiceOff: "🔇 Voice messages: OFF",
       voiceUnavailable: "Speech synthesis is not available on this device.",
       voiceEnabledMessage: "Voice messages have been enabled.",
-      voiceLanguageSelected: "English language active.",
       voiceStoreSelected: (number, name) => `Europris ${name}, store number ${number}, has been selected.`,
       voiceNearest: (number, name, distance) => `Europris ${name}, store number ${number}, is ${distance} away.`,
       voiceOpening: name => `Opening the delivery page for Europris ${name}.`,
@@ -946,10 +861,8 @@
   let currentName = "";
   let currentStore = null;
   let currentPrivateContact = null;
-  let voiceEnabled = false;
+  let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let lastNumberAnnounced = "";
-  let voiceSessionArmed = false;
-  let startupSpeechToken = 0;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1025,7 +938,6 @@
       return;
     }
 
-    armVoiceSession();
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(String(message));
@@ -1076,63 +988,6 @@
     voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
     voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
   }
-
-  function armVoiceSession() {
-    if (!voiceEnabled || !speechSupported() || voiceSessionArmed) return;
-
-    // Dokładnie odtwarzamy zmianę stanu, która ręcznie przywraca głos,
-    // ale bez odtwarzania dodatkowego komunikatu.
-    voiceEnabled = false;
-    updateVoiceButton();
-    window.speechSynthesis.cancel();
-
-    voiceEnabled = true;
-    updateVoiceButton();
-    voiceSessionArmed = true;
-  }
-
-  function speakStartup(message) {
-    if (!voiceEnabled || !speechSupported() || !message) return;
-
-    const token = ++startupSpeechToken;
-    let attempts = 0;
-
-    const attempt = () => {
-      if (token !== startupSpeechToken) return;
-      attempts += 1;
-
-      armVoiceSession();
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(String(message));
-      utterance.lang = speechLanguage();
-      utterance.rate = 0.96;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      const selectedVoice = selectVoice(utterance.lang);
-      if (selectedVoice) utterance.voice = selectedVoice;
-
-      let started = false;
-      utterance.onstart = () => { started = true; };
-      utterance.onend = () => { started = true; };
-      utterance.onerror = () => {};
-
-      window.speechSynthesis.speak(utterance);
-
-      window.setTimeout(() => {
-        if (token !== startupSpeechToken || started) return;
-
-        if (attempts < 6) {
-          voiceSessionArmed = false;
-          attempt();
-        }
-      }, 500);
-    };
-
-    window.setTimeout(attempt, 250);
-  }
-
 
   function normalized(value) {
     return String(value)
@@ -1390,7 +1245,7 @@
       locationMessage.textContent = "";
       locationResult.textContent = text.locationAuto(best.store.number, name, distance);
       useNearest.hidden = true;
-      speakStartup(text.voiceNearest(best.store.number, name, distance));
+      speak(text.voiceNearest(best.store.number, name, distance));
       return;
     }
 
@@ -2017,8 +1872,7 @@
     if (!speechSupported()) return;
 
     voiceEnabled = !voiceEnabled;
-    voiceSessionArmed = false;
-    startupSpeechToken += 1;
+    localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
     updateVoiceButton();
 
     if (voiceEnabled) {
@@ -2089,18 +1943,15 @@
       language = button.dataset.lang;
       localStorage.setItem(LANGUAGE_KEY, language);
       applyLanguage();
-      speak(translations[language].voiceLanguageSelected);
     });
   });
 
-
-  localStorage.removeItem(VOICE_KEY);
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=27", { cache: "no-store" })
+  fetch("stores.json?v=19", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -2131,16 +1982,6 @@
       status.textContent = translations[language].loadError;
       locationMessage.textContent = translations[language].locationNoCoordinates;
     });
-
-
-
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      voiceSessionArmed = false;
-      startupSpeechToken += 1;
-    }
-  });
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
