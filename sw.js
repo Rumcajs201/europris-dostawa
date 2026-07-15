@@ -1,15 +1,15 @@
-const CACHE_NAME = "europris-app-v25-voice-startup-logo";
+const CACHE_NAME = "europris-app-v26-icons-speech-start";
 
 const STATIC_FILES = [
   "./",
   "./index.html",
   "./xlsx.full.min.js",
   "./rumcajs-logo.png",
-  "./manifest.webmanifest",
+  "./manifest-v26.webmanifest",
   "./stores.json",
-  "./europris-icon-180.png",
-  "./europris-icon-192.png",
-  "./europris-icon-512.png"
+  "./europris-app-icon-180-v26.png",
+  "./europris-app-icon-192-v26.png",
+  "./europris-app-icon-512-v26.png"
 ];
 
 self.addEventListener("install", event => {

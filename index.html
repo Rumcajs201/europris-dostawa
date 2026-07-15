@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Europris">
 
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="europris-icon-180.png?v=3">
-  <link rel="icon" type="image/png" sizes="192x192" href="europris-icon-192.png?v=3">
-  <link rel="icon" type="image/png" sizes="512x512" href="europris-icon-512.png?v=3">
+  <link rel="manifest" href="manifest-v26.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v26.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v26.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v26.png">
 
   <title>Europris</title>
 
@@ -948,7 +948,8 @@
   let currentPrivateContact = null;
   let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let lastNumberAnnounced = "";
-  let voiceStartupPromise = null;
+  let voiceSessionArmed = false;
+  let startupSpeechToken = 0;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1024,6 +1025,7 @@
       return;
     }
 
+    armVoiceSession();
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(String(message));
@@ -1075,55 +1077,62 @@
     voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
   }
 
-  function initializeVoiceAtStartup() {
-    if (voiceStartupPromise) return voiceStartupPromise;
+  function armVoiceSession() {
+    if (!voiceEnabled || !speechSupported() || voiceSessionArmed) return;
 
-    voiceStartupPromise = new Promise(resolve => {
-      if (!voiceEnabled || !speechSupported()) {
-        resolve();
-        return;
-      }
+    // Dokładnie odtwarzamy zmianę stanu, która ręcznie przywraca głos,
+    // ale bez odtwarzania dodatkowego komunikatu.
+    voiceEnabled = false;
+    updateVoiceButton();
+    window.speechSynthesis.cancel();
 
-      const synthesis = window.speechSynthesis;
-      const storedState = voiceEnabled;
+    voiceEnabled = true;
+    updateVoiceButton();
+    voiceSessionArmed = true;
+  }
 
-      // Programowo wykonujemy tę samą sekwencję stanu,
-      // która ręcznie przywraca głos: WYŁ. -> WŁ.
-      voiceEnabled = false;
-      updateVoiceButton();
-      synthesis.cancel();
+  function speakStartup(message) {
+    if (!voiceEnabled || !speechSupported() || !message) return;
+
+    const token = ++startupSpeechToken;
+    let attempts = 0;
+
+    const attempt = () => {
+      if (token !== startupSpeechToken) return;
+      attempts += 1;
+
+      armVoiceSession();
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(String(message));
+      utterance.lang = speechLanguage();
+      utterance.rate = 0.96;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      const selectedVoice = selectVoice(utterance.lang);
+      if (selectedVoice) utterance.voice = selectedVoice;
+
+      let started = false;
+      utterance.onstart = () => { started = true; };
+      utterance.onend = () => { started = true; };
+      utterance.onerror = () => {};
+
+      window.speechSynthesis.speak(utterance);
 
       window.setTimeout(() => {
-        voiceEnabled = storedState;
-        updateVoiceButton();
+        if (token !== startupSpeechToken || started) return;
 
-        const primer = new SpeechSynthesisUtterance(".");
-        primer.lang = speechLanguage();
-        primer.rate = 2;
-        primer.pitch = 1;
-        primer.volume = 0.01;
+        if (attempts < 6) {
+          voiceSessionArmed = false;
+          attempt();
+        }
+      }, 500);
+    };
 
-        const selectedVoice = selectVoice(primer.lang);
-        if (selectedVoice) primer.voice = selectedVoice;
-
-        let completed = false;
-        const finish = () => {
-          if (completed) return;
-          completed = true;
-          synthesis.cancel();
-          resolve();
-        };
-
-        primer.onend = finish;
-        primer.onerror = finish;
-
-        synthesis.speak(primer);
-        window.setTimeout(finish, 900);
-      }, 80);
-    });
-
-    return voiceStartupPromise;
+    window.setTimeout(attempt, 250);
   }
+
 
   function normalized(value) {
     return String(value)
@@ -1381,7 +1390,7 @@
       locationMessage.textContent = "";
       locationResult.textContent = text.locationAuto(best.store.number, name, distance);
       useNearest.hidden = true;
-      speak(text.voiceNearest(best.store.number, name, distance));
+      speakStartup(text.voiceNearest(best.store.number, name, distance));
       return;
     }
 
@@ -2008,7 +2017,8 @@
     if (!speechSupported()) return;
 
     voiceEnabled = !voiceEnabled;
-    voiceStartupPromise = null;
+    voiceSessionArmed = false;
+    startupSpeechToken += 1;
     localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
     updateVoiceButton();
 
@@ -2090,12 +2100,12 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=25", { cache: "no-store" })
+  fetch("stores.json?v=26", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
     })
-    .then(async data => {
+    .then(data => {
       stores = Array.isArray(data) ? data : [];
 
       // Usuń stary, błędny duplikat Holmestrand.
@@ -2111,10 +2121,6 @@
 
       if (!locationRequestedThisLaunch) {
         locationRequestedThisLaunch = true;
-
-        // Najpierw uruchamiamy silnik mowy, dopiero później GPS.
-        // Dzięki temu pierwszy komunikat nie trafia do nieaktywnego syntezatora.
-        await initializeVoiceAtStartup();
         requestNearestStore();
       }
     })
@@ -2128,6 +2134,13 @@
 
 
 
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      voiceSessionArmed = false;
+      startupSpeechToken += 1;
+    }
+  });
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
