@@ -94,6 +94,24 @@
       border-color: var(--green);
     }
 
+
+    .voice-toggle {
+      width: 100%;
+      min-height: 42px;
+      margin: -3px 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .voice-toggle.enabled {
+      border-color: var(--green);
+      color: var(--green);
+      background: color-mix(in srgb, var(--green) 7%, transparent);
+    }
+
     h1 {
       margin: 0 0 7px;
       font-size: 1.4rem;
@@ -534,6 +552,8 @@
       <button class="language" data-lang="en">EN</button>
     </div>
 
+    <button id="voiceToggle" class="voice-toggle" type="button"></button>
+
     <h1 id="title"></h1>
     <p id="description" class="description"></p>
 
@@ -646,6 +666,7 @@
   const DB_STORE = "deliveries";
   const DB_CONTACTS = "privateContacts";
   const LANGUAGE_KEY = "europris_language_v6";
+  const VOICE_KEY = "europris_voice_enabled_v1";
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
 
@@ -667,6 +688,14 @@
       privateSaved: "Prywatny kontakt został zapisany.",
       privateDeleted: "Prywatny kontakt został usunięty.",
       privateInvalid: "Wpisz prawidłowy numer telefonu.",
+      voiceOn: "🔊 Komunikaty głosowe: WŁ.",
+      voiceOff: "🔇 Komunikaty głosowe: WYŁ.",
+      voiceUnavailable: "Syntezator mowy nie jest dostępny na tym urządzeniu.",
+      voiceEnabledMessage: "Komunikaty głosowe zostały włączone.",
+      voiceStoreSelected: (number, name) => `Wybrano sklep Europris ${name}, numer ${number}.`,
+      voiceNearest: (number, name, distance) => `W odległości ${distance} znajduje się sklep Europris ${name}, numer ${number}.`,
+      voiceOpening: name => `Otwieram stronę dostawy dla sklepu Europris ${name}.`,
+      voiceSavedOpening: name => `Dostawa do sklepu Europris ${name} została zapisana. Otwieram stronę dostawy.`,
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
       historyPrint: "Drukuj zestawienie miesiąca",
@@ -718,6 +747,14 @@
       privateSaved: "Privat kontakt er lagret.",
       privateDeleted: "Privat kontakt er slettet.",
       privateInvalid: "Skriv inn et gyldig telefonnummer.",
+      voiceOn: "🔊 Talemeldinger: PÅ",
+      voiceOff: "🔇 Talemeldinger: AV",
+      voiceUnavailable: "Talesyntese er ikke tilgjengelig på denne enheten.",
+      voiceEnabledMessage: "Talemeldinger er slått på.",
+      voiceStoreSelected: (number, name) => `Europris ${name}, butikk nummer ${number}, er valgt.`,
+      voiceNearest: (number, name, distance) => `Europris ${name}, butikk nummer ${number}, ligger ${distance} unna.`,
+      voiceOpening: name => `Åpner leveringssiden for Europris ${name}.`,
+      voiceSavedOpening: name => `Leveringen til Europris ${name} er lagret. Åpner leveringssiden.`,
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
       historyPrint: "Skriv ut månedsoversikt",
@@ -769,6 +806,14 @@
       privateSaved: "Private contact saved.",
       privateDeleted: "Private contact deleted.",
       privateInvalid: "Enter a valid phone number.",
+      voiceOn: "🔊 Voice messages: ON",
+      voiceOff: "🔇 Voice messages: OFF",
+      voiceUnavailable: "Speech synthesis is not available on this device.",
+      voiceEnabledMessage: "Voice messages have been enabled.",
+      voiceStoreSelected: (number, name) => `Europris ${name}, store number ${number}, has been selected.`,
+      voiceNearest: (number, name, distance) => `Europris ${name}, store number ${number}, is ${distance} away.`,
+      voiceOpening: name => `Opening the delivery page for Europris ${name}.`,
+      voiceSavedOpening: name => `The delivery to Europris ${name} has been saved. Opening the delivery page.`,
       history: "Delivery history",
       historyTitle: "Delivery history",
       historyPrint: "Print monthly report",
@@ -813,11 +858,13 @@
   let currentName = "";
   let currentStore = null;
   let currentPrivateContact = null;
+  let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
   let locationRequestedThisLaunch = false;
 
+  const voiceToggle = document.getElementById("voiceToggle");
   const search = document.getElementById("search");
   const results = document.getElementById("results");
   const selectedNumber = document.getElementById("selectedNumber");
@@ -854,6 +901,89 @@
   const useNearest = document.getElementById("useNearest");
   const retryLocation = document.getElementById("retryLocation");
   const footer = document.getElementById("footer");
+
+
+  function speechSupported() {
+    return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  }
+
+  function speechLanguage() {
+    if (language === "no") return "nb-NO";
+    if (language === "en") return "en-US";
+    return "pl-PL";
+  }
+
+  function selectVoice(langCode) {
+    const voices = window.speechSynthesis?.getVoices?.() || [];
+    const exact = voices.find(voice =>
+      String(voice.lang || "").toLowerCase() === langCode.toLowerCase()
+    );
+    if (exact) return exact;
+
+    const prefix = langCode.slice(0, 2).toLowerCase();
+    return voices.find(voice =>
+      String(voice.lang || "").toLowerCase().startsWith(prefix)
+    ) || null;
+  }
+
+  function speak(message, options = {}) {
+    const { force = false, onDone = null } = options;
+
+    if ((!voiceEnabled && !force) || !speechSupported() || !message) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(String(message));
+    utterance.lang = speechLanguage();
+    utterance.rate = 0.96;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    const selectedVoice = selectVoice(utterance.lang);
+    if (selectedVoice) utterance.voice = selectedVoice;
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (typeof onDone === "function") onDone();
+    };
+
+    utterance.onend = finish;
+    utterance.onerror = finish;
+
+    window.speechSynthesis.speak(utterance);
+
+    // Zabezpieczenie na wypadek, gdy system nie wywoła zdarzenia końca mowy.
+    if (typeof onDone === "function") {
+      window.setTimeout(finish, 2800);
+    }
+  }
+
+  function speakAndRun(message, action) {
+    if (!voiceEnabled || !speechSupported()) {
+      action();
+      return;
+    }
+
+    speak(message, { onDone: action });
+  }
+
+  function updateVoiceButton() {
+    const text = translations[language];
+    const supported = speechSupported();
+
+    voiceToggle.disabled = !supported;
+    voiceToggle.textContent = supported
+      ? (voiceEnabled ? text.voiceOn : text.voiceOff)
+      : text.voiceUnavailable;
+
+    voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
+    voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
+  }
 
   function normalized(value) {
     return String(value)
@@ -942,6 +1072,7 @@
     retryLocation.textContent = text.locationRetry;
     useNearest.textContent = text.locationUse;
     footer.textContent = text.footer;
+    updateVoiceButton();
 
     document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);
@@ -969,13 +1100,20 @@
     await syncCurrentStore();
   }
 
-  async function selectStore(store) {
+  async function selectStore(store, announce = true) {
     currentNumber = String(store.number);
     currentName = cleanStoreName(store.name);
     currentStore = store;
     search.value = currentName || currentNumber;
     results.replaceChildren();
     await updateSelected();
+
+    if (announce) {
+      speak(translations[language].voiceStoreSelected(
+        store.number,
+        cleanStoreName(store.name)
+      ));
+    }
   }
 
   async function clearSelection() {
@@ -1080,10 +1218,11 @@
     nearestWasAutoSelected = best.distance <= 1000;
 
     if (nearestWasAutoSelected) {
-      selectStore(best.store);
+      void selectStore(best.store, false);
       locationMessage.textContent = "";
       locationResult.textContent = text.locationAuto(best.store.number, name, distance);
       useNearest.hidden = true;
+      speak(text.voiceNearest(best.store.number, name, distance));
       return;
     }
 
@@ -1572,7 +1711,11 @@
       return;
     }
 
-    window.location.assign(deliveryUrl(number));
+    const storeName = currentName || number;
+    speakAndRun(
+      translations[language].voiceSavedOpening(storeName),
+      () => window.location.assign(deliveryUrl(number))
+    );
   }
 
   async function callStore() {
@@ -1629,8 +1772,12 @@
       return;
     }
 
-    window.location.assign(
-      DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX
+    const storeName = currentName || number;
+    const target = DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX;
+
+    speakAndRun(
+      translations[language].voiceOpening(storeName),
+      () => window.location.assign(target)
     );
   }
 
@@ -1690,6 +1837,20 @@
     currentName = currentStore ? cleanStoreName(currentStore.name) : "";
     search.value = currentNumber;
     void updateSelected();
+  });
+
+  voiceToggle.addEventListener("click", () => {
+    if (!speechSupported()) return;
+
+    voiceEnabled = !voiceEnabled;
+    localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
+    updateVoiceButton();
+
+    if (voiceEnabled) {
+      speak(translations[language].voiceEnabledMessage, { force: true });
+    } else {
+      window.speechSynthesis.cancel();
+    }
   });
 
   openButton.addEventListener("click", openDelivery);
@@ -1761,7 +1922,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=12", { cache: "no-store" })
+  fetch("stores.json?v=18", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
