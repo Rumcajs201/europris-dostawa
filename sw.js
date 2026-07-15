@@ -1,15 +1,15 @@
-const CACHE_NAME = "europris-app-v27-europris-icons-voice-off";
+const CACHE_NAME = "europris-app-v28-stable-speech";
 
 const STATIC_FILES = [
   "./",
   "./index.html",
   "./xlsx.full.min.js",
   "./rumcajs-logo.png",
-  "./manifest-v27.webmanifest",
+  "./manifest-v28.webmanifest",
   "./stores.json",
-  "./europris-app-icon-180-v27.png",
-  "./europris-app-icon-192-v27.png",
-  "./europris-app-icon-512-v27.png"
+  "./europris-app-icon-180-v28.png",
+  "./europris-app-icon-192-v28.png",
+  "./europris-app-icon-512-v28.png"
 ];
 
 self.addEventListener("install", event => {

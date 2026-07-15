@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Europris">
 
-  <link rel="manifest" href="manifest-v27.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v27.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v27.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v27.png">
+  <link rel="manifest" href="manifest-v28.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v28.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v28.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v28.png">
 
   <title>Europris</title>
 
@@ -946,10 +946,11 @@
   let currentName = "";
   let currentStore = null;
   let currentPrivateContact = null;
-  let voiceEnabled = false;
+  let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let lastNumberAnnounced = "";
-  let voiceSessionArmed = false;
-  let startupSpeechToken = 0;
+  let activeUtterance = null;
+  let speechRequestId = 0;
+  let startupAnnouncementDone = false;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1017,17 +1018,7 @@
     ) || null;
   }
 
-  function speak(message, options = {}) {
-    const { force = false, onDone = null } = options;
-
-    if ((!voiceEnabled && !force) || !speechSupported() || !message) {
-      if (typeof onDone === "function") onDone();
-      return;
-    }
-
-    armVoiceSession();
-    window.speechSynthesis.cancel();
-
+  function createUtterance(message, onDone = null) {
     const utterance = new SpeechSynthesisUtterance(String(message));
     utterance.lang = speechLanguage();
     utterance.rate = 0.96;
@@ -1041,18 +1032,67 @@
     const finish = () => {
       if (finished) return;
       finished = true;
+
+      if (activeUtterance === utterance) {
+        activeUtterance = null;
+      }
+
       if (typeof onDone === "function") onDone();
     };
 
     utterance.onend = finish;
     utterance.onerror = finish;
+    return { utterance, finish };
+  }
 
-    window.speechSynthesis.speak(utterance);
+  function speak(message, options = {}) {
+    const {
+      force = false,
+      onDone = null,
+      interrupt = true,
+      startup = false
+    } = options;
 
-    // Zabezpieczenie na wypadek, gdy system nie wywoła zdarzenia końca mowy.
-    if (typeof onDone === "function") {
-      window.setTimeout(finish, 2800);
+    if ((!voiceEnabled && !force) || !speechSupported() || !message) {
+      if (typeof onDone === "function") onDone();
+      return;
     }
+
+    const requestId = ++speechRequestId;
+    const synthesis = window.speechSynthesis;
+
+    const startSpeaking = () => {
+      if (requestId !== speechRequestId) return;
+
+      const { utterance, finish } = createUtterance(message, onDone);
+
+      // Trwała referencja zapobiega utracie obiektu wypowiedzi,
+      // zanim iOS rozpocznie faktyczne odtwarzanie.
+      activeUtterance = utterance;
+      synthesis.speak(activeUtterance);
+
+      if (typeof onDone === "function") {
+        window.setTimeout(finish, 4500);
+      }
+    };
+
+    // Pierwszego komunikatu GPS nie poprzedzamy cancel().
+    // Jest to czysta pierwsza wypowiedź po uruchomieniu PWA.
+    if (startup) {
+      window.setTimeout(startSpeaking, 180);
+      return;
+    }
+
+    if (interrupt && (synthesis.speaking || synthesis.pending || activeUtterance)) {
+      synthesis.cancel();
+      activeUtterance = null;
+
+      // Safari potrzebuje osobnego obrotu pętli zdarzeń po cancel().
+      window.setTimeout(startSpeaking, 90);
+      return;
+    }
+
+    startSpeaking();
   }
 
   function speakAndRun(message, action) {
@@ -1061,7 +1101,20 @@
       return;
     }
 
-    speak(message, { onDone: action });
+    speak(message, {
+      onDone: action,
+      interrupt: true
+    });
+  }
+
+  function speakStartup(message) {
+    if (startupAnnouncementDone || !voiceEnabled || !message) return;
+
+    startupAnnouncementDone = true;
+    speak(message, {
+      interrupt: false,
+      startup: true
+    });
   }
 
   function updateVoiceButton() {
@@ -1076,63 +1129,6 @@
     voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
     voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
   }
-
-  function armVoiceSession() {
-    if (!voiceEnabled || !speechSupported() || voiceSessionArmed) return;
-
-    // Dokładnie odtwarzamy zmianę stanu, która ręcznie przywraca głos,
-    // ale bez odtwarzania dodatkowego komunikatu.
-    voiceEnabled = false;
-    updateVoiceButton();
-    window.speechSynthesis.cancel();
-
-    voiceEnabled = true;
-    updateVoiceButton();
-    voiceSessionArmed = true;
-  }
-
-  function speakStartup(message) {
-    if (!voiceEnabled || !speechSupported() || !message) return;
-
-    const token = ++startupSpeechToken;
-    let attempts = 0;
-
-    const attempt = () => {
-      if (token !== startupSpeechToken) return;
-      attempts += 1;
-
-      armVoiceSession();
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(String(message));
-      utterance.lang = speechLanguage();
-      utterance.rate = 0.96;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      const selectedVoice = selectVoice(utterance.lang);
-      if (selectedVoice) utterance.voice = selectedVoice;
-
-      let started = false;
-      utterance.onstart = () => { started = true; };
-      utterance.onend = () => { started = true; };
-      utterance.onerror = () => {};
-
-      window.speechSynthesis.speak(utterance);
-
-      window.setTimeout(() => {
-        if (token !== startupSpeechToken || started) return;
-
-        if (attempts < 6) {
-          voiceSessionArmed = false;
-          attempt();
-        }
-      }, 500);
-    };
-
-    window.setTimeout(attempt, 250);
-  }
-
 
   function normalized(value) {
     return String(value)
@@ -2017,14 +2013,41 @@
     if (!speechSupported()) return;
 
     voiceEnabled = !voiceEnabled;
-    voiceSessionArmed = false;
-    startupSpeechToken += 1;
+    localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
+
+    speechRequestId += 1;
+    startupAnnouncementDone = false;
+
+    if (!voiceEnabled) {
+      window.speechSynthesis.cancel();
+      activeUtterance = null;
+    }
+
     updateVoiceButton();
 
     if (voiceEnabled) {
-      speak(translations[language].voiceEnabledMessage, { force: true });
-    } else {
-      window.speechSynthesis.cancel();
+      speak(translations[language].voiceEnabledMessage, {
+        force: true,
+        interrupt: false
+      });
+
+      // Po ręcznym włączeniu, jeżeli GPS już zna najbliższy sklep,
+      // natychmiast odtwórz również właściwy komunikat lokalizacyjny.
+      if (nearestStore && Number.isFinite(nearestDistanceMeters) && nearestWasAutoSelected) {
+        const name = cleanStoreName(nearestStore.name);
+        const distance = formatDistance(nearestDistanceMeters);
+
+        window.setTimeout(() => {
+          startupAnnouncementDone = false;
+          speakStartup(
+            translations[language].voiceNearest(
+              nearestStore.number,
+              name,
+              distance
+            )
+          );
+        }, 900);
+      }
     }
   });
 
@@ -2094,13 +2117,12 @@
   });
 
 
-  localStorage.removeItem(VOICE_KEY);
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=27", { cache: "no-store" })
+  fetch("stores.json?v=28", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -2135,12 +2157,6 @@
 
 
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      voiceSessionArmed = false;
-      startupSpeechToken += 1;
-    }
-  });
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
