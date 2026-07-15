@@ -1,14 +1,15 @@
-const CACHE_NAME = "europris-app-v19-voice-number-navigation";
+const CACHE_NAME = "europris-app-v27-europris-icons-voice-off";
 
 const STATIC_FILES = [
   "./",
   "./index.html",
   "./xlsx.full.min.js",
-  "./manifest.webmanifest",
+  "./rumcajs-logo.png",
+  "./manifest-v27.webmanifest",
   "./stores.json",
-  "./europris-icon-180.png",
-  "./europris-icon-192.png",
-  "./europris-icon-512.png"
+  "./europris-app-icon-180-v27.png",
+  "./europris-app-icon-192-v27.png",
+  "./europris-app-icon-512-v27.png"
 ];
 
 self.addEventListener("install", event => {
