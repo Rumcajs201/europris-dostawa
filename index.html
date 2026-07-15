@@ -247,6 +247,15 @@
       background: color-mix(in srgb, var(--green) 12%, transparent);
     }
 
+
+    /* Tylko trzy kafelki zależne od wyboru sklepu:
+       nieaktywne = czerwony napis, aktywne = dotychczasowy zielony. */
+    #navigate:disabled,
+    #call:disabled,
+    #callPrivate:disabled {
+      color: var(--danger);
+    }
+
     .error {
       min-height: 23px;
       margin-top: 8px;
@@ -1752,7 +1761,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=11", { cache: "no-store" })
+  fetch("stores.json?v=12", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();

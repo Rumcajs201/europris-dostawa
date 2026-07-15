@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v15-excel-daily-history";
+const CACHE_NAME = "europris-app-v16-disabled-red-text";
 
 const STATIC_FILES = [
   "./",
