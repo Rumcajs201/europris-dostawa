@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Europris">
 
-  <link rel="manifest" href="manifest-v28.webmanifest">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v28.png">
   <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v28.png">
   <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v28.png">
@@ -144,27 +144,6 @@
       background: var(--green);
       color: #fff;
       border-color: var(--green);
-    }
-
-
-    .voice-toggle {
-      width: 100%;
-      min-height: 38px;
-      margin: 0;
-      padding: 0 8px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: transparent;
-      color: var(--text);
-      font-size: .78rem;
-      font-weight: 850;
-      line-height: 1.15;
-    }
-
-    .voice-toggle.enabled {
-      border-color: var(--green);
-      color: var(--green);
-      background: color-mix(in srgb, var(--green) 7%, transparent);
     }
 
     h1 {
@@ -631,8 +610,6 @@
           <button class="language" data-lang="no">NO</button>
           <button class="language" data-lang="en">EN</button>
         </div>
-
-        <button id="voiceToggle" class="voice-toggle" type="button"></button>
       </div>
     </div>
 
@@ -748,7 +725,6 @@
   const DB_STORE = "deliveries";
   const DB_CONTACTS = "privateContacts";
   const LANGUAGE_KEY = "europris_language_v6";
-  const VOICE_KEY = "europris_voice_enabled_v1";
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
 
@@ -770,16 +746,6 @@
       privateSaved: "Prywatny kontakt został zapisany.",
       privateDeleted: "Prywatny kontakt został usunięty.",
       privateInvalid: "Wpisz prawidłowy numer telefonu.",
-      voiceOn: "🔊 Komunikaty głosowe: WŁ.",
-      voiceOff: "🔇 Komunikaty głosowe: WYŁ.",
-      voiceUnavailable: "Syntezator mowy nie jest dostępny na tym urządzeniu.",
-      voiceEnabledMessage: "Komunikaty głosowe zostały włączone.",
-      voiceLanguageSelected: "Język polski aktywny.",
-      voiceStoreSelected: (number, name) => `Wybrano sklep Europris ${name}, numer ${number}.`,
-      voiceNearest: (number, name, distance) => `W odległości ${distance} znajduje się sklep Europris ${name}, numer ${number}.`,
-      voiceOpening: name => `Otwieram stronę dostawy dla sklepu Europris ${name}.`,
-      voiceNavigation: name => `Uruchamiam nawigację do sklepu Europris ${name}.`,
-      voiceSavedOpening: name => `Dostawa do sklepu Europris ${name} została zapisana w historii. Otwieram stronę dostawy.`,
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
       historyPrint: "Drukuj zestawienie miesiąca",
@@ -831,16 +797,6 @@
       privateSaved: "Privat kontakt er lagret.",
       privateDeleted: "Privat kontakt er slettet.",
       privateInvalid: "Skriv inn et gyldig telefonnummer.",
-      voiceOn: "🔊 Talemeldinger: PÅ",
-      voiceOff: "🔇 Talemeldinger: AV",
-      voiceUnavailable: "Talesyntese er ikke tilgjengelig på denne enheten.",
-      voiceEnabledMessage: "Talemeldinger er slått på.",
-      voiceLanguageSelected: "Norsk språk aktivt.",
-      voiceStoreSelected: (number, name) => `Europris ${name}, butikk nummer ${number}, er valgt.`,
-      voiceNearest: (number, name, distance) => `Europris ${name}, butikk nummer ${number}, ligger ${distance} unna.`,
-      voiceOpening: name => `Åpner leveringssiden for Europris ${name}.`,
-      voiceNavigation: name => `Starter navigasjon til Europris ${name}.`,
-      voiceSavedOpening: name => `Leveringen til Europris ${name} er lagret i historikken. Åpner leveringssiden.`,
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
       historyPrint: "Skriv ut månedsoversikt",
@@ -892,16 +848,6 @@
       privateSaved: "Private contact saved.",
       privateDeleted: "Private contact deleted.",
       privateInvalid: "Enter a valid phone number.",
-      voiceOn: "🔊 Voice messages: ON",
-      voiceOff: "🔇 Voice messages: OFF",
-      voiceUnavailable: "Speech synthesis is not available on this device.",
-      voiceEnabledMessage: "Voice messages have been enabled.",
-      voiceLanguageSelected: "English language active.",
-      voiceStoreSelected: (number, name) => `Europris ${name}, store number ${number}, has been selected.`,
-      voiceNearest: (number, name, distance) => `Europris ${name}, store number ${number}, is ${distance} away.`,
-      voiceOpening: name => `Opening the delivery page for Europris ${name}.`,
-      voiceNavigation: name => `Starting navigation to Europris ${name}.`,
-      voiceSavedOpening: name => `The delivery to Europris ${name} has been saved in the history. Opening the delivery page.`,
       history: "Delivery history",
       historyTitle: "Delivery history",
       historyPrint: "Print monthly report",
@@ -946,17 +892,10 @@
   let currentName = "";
   let currentStore = null;
   let currentPrivateContact = null;
-  let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
-  let lastNumberAnnounced = "";
-  let activeUtterance = null;
-  let speechRequestId = 0;
-  let startupAnnouncementDone = false;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
   let locationRequestedThisLaunch = false;
-
-  const voiceToggle = document.getElementById("voiceToggle");
   const search = document.getElementById("search");
   const results = document.getElementById("results");
   const selectedNumber = document.getElementById("selectedNumber");
@@ -994,141 +933,6 @@
   const retryLocation = document.getElementById("retryLocation");
   const footer = document.getElementById("footer");
 
-
-  function speechSupported() {
-    return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-  }
-
-  function speechLanguage() {
-    if (language === "no") return "nb-NO";
-    if (language === "en") return "en-US";
-    return "pl-PL";
-  }
-
-  function selectVoice(langCode) {
-    const voices = window.speechSynthesis?.getVoices?.() || [];
-    const exact = voices.find(voice =>
-      String(voice.lang || "").toLowerCase() === langCode.toLowerCase()
-    );
-    if (exact) return exact;
-
-    const prefix = langCode.slice(0, 2).toLowerCase();
-    return voices.find(voice =>
-      String(voice.lang || "").toLowerCase().startsWith(prefix)
-    ) || null;
-  }
-
-  function createUtterance(message, onDone = null) {
-    const utterance = new SpeechSynthesisUtterance(String(message));
-    utterance.lang = speechLanguage();
-    utterance.rate = 0.96;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    const selectedVoice = selectVoice(utterance.lang);
-    if (selectedVoice) utterance.voice = selectedVoice;
-
-    let finished = false;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-
-      if (activeUtterance === utterance) {
-        activeUtterance = null;
-      }
-
-      if (typeof onDone === "function") onDone();
-    };
-
-    utterance.onend = finish;
-    utterance.onerror = finish;
-    return { utterance, finish };
-  }
-
-  function speak(message, options = {}) {
-    const {
-      force = false,
-      onDone = null,
-      interrupt = true,
-      startup = false
-    } = options;
-
-    if ((!voiceEnabled && !force) || !speechSupported() || !message) {
-      if (typeof onDone === "function") onDone();
-      return;
-    }
-
-    const requestId = ++speechRequestId;
-    const synthesis = window.speechSynthesis;
-
-    const startSpeaking = () => {
-      if (requestId !== speechRequestId) return;
-
-      const { utterance, finish } = createUtterance(message, onDone);
-
-      // Trwała referencja zapobiega utracie obiektu wypowiedzi,
-      // zanim iOS rozpocznie faktyczne odtwarzanie.
-      activeUtterance = utterance;
-      synthesis.speak(activeUtterance);
-
-      if (typeof onDone === "function") {
-        window.setTimeout(finish, 4500);
-      }
-    };
-
-    // Pierwszego komunikatu GPS nie poprzedzamy cancel().
-    // Jest to czysta pierwsza wypowiedź po uruchomieniu PWA.
-    if (startup) {
-      window.setTimeout(startSpeaking, 180);
-      return;
-    }
-
-    if (interrupt && (synthesis.speaking || synthesis.pending || activeUtterance)) {
-      synthesis.cancel();
-      activeUtterance = null;
-
-      // Safari potrzebuje osobnego obrotu pętli zdarzeń po cancel().
-      window.setTimeout(startSpeaking, 90);
-      return;
-    }
-
-    startSpeaking();
-  }
-
-  function speakAndRun(message, action) {
-    if (!voiceEnabled || !speechSupported()) {
-      action();
-      return;
-    }
-
-    speak(message, {
-      onDone: action,
-      interrupt: true
-    });
-  }
-
-  function speakStartup(message) {
-    if (startupAnnouncementDone || !voiceEnabled || !message) return;
-
-    startupAnnouncementDone = true;
-    speak(message, {
-      interrupt: false,
-      startup: true
-    });
-  }
-
-  function updateVoiceButton() {
-    const text = translations[language];
-    const supported = speechSupported();
-
-    voiceToggle.disabled = !supported;
-    voiceToggle.textContent = supported
-      ? (voiceEnabled ? text.voiceOn : text.voiceOff)
-      : text.voiceUnavailable;
-
-    voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
-    voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
-  }
 
   function normalized(value) {
     return String(value)
@@ -1217,7 +1021,6 @@
     retryLocation.textContent = text.locationRetry;
     useNearest.textContent = text.locationUse;
     footer.textContent = text.footer;
-    updateVoiceButton();
 
     document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);
@@ -1245,20 +1048,13 @@
     await syncCurrentStore();
   }
 
-  async function selectStore(store, announce = true) {
+  async function selectStore(store) {
     currentNumber = String(store.number);
     currentName = cleanStoreName(store.name);
     currentStore = store;
     search.value = currentName || currentNumber;
     results.replaceChildren();
     await updateSelected();
-
-    if (announce) {
-      speak(translations[language].voiceStoreSelected(
-        store.number,
-        cleanStoreName(store.name)
-      ));
-    }
   }
 
   async function clearSelection() {
@@ -1308,31 +1104,13 @@
       currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       results.replaceChildren();
       await updateSelected();
-      announceNumberSelectedStore();
       return;
     }
 
-    lastNumberAnnounced = "";
     await clearSelection();
     renderSearchResults(value);
   }
 
-
-  function announceNumberSelectedStore() {
-    if (!currentStore) {
-      lastNumberAnnounced = "";
-      return;
-    }
-
-    const storeNumber = String(currentStore.number);
-    if (lastNumberAnnounced === storeNumber) return;
-
-    lastNumberAnnounced = storeNumber;
-    speak(translations[language].voiceStoreSelected(
-      currentStore.number,
-      cleanStoreName(currentStore.name)
-    ));
-  }
 
   function toRadians(value) {
     return value * Math.PI / 180;
@@ -1382,11 +1160,10 @@
     nearestWasAutoSelected = best.distance <= 1000;
 
     if (nearestWasAutoSelected) {
-      void selectStore(best.store, false);
+      void selectStore(best.store);
       locationMessage.textContent = "";
       locationResult.textContent = text.locationAuto(best.store.number, name, distance);
       useNearest.hidden = true;
-      speakStartup(text.voiceNearest(best.store.number, name, distance));
       return;
     }
 
@@ -1874,12 +1651,7 @@
       error.textContent = translations[language].historyImportError;
       return;
     }
-
-    const storeName = currentName || number;
-    speakAndRun(
-      translations[language].voiceSavedOpening(storeName),
-      () => window.location.assign(deliveryUrl(number))
-    );
+    window.location.assign(deliveryUrl(number));
   }
 
   async function callStore() {
@@ -1936,12 +1708,8 @@
       return;
     }
 
-    const storeName = currentName || number;
-    const target = DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX;
-
-    speakAndRun(
-      translations[language].voiceOpening(storeName),
-      () => window.location.assign(target)
+    window.location.assign(
+      DELIVERY_BASE + encodeURIComponent(number) + DELIVERY_SUFFIX
     );
   }
 
@@ -1957,12 +1725,8 @@
     const longitude = Number(currentStore.longitude);
     const destination = encodeURIComponent(`${latitude},${longitude}`);
     const url = `${GOOGLE_MAPS_DIRECTIONS}&destination=${destination}&travelmode=driving`;
-    const storeName = cleanStoreName(currentStore.name);
 
-    speakAndRun(
-      translations[language].voiceNavigation(storeName),
-      () => window.location.assign(url)
-    );
+    window.location.assign(url);
   }
 
   document.querySelectorAll("[data-digit]").forEach(button => {
@@ -1981,13 +1745,11 @@
       search.value = currentNumber;
       results.replaceChildren();
       void updateSelected().then(() => {
-        announceNumberSelectedStore();
       });
     });
   });
 
   document.getElementById("clear").addEventListener("click", () => {
-    lastNumberAnnounced = "";
     search.value = "";
     results.replaceChildren();
     void clearSelection();
@@ -2002,53 +1764,10 @@
     }
 
     currentNumber = currentNumber.slice(0, -1);
-    lastNumberAnnounced = "";
     currentStore = findStoreByNumber(currentNumber);
     currentName = currentStore ? cleanStoreName(currentStore.name) : "";
     search.value = currentNumber;
     void updateSelected();
-  });
-
-  voiceToggle.addEventListener("click", () => {
-    if (!speechSupported()) return;
-
-    voiceEnabled = !voiceEnabled;
-    localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
-
-    speechRequestId += 1;
-    startupAnnouncementDone = false;
-
-    if (!voiceEnabled) {
-      window.speechSynthesis.cancel();
-      activeUtterance = null;
-    }
-
-    updateVoiceButton();
-
-    if (voiceEnabled) {
-      speak(translations[language].voiceEnabledMessage, {
-        force: true,
-        interrupt: false
-      });
-
-      // Po ręcznym włączeniu, jeżeli GPS już zna najbliższy sklep,
-      // natychmiast odtwórz również właściwy komunikat lokalizacyjny.
-      if (nearestStore && Number.isFinite(nearestDistanceMeters) && nearestWasAutoSelected) {
-        const name = cleanStoreName(nearestStore.name);
-        const distance = formatDistance(nearestDistanceMeters);
-
-        window.setTimeout(() => {
-          startupAnnouncementDone = false;
-          speakStartup(
-            translations[language].voiceNearest(
-              nearestStore.number,
-              name,
-              distance
-            )
-          );
-        }, 900);
-      }
-    }
   });
 
   openButton.addEventListener("click", openDelivery);
@@ -2112,7 +1831,6 @@
       language = button.dataset.lang;
       localStorage.setItem(LANGUAGE_KEY, language);
       applyLanguage();
-      speak(translations[language].voiceLanguageSelected);
     });
   });
 
@@ -2159,8 +1877,24 @@
 
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    let refreshing = false;
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    window.addEventListener("load", async () => {
+      try {
+        const registration = await navigator.serviceWorker.register("sw.js", {
+          updateViaCache: "none"
+        });
+
+        await registration.update();
+      } catch {
+        // Aplikacja działa dalej online nawet bez Service Workera.
+      }
     });
   }
 })();

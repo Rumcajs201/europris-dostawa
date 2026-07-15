@@ -1,11 +1,11 @@
-const CACHE_NAME = "europris-app-v28-stable-speech";
+const CACHE_NAME = "europris-app-stable-v30-no-voice";
 
 const STATIC_FILES = [
   "./",
   "./index.html",
   "./xlsx.full.min.js",
   "./rumcajs-logo.png",
-  "./manifest-v28.webmanifest",
+  "./manifest.webmanifest",
   "./stores.json",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
@@ -34,6 +34,30 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+
+  const requestUrl = new URL(event.request.url);
+  const isNavigation = event.request.mode === "navigate";
+  const isCoreFile =
+    requestUrl.pathname.endsWith("/index.html") ||
+    requestUrl.pathname.endsWith("/manifest.webmanifest") ||
+    requestUrl.pathname.endsWith("/stores.json");
+
+  if (isNavigation || isCoreFile) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" })
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then(cached =>
+            cached || caches.match("./index.html")
+          )
+        )
+    );
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
