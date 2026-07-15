@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Europris">
 
-  <link rel="manifest" href="manifest-v26.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v26.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v26.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v26.png">
+  <link rel="manifest" href="manifest-v27.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="europris-app-icon-180-v27.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="europris-app-icon-192-v27.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="europris-app-icon-512-v27.png">
 
   <title>Europris</title>
 
@@ -946,7 +946,7 @@
   let currentName = "";
   let currentStore = null;
   let currentPrivateContact = null;
-  let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
+  let voiceEnabled = false;
   let lastNumberAnnounced = "";
   let voiceSessionArmed = false;
   let startupSpeechToken = 0;
@@ -2019,7 +2019,6 @@
     voiceEnabled = !voiceEnabled;
     voiceSessionArmed = false;
     startupSpeechToken += 1;
-    localStorage.setItem(VOICE_KEY, voiceEnabled ? "true" : "false");
     updateVoiceButton();
 
     if (voiceEnabled) {
@@ -2095,12 +2094,13 @@
   });
 
 
+  localStorage.removeItem(VOICE_KEY);
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=26", { cache: "no-store" })
+  fetch("stores.json?v=27", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
