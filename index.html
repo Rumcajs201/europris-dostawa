@@ -70,11 +70,68 @@
       box-shadow: 0 10px 28px rgba(0, 0, 0, .10);
     }
 
-    .languages {
-      display: flex;
-      justify-content: flex-end;
-      gap: 7px;
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(112px, 1fr) auto;
+      gap: 10px;
+      align-items: start;
       margin-bottom: 12px;
+    }
+
+    .brand-mark {
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 6px 8px 0;
+      overflow: hidden;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--green);
+      border-radius: 13px;
+      color: var(--green);
+      font-size: 1.35rem;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--green) 10%, transparent);
+    }
+
+    .brand-copy {
+      min-width: 0;
+      line-height: 1.05;
+    }
+
+    .brand-name {
+      color: var(--green);
+      font-weight: 950;
+      letter-spacing: .05em;
+      font-size: .92rem;
+    }
+
+    .brand-tagline {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .topbar-controls {
+      width: 158px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .languages {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin: 0;
     }
 
     .language {
@@ -97,13 +154,16 @@
 
     .voice-toggle {
       width: 100%;
-      min-height: 42px;
-      margin: -3px 0 12px;
+      min-height: 38px;
+      margin: 0;
+      padding: 0 8px;
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 10px;
       background: transparent;
       color: var(--text);
-      font-weight: 800;
+      font-size: .78rem;
+      font-weight: 850;
+      line-height: 1.15;
     }
 
     .voice-toggle.enabled {
@@ -511,6 +571,21 @@
       padding: 14px 6px;
     }
 
+
+    @media (max-width: 360px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-mark {
+        min-height: auto;
+      }
+
+      .topbar-controls {
+        width: 100%;
+      }
+    }
+
     @media print {
       body { background: #fff; color: #000; padding: 0; }
 
@@ -546,13 +621,25 @@
 <body>
 <main>
   <section class="card">
-    <div class="languages">
-      <button class="language" data-lang="pl">PL</button>
-      <button class="language" data-lang="no">NO</button>
-      <button class="language" data-lang="en">EN</button>
-    </div>
+    <div class="topbar">
+      <div class="brand-mark" aria-label="Created by Rumcajs and AI">
+        <div class="brand-icon">R</div>
+        <div class="brand-copy">
+          <div class="brand-name">RUMCAJS</div>
+          <div class="brand-tagline">Created with AI</div>
+        </div>
+      </div>
 
-    <button id="voiceToggle" class="voice-toggle" type="button"></button>
+      <div class="topbar-controls">
+        <div class="languages">
+          <button class="language" data-lang="pl">PL</button>
+          <button class="language" data-lang="no">NO</button>
+          <button class="language" data-lang="en">EN</button>
+        </div>
+
+        <button id="voiceToggle" class="voice-toggle" type="button"></button>
+      </div>
+    </div>
 
     <h1 id="title"></h1>
     <p id="description" class="description"></p>
@@ -939,6 +1026,7 @@
     }
 
     window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
 
     const utterance = new SpeechSynthesisUtterance(String(message));
     utterance.lang = speechLanguage();
@@ -987,6 +1075,19 @@
 
     voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
     voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
+  }
+
+  function restoreSpeechEngine() {
+    if (!speechSupported()) return;
+
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch {
+      // Niektóre przeglądarki mogą chwilowo blokować silnik podczas przełączania aplikacji.
+    }
+
+    updateVoiceButton();
   }
 
   function normalized(value) {
@@ -1951,7 +2052,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=19", { cache: "no-store" })
+  fetch("stores.json?v=20", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -1982,6 +2083,17 @@
       status.textContent = translations[language].loadError;
       locationMessage.textContent = translations[language].locationNoCoordinates;
     });
+
+  window.addEventListener("pageshow", restoreSpeechEngine);
+  window.addEventListener("focus", restoreSpeechEngine);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) restoreSpeechEngine();
+  });
+
+  if (speechSupported()) {
+    window.speechSynthesis.addEventListener?.("voiceschanged", updateVoiceButton);
+  }
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

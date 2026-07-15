@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v19-voice-number-navigation";
+const CACHE_NAME = "europris-app-v20-speech-return-topbar";
 
 const STATIC_FILES = [
   "./",
