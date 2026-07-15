@@ -695,7 +695,8 @@
       voiceStoreSelected: (number, name) => `Wybrano sklep Europris ${name}, numer ${number}.`,
       voiceNearest: (number, name, distance) => `W odległości ${distance} znajduje się sklep Europris ${name}, numer ${number}.`,
       voiceOpening: name => `Otwieram stronę dostawy dla sklepu Europris ${name}.`,
-      voiceSavedOpening: name => `Dostawa do sklepu Europris ${name} została zapisana. Otwieram stronę dostawy.`,
+      voiceNavigation: name => `Uruchamiam nawigację do sklepu Europris ${name}.`,
+      voiceSavedOpening: name => `Dostawa do sklepu Europris ${name} została zapisana w historii. Otwieram stronę dostawy.`,
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
       historyPrint: "Drukuj zestawienie miesiąca",
@@ -754,7 +755,8 @@
       voiceStoreSelected: (number, name) => `Europris ${name}, butikk nummer ${number}, er valgt.`,
       voiceNearest: (number, name, distance) => `Europris ${name}, butikk nummer ${number}, ligger ${distance} unna.`,
       voiceOpening: name => `Åpner leveringssiden for Europris ${name}.`,
-      voiceSavedOpening: name => `Leveringen til Europris ${name} er lagret. Åpner leveringssiden.`,
+      voiceNavigation: name => `Starter navigasjon til Europris ${name}.`,
+      voiceSavedOpening: name => `Leveringen til Europris ${name} er lagret i historikken. Åpner leveringssiden.`,
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
       historyPrint: "Skriv ut månedsoversikt",
@@ -813,7 +815,8 @@
       voiceStoreSelected: (number, name) => `Europris ${name}, store number ${number}, has been selected.`,
       voiceNearest: (number, name, distance) => `Europris ${name}, store number ${number}, is ${distance} away.`,
       voiceOpening: name => `Opening the delivery page for Europris ${name}.`,
-      voiceSavedOpening: name => `The delivery to Europris ${name} has been saved. Opening the delivery page.`,
+      voiceNavigation: name => `Starting navigation to Europris ${name}.`,
+      voiceSavedOpening: name => `The delivery to Europris ${name} has been saved in the history. Opening the delivery page.`,
       history: "Delivery history",
       historyTitle: "Delivery history",
       historyPrint: "Print monthly report",
@@ -859,6 +862,7 @@
   let currentStore = null;
   let currentPrivateContact = null;
   let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
+  let lastNumberAnnounced = "";
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1163,11 +1167,30 @@
       currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       results.replaceChildren();
       await updateSelected();
+      announceNumberSelectedStore();
       return;
     }
 
+    lastNumberAnnounced = "";
     await clearSelection();
     renderSearchResults(value);
+  }
+
+
+  function announceNumberSelectedStore() {
+    if (!currentStore) {
+      lastNumberAnnounced = "";
+      return;
+    }
+
+    const storeNumber = String(currentStore.number);
+    if (lastNumberAnnounced === storeNumber) return;
+
+    lastNumberAnnounced = storeNumber;
+    speak(translations[language].voiceStoreSelected(
+      currentStore.number,
+      cleanStoreName(currentStore.name)
+    ));
   }
 
   function toRadians(value) {
@@ -1781,8 +1804,8 @@
     );
   }
 
-  function openNavigation() {
-    syncCurrentStore();
+  async function openNavigation() {
+    await syncCurrentStore();
 
     if (!hasValidCoordinates(currentStore)) {
       error.textContent = translations[language].navigationError;
@@ -1793,10 +1816,12 @@
     const longitude = Number(currentStore.longitude);
     const destination = encodeURIComponent(`${latitude},${longitude}`);
     const url = `${GOOGLE_MAPS_DIRECTIONS}&destination=${destination}&travelmode=driving`;
+    const storeName = cleanStoreName(currentStore.name);
 
-    // _blank zachowuje otwartą aplikację PWA po powrocie z Google Maps.
-    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
-    if (!newWindow) window.location.assign(url);
+    speakAndRun(
+      translations[language].voiceNavigation(storeName),
+      () => window.location.assign(url)
+    );
   }
 
   document.querySelectorAll("[data-digit]").forEach(button => {
@@ -1814,11 +1839,14 @@
       currentName = currentStore ? cleanStoreName(currentStore.name) : "";
       search.value = currentNumber;
       results.replaceChildren();
-      void updateSelected();
+      void updateSelected().then(() => {
+        announceNumberSelectedStore();
+      });
     });
   });
 
   document.getElementById("clear").addEventListener("click", () => {
+    lastNumberAnnounced = "";
     search.value = "";
     results.replaceChildren();
     void clearSelection();
@@ -1833,6 +1861,7 @@
     }
 
     currentNumber = currentNumber.slice(0, -1);
+    lastNumberAnnounced = "";
     currentStore = findStoreByNumber(currentNumber);
     currentName = currentStore ? cleanStoreName(currentStore.name) : "";
     search.value = currentNumber;
@@ -1922,7 +1951,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=18", { cache: "no-store" })
+  fetch("stores.json?v=19", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
