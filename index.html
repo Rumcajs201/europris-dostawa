@@ -779,7 +779,7 @@
       voiceOff: "🔇 Komunikaty głosowe: WYŁ.",
       voiceUnavailable: "Syntezator mowy nie jest dostępny na tym urządzeniu.",
       voiceEnabledMessage: "Komunikaty głosowe zostały włączone.",
-      voiceLanguageSelected: "Włączono obsługę języka polskiego.",
+      voiceLanguageSelected: "Język polski aktywny.",
       voiceStoreSelected: (number, name) => `Wybrano sklep Europris ${name}, numer ${number}.`,
       voiceNearest: (number, name, distance) => `W odległości ${distance} znajduje się sklep Europris ${name}, numer ${number}.`,
       voiceOpening: name => `Otwieram stronę dostawy dla sklepu Europris ${name}.`,
@@ -840,7 +840,7 @@
       voiceOff: "🔇 Talemeldinger: AV",
       voiceUnavailable: "Talesyntese er ikke tilgjengelig på denne enheten.",
       voiceEnabledMessage: "Talemeldinger er slått på.",
-      voiceLanguageSelected: "Norsk språk er aktivert.",
+      voiceLanguageSelected: "Norsk språk aktivt.",
       voiceStoreSelected: (number, name) => `Europris ${name}, butikk nummer ${number}, er valgt.`,
       voiceNearest: (number, name, distance) => `Europris ${name}, butikk nummer ${number}, ligger ${distance} unna.`,
       voiceOpening: name => `Åpner leveringssiden for Europris ${name}.`,
@@ -901,7 +901,7 @@
       voiceOff: "🔇 Voice messages: OFF",
       voiceUnavailable: "Speech synthesis is not available on this device.",
       voiceEnabledMessage: "Voice messages have been enabled.",
-      voiceLanguageSelected: "English language support has been enabled.",
+      voiceLanguageSelected: "English language active.",
       voiceStoreSelected: (number, name) => `Europris ${name}, store number ${number}, has been selected.`,
       voiceNearest: (number, name, distance) => `Europris ${name}, store number ${number}, is ${distance} away.`,
       voiceOpening: name => `Opening the delivery page for Europris ${name}.`,
@@ -953,9 +953,6 @@
   let currentPrivateContact = null;
   let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let lastNumberAnnounced = "";
-  let pendingSpeech = null;
-  let speechVoicesReady = false;
-  let speechRetryTimer = null;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1010,13 +1007,8 @@
     return "pl-PL";
   }
 
-  function availableVoices() {
-    if (!speechSupported()) return [];
-    return window.speechSynthesis.getVoices() || [];
-  }
-
   function selectVoice(langCode) {
-    const voices = availableVoices();
+    const voices = window.speechSynthesis?.getVoices?.() || [];
     const exact = voices.find(voice =>
       String(voice.lang || "").toLowerCase() === langCode.toLowerCase()
     );
@@ -1028,40 +1020,7 @@
     ) || null;
   }
 
-  function markVoicesReady() {
-    speechVoicesReady = availableVoices().length > 0;
-
-    if (speechVoicesReady && pendingSpeech) {
-      const queued = pendingSpeech;
-      pendingSpeech = null;
-      window.clearTimeout(speechRetryTimer);
-      speechRetryTimer = null;
-      speak(queued.message, queued.options);
-    }
-  }
-
-  function scheduleSpeechRetry() {
-    window.clearTimeout(speechRetryTimer);
-
-    let attempts = 0;
-    const retry = () => {
-      attempts += 1;
-      markVoicesReady();
-
-      if (!speechVoicesReady && pendingSpeech && attempts < 20) {
-        speechRetryTimer = window.setTimeout(retry, 150);
-      } else if (!speechVoicesReady && pendingSpeech) {
-        // Po około 3 sekundach próbujemy mimo braku listy głosów.
-        const queued = pendingSpeech;
-        pendingSpeech = null;
-        speakNow(queued.message, queued.options);
-      }
-    };
-
-    speechRetryTimer = window.setTimeout(retry, 50);
-  }
-
-  function speakNow(message, options = {}) {
+  function speak(message, options = {}) {
     const { force = false, onDone = null } = options;
 
     if ((!voiceEnabled && !force) || !speechSupported() || !message) {
@@ -1070,7 +1029,6 @@
     }
 
     window.speechSynthesis.cancel();
-    window.speechSynthesis.resume();
 
     const utterance = new SpeechSynthesisUtterance(String(message));
     utterance.lang = speechLanguage();
@@ -1093,27 +1051,10 @@
 
     window.speechSynthesis.speak(utterance);
 
+    // Zabezpieczenie na wypadek, gdy system nie wywoła zdarzenia końca mowy.
     if (typeof onDone === "function") {
-      window.setTimeout(finish, 3200);
+      window.setTimeout(finish, 2800);
     }
-  }
-
-  function speak(message, options = {}) {
-    const { force = false, onDone = null } = options;
-
-    if ((!voiceEnabled && !force) || !speechSupported() || !message) {
-      if (typeof onDone === "function") onDone();
-      return;
-    }
-
-    if (!speechVoicesReady && availableVoices().length === 0) {
-      pendingSpeech = { message: String(message), options };
-      scheduleSpeechRetry();
-      return;
-    }
-
-    speechVoicesReady = true;
-    speakNow(message, options);
   }
 
   function speakAndRun(message, action) {
@@ -1137,7 +1078,6 @@
     voiceToggle.classList.toggle("enabled", supported && voiceEnabled);
     voiceToggle.setAttribute("aria-pressed", voiceEnabled ? "true" : "false");
   }
-
 
   function normalized(value) {
     return String(value)
@@ -2026,7 +1966,6 @@
     updateVoiceButton();
 
     if (voiceEnabled) {
-      speechVoicesReady = availableVoices().length > 0;
       speak(translations[language].voiceEnabledMessage, { force: true });
     } else {
       window.speechSynthesis.cancel();
@@ -2098,24 +2037,13 @@
     });
   });
 
-  if (speechSupported()) {
-    markVoicesReady();
-
-    if (!speechVoicesReady) {
-      scheduleSpeechRetry();
-    }
-
-    if ("onvoiceschanged" in window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = markVoicesReady;
-    }
-  }
 
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=23", { cache: "no-store" })
+  fetch("stores.json?v=24", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();

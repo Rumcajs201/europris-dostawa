@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v23-speech-voices-ready";
+const CACHE_NAME = "europris-app-v24-exact-v18-speech-engine";
 
 const STATIC_FILES = [
   "./",
