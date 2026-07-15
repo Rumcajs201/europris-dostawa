@@ -950,6 +950,7 @@
   let currentPrivateContact = null;
   let voiceEnabled = localStorage.getItem(VOICE_KEY) === "true";
   let lastNumberAnnounced = "";
+  let speechNeedsGestureReset = false;
   let nearestStore = null;
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
@@ -1080,14 +1081,34 @@
   function restoreSpeechEngine() {
     if (!speechSupported()) return;
 
+    // Nie używamy tutaj cancel(), ponieważ zdarzenia pageshow/focus
+    // mogą wystąpić również podczas uruchamiania aplikacji i skasować
+    // komunikat o najbliższym sklepie.
+    speechNeedsGestureReset = true;
+    updateVoiceButton();
+  }
+
+  function unlockSpeechFromUserGesture() {
+    if (!speechSupported() || !voiceEnabled || !speechNeedsGestureReset) return;
+
+    speechNeedsGestureReset = false;
+
     try {
       window.speechSynthesis.cancel();
       window.speechSynthesis.resume();
-    } catch {
-      // Niektóre przeglądarki mogą chwilowo blokować silnik podczas przełączania aplikacji.
-    }
 
-    updateVoiceButton();
+      // Krótka, niesłyszalna wypowiedź uruchamiana bezpośrednio
+      // z gestu użytkownika odblokowuje silnik mowy po powrocie
+      // z Google Maps na iOS/Safari.
+      const primer = new SpeechSynthesisUtterance(".");
+      primer.lang = speechLanguage();
+      primer.volume = 0;
+      primer.rate = 2;
+      window.speechSynthesis.speak(primer);
+    } catch {
+      // Przy kolejnym dotknięciu zostanie wykonana następna próba.
+      speechNeedsGestureReset = true;
+    }
   }
 
   function normalized(value) {
@@ -1977,6 +1998,7 @@
     updateVoiceButton();
 
     if (voiceEnabled) {
+      speechNeedsGestureReset = false;
       speak(translations[language].voiceEnabledMessage, { force: true });
     } else {
       window.speechSynthesis.cancel();
@@ -2052,7 +2074,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=20", { cache: "no-store" })
+  fetch("stores.json?v=21", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -2084,11 +2106,25 @@
       locationMessage.textContent = translations[language].locationNoCoordinates;
     });
 
-  window.addEventListener("pageshow", restoreSpeechEngine);
-  window.addEventListener("focus", restoreSpeechEngine);
+  window.addEventListener("pageshow", event => {
+    if (event.persisted) restoreSpeechEngine();
+  });
 
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) restoreSpeechEngine();
+    if (document.hidden) {
+      speechNeedsGestureReset = true;
+      return;
+    }
+
+    updateVoiceButton();
+  });
+
+  // Capture powoduje wykonanie odblokowania przed właściwą obsługą
+  // klikniętego przycisku (np. Google Maps lub strony dostawy).
+  document.addEventListener("pointerdown", unlockSpeechFromUserGesture, true);
+  document.addEventListener("touchstart", unlockSpeechFromUserGesture, {
+    capture: true,
+    passive: true
   });
 
   if (speechSupported()) {
