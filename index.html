@@ -1146,6 +1146,16 @@
     }
   }
 
+  function persistDailyAssignment() {
+    saveTourNumber();
+    saveTrailerNumber();
+  }
+
+  function restoreDailyAssignment() {
+    loadTourNumber();
+    loadTrailerNumber();
+  }
+
   function normalized(value) {
     return String(value)
       .toLocaleLowerCase("nb-NO")
@@ -1793,104 +1803,111 @@
     URL.revokeObjectURL(url);
   }
 
+  function escapeXml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
   async function exportExcel() {
-    if (typeof XLSX === "undefined") {
-      error.textContent = translations[language].historyImportError;
-      return;
-    }
+    persistDailyAssignment();
 
     const month = historyMonth.value;
     const entries = (await getAllDeliveries())
       .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
       .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
 
-    const rows = entries.map(item => {
-      const date = new Date(item.createdAt);
-
-      return {
-        "Data": date.toLocaleDateString("pl-PL"),
-        "Godzina": date.toLocaleTimeString("pl-PL", {
-          hour: "2-digit",
-          minute: "2-digit"
-        }),
-        "Kurs": String(item.tourNumber || ""),
-        "Naczepa": String(item.trailerNumber || ""),
-        "Numer sklepu": String(item.storeNumber || ""),
-        "Nazwa sklepu": String(item.storeName || ""),
-        "Adres": String(item.address || ""),
-        "Telefon": String(item.phone || "")
-      };
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(rows, {
-      header: [
-        "Data",
-        "Godzina",
-        "Kurs",
-        "Naczepa",
-        "Numer sklepu",
-        "Nazwa sklepu",
-        "Adres",
-        "Telefon"
-      ]
-    });
-
-    worksheet["!cols"] = [
-      { wch: 13 },
-      { wch: 10 },
-      { wch: 8 },
-      { wch: 10 },
-      { wch: 14 },
-      { wch: 25 },
-      { wch: 42 },
-      { wch: 14 }
+    const headers = [
+      "Data", "Godzina", "Kurs", "Naczepa",
+      "Numer sklepu", "Nazwa sklepu", "Adres", "Telefon"
     ];
 
-    worksheet["!autofilter"] = {
-      ref: worksheet["!ref"] || "A1:H1"
-    };
-
-    // Naprzemienne tło kolejnych dni: biały / jasnoszary.
-    // Styl zostaje zapisany przez wersję biblioteki dołączoną do projektu.
     let previousDay = "";
     let dayBand = 0;
 
-    entries.forEach((item, index) => {
+    const rowsXml = entries.map(item => {
       const dayKey = localDateKey(item.createdAt);
       if (dayKey !== previousDay) {
         if (previousDay) dayBand += 1;
         previousDay = dayKey;
       }
 
-      if (dayBand % 2 === 1) {
-        const excelRow = index + 2;
+      const date = new Date(item.createdAt);
+      const values = [
+        date.toLocaleDateString("pl-PL"),
+        date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+        String(item.tourNumber || ""),
+        String(item.trailerNumber || ""),
+        String(item.storeNumber || ""),
+        String(item.storeName || ""),
+        String(item.address || ""),
+        String(item.phone || "")
+      ];
 
-        for (let column = 0; column < 8; column += 1) {
-          const address = XLSX.utils.encode_cell({ r: excelRow - 1, c: column });
-          if (!worksheet[address]) continue;
+      const styleId = dayBand % 2 === 1 ? "DayGray" : "DayWhite";
+      const cells = values.map(value =>
+        `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`
+      ).join("");
 
-          worksheet[address].s = {
-            ...(worksheet[address].s || {}),
-            fill: {
-              patternType: "solid",
-              fgColor: { rgb: "E7E7E7" },
-              bgColor: { rgb: "E7E7E7" }
-            }
-          };
-        }
-      }
-    });
+      return `<Row>${cells}</Row>`;
+    }).join("");
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Dostawy");
+    const headerCells = headers.map(value =>
+      `<Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`
+    ).join("");
 
-    XLSX.writeFile(workbook, `europris-dostawy-${month}.xlsx`, {
-      compression: true,
-      cellStyles: true
-    });
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Center"/>
+   <Font ss:FontName="Calibri" ss:Size="11"/>
+  </Style>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1"/>
+   <Interior ss:Color="#D9EAD3" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="DayWhite">
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="DayGray">
+   <Interior ss:Color="#E7E7E7" ss:Pattern="Solid"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Dostawy">
+  <Table>
+   <Column ss:Width="85"/><Column ss:Width="65"/><Column ss:Width="50"/>
+   <Column ss:Width="65"/><Column ss:Width="85"/><Column ss:Width="150"/>
+   <Column ss:Width="260"/><Column ss:Width="90"/>
+   <Row>${headerCells}</Row>
+   ${rowsXml}
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>`;
+
+    downloadFile(
+      `europris-dostawy-${month}.xls`,
+      "\uFEFF" + xml,
+      "application/vnd.ms-excel;charset=utf-8"
+    );
+
+    window.setTimeout(restoreDailyAssignment, 250);
+    window.setTimeout(restoreDailyAssignment, 1000);
   }
 
   async function exportJson() {
+    persistDailyAssignment();
     const deliveries = await getAllDeliveries();
     const privateContacts = await getAllPrivateContacts();
 
@@ -1952,6 +1969,7 @@
   }
 
   async function openAndSaveDelivery() {
+    persistDailyAssignment();
     const number = cleanNumber(currentNumber);
 
     if (!/^\d{1,8}$/.test(number) || !currentStore) {
@@ -1973,10 +1991,8 @@
       return;
     }
 
-    saveTourNumber();
-    saveTrailerNumber();
-
-    // Utrwal wartości na cały bieżący dzień.
+    tourNumber.value = tour;
+    trailerNumber.value = trailer;
     localStorage.setItem(tourStorageKey(), tour);
     localStorage.setItem(trailerStorageKey(), trailer);
 
@@ -2038,6 +2054,7 @@
   }
 
   function openDelivery() {
+    persistDailyAssignment();
     const number = cleanNumber(currentNumber);
 
     if (!/^\d{1,8}$/.test(number)) {
@@ -2051,6 +2068,7 @@
   }
 
   async function openNavigation() {
+    persistDailyAssignment();
     await syncCurrentStore();
 
     if (!hasValidCoordinates(currentStore)) {
@@ -2186,14 +2204,13 @@
   });
 
 
-  loadTourNumber();
-  loadTrailerNumber();
+  restoreDailyAssignment();
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=33", { cache: "no-store" })
+  fetch("stores.json?v=34", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
@@ -2228,6 +2245,13 @@
 
 
 
+
+  window.addEventListener("pageshow", restoreDailyAssignment);
+  window.addEventListener("focus", restoreDailyAssignment);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) restoreDailyAssignment();
+  });
 
   if ("serviceWorker" in navigator) {
     let refreshing = false;
