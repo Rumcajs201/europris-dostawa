@@ -837,6 +837,9 @@
   const LANGUAGE_KEY = "europris_language_v6";
   const TRAILER_KEY_PREFIX = "europris_trailer_";
   const TOUR_KEY_PREFIX = "europris_tour_";
+  const ACTIVE_ASSIGNMENT_DATE_KEY = "europris_active_assignment_date";
+  const ACTIVE_TOUR_KEY = "europris_active_tour";
+  const ACTIVE_TRAILER_KEY = "europris_active_trailer";
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
 
@@ -1112,49 +1115,65 @@
     return String(value || "").replace(/\D/g, "").slice(0, 2);
   }
 
-  function loadTrailerNumber() {
-    trailerNumber.value = cleanTrailerNumber(
-      localStorage.getItem(trailerStorageKey()) || ""
-    );
+  function resetAssignmentForNewDay() {
+    tourNumber.value = "";
+    trailerNumber.value = "";
+    localStorage.setItem(ACTIVE_ASSIGNMENT_DATE_KEY, currentLocalDateKey());
+    localStorage.removeItem(ACTIVE_TOUR_KEY);
+    localStorage.removeItem(ACTIVE_TRAILER_KEY);
   }
 
-  function loadTourNumber() {
-    tourNumber.value = cleanTourNumber(
-      localStorage.getItem(tourStorageKey()) || ""
-    );
-  }
+  function loadDailyAssignment() {
+    const today = currentLocalDateKey();
+    const savedDate = localStorage.getItem(ACTIVE_ASSIGNMENT_DATE_KEY);
 
-  function saveTrailerNumber() {
-    const value = cleanTrailerNumber(trailerNumber.value);
-    trailerNumber.value = value;
-
-    if (value) {
-      localStorage.setItem(trailerStorageKey(), value);
-    } else {
-      localStorage.removeItem(trailerStorageKey());
+    if (savedDate !== today) {
+      resetAssignmentForNewDay();
+      return;
     }
+
+    const savedTour = cleanTourNumber(
+      localStorage.getItem(ACTIVE_TOUR_KEY) ||
+      localStorage.getItem(tourStorageKey()) ||
+      ""
+    );
+
+    const savedTrailer = cleanTrailerNumber(
+      localStorage.getItem(ACTIVE_TRAILER_KEY) ||
+      localStorage.getItem(trailerStorageKey()) ||
+      ""
+    );
+
+    tourNumber.value = savedTour;
+    trailerNumber.value = savedTrailer;
   }
 
-  function saveTourNumber() {
-    const value = cleanTourNumber(tourNumber.value);
-    tourNumber.value = value;
+  function saveDailyAssignment() {
+    const tour = cleanTourNumber(tourNumber.value);
+    const trailer = cleanTrailerNumber(trailerNumber.value);
+    const today = currentLocalDateKey();
 
-    if (value) {
-      localStorage.setItem(tourStorageKey(), value);
-    } else {
-      localStorage.removeItem(tourStorageKey());
+    localStorage.setItem(ACTIVE_ASSIGNMENT_DATE_KEY, today);
+
+    // Pusty stan podczas przeładowania lub powrotu nie kasuje
+    // wcześniej zapisanych wartości z bieżącego dnia.
+    if (tour) {
+      tourNumber.value = tour;
+      localStorage.setItem(ACTIVE_TOUR_KEY, tour);
+      localStorage.setItem(tourStorageKey(), tour);
     }
-  }
 
-  function persistDailyAssignment() {
-    saveTourNumber();
-    saveTrailerNumber();
+    if (trailer) {
+      trailerNumber.value = trailer;
+      localStorage.setItem(ACTIVE_TRAILER_KEY, trailer);
+      localStorage.setItem(trailerStorageKey(), trailer);
+    }
   }
 
   function restoreDailyAssignment() {
-    loadTourNumber();
-    loadTrailerNumber();
+    loadDailyAssignment();
   }
+
 
   function normalized(value) {
     return String(value)
@@ -1803,111 +1822,89 @@
     URL.revokeObjectURL(url);
   }
 
-  function escapeXml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&apos;");
-  }
-
   async function exportExcel() {
-    persistDailyAssignment();
+    saveDailyAssignment();
+
+    if (typeof XLSX === "undefined") {
+      error.textContent = translations[language].historyImportError;
+      return;
+    }
 
     const month = historyMonth.value;
     const entries = (await getAllDeliveries())
       .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
       .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
 
-    const headers = [
-      "Data", "Godzina", "Kurs", "Naczepa",
-      "Numer sklepu", "Nazwa sklepu", "Adres", "Telefon"
-    ];
+    const data = [[
+      "Data",
+      "Godzina",
+      "Kurs",
+      "Naczepa",
+      "Numer sklepu",
+      "Nazwa sklepu",
+      "Adres",
+      "Telefon"
+    ]];
 
     let previousDay = "";
-    let dayBand = 0;
 
-    const rowsXml = entries.map(item => {
+    for (const item of entries) {
       const dayKey = localDateKey(item.createdAt);
-      if (dayKey !== previousDay) {
-        if (previousDay) dayBand += 1;
-        previousDay = dayKey;
+
+      // SheetJS Community nie zapisuje kolorów komórek.
+      // Pusty wiersz niezawodnie i czytelnie rozdziela kolejne dni.
+      if (previousDay && dayKey !== previousDay) {
+        data.push(["", "", "", "", "", "", "", ""]);
       }
 
+      previousDay = dayKey;
       const date = new Date(item.createdAt);
-      const values = [
+
+      data.push([
         date.toLocaleDateString("pl-PL"),
-        date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+        date.toLocaleTimeString("pl-PL", {
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
         String(item.tourNumber || ""),
         String(item.trailerNumber || ""),
         String(item.storeNumber || ""),
         String(item.storeName || ""),
         String(item.address || ""),
         String(item.phone || "")
-      ];
+      ]);
+    }
 
-      const styleId = dayBand % 2 === 1 ? "DayGray" : "DayWhite";
-      const cells = values.map(value =>
-        `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`
-      ).join("");
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
 
-      return `<Row>${cells}</Row>`;
-    }).join("");
+    worksheet["!cols"] = [
+      { wch: 13 },
+      { wch: 10 },
+      { wch: 8 },
+      { wch: 10 },
+      { wch: 14 },
+      { wch: 25 },
+      { wch: 42 },
+      { wch: 14 }
+    ];
 
-    const headerCells = headers.map(value =>
-      `<Cell ss:StyleID="Header"><Data ss:Type="String">${escapeXml(value)}</Data></Cell>`
-    ).join("");
+    worksheet["!autofilter"] = {
+      ref: "A1:H1"
+    };
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Styles>
-  <Style ss:ID="Default" ss:Name="Normal">
-   <Alignment ss:Vertical="Center"/>
-   <Font ss:FontName="Calibri" ss:Size="11"/>
-  </Style>
-  <Style ss:ID="Header">
-   <Font ss:Bold="1"/>
-   <Interior ss:Color="#D9EAD3" ss:Pattern="Solid"/>
-  </Style>
-  <Style ss:ID="DayWhite">
-   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
-  </Style>
-  <Style ss:ID="DayGray">
-   <Interior ss:Color="#E7E7E7" ss:Pattern="Solid"/>
-  </Style>
- </Styles>
- <Worksheet ss:Name="Dostawy">
-  <Table>
-   <Column ss:Width="85"/><Column ss:Width="65"/><Column ss:Width="50"/>
-   <Column ss:Width="65"/><Column ss:Width="85"/><Column ss:Width="150"/>
-   <Column ss:Width="260"/><Column ss:Width="90"/>
-   <Row>${headerCells}</Row>
-   ${rowsXml}
-  </Table>
-  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
-   <FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
-  </WorksheetOptions>
- </Worksheet>
-</Workbook>`;
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Dostawy");
 
-    downloadFile(
-      `europris-dostawy-${month}.xls`,
-      "\uFEFF" + xml,
-      "application/vnd.ms-excel;charset=utf-8"
-    );
+    XLSX.writeFile(workbook, `europris-dostawy-${month}.xlsx`, {
+      compression: true
+    });
 
     window.setTimeout(restoreDailyAssignment, 250);
     window.setTimeout(restoreDailyAssignment, 1000);
   }
 
   async function exportJson() {
-    persistDailyAssignment();
+    saveDailyAssignment();
     const deliveries = await getAllDeliveries();
     const privateContacts = await getAllPrivateContacts();
 
@@ -1969,7 +1966,7 @@
   }
 
   async function openAndSaveDelivery() {
-    persistDailyAssignment();
+    saveDailyAssignment();
     const number = cleanNumber(currentNumber);
 
     if (!/^\d{1,8}$/.test(number) || !currentStore) {
@@ -1993,8 +1990,7 @@
 
     tourNumber.value = tour;
     trailerNumber.value = trailer;
-    localStorage.setItem(tourStorageKey(), tour);
-    localStorage.setItem(trailerStorageKey(), trailer);
+    saveDailyAssignment();
 
     try {
       await addDelivery(currentStore, trailer, tour);
@@ -2054,7 +2050,7 @@
   }
 
   function openDelivery() {
-    persistDailyAssignment();
+    saveDailyAssignment();
     const number = cleanNumber(currentNumber);
 
     if (!/^\d{1,8}$/.test(number)) {
@@ -2068,7 +2064,7 @@
   }
 
   async function openNavigation() {
-    persistDailyAssignment();
+    saveDailyAssignment();
     await syncCurrentStore();
 
     if (!hasValidCoordinates(currentStore)) {
@@ -2086,17 +2082,17 @@
 
   tourNumber.addEventListener("input", () => {
     tourNumber.value = cleanTourNumber(tourNumber.value);
-    saveTourNumber();
+    saveDailyAssignment();
   });
 
-  tourNumber.addEventListener("change", saveTourNumber);
+  tourNumber.addEventListener("change", saveDailyAssignment);
 
   trailerNumber.addEventListener("input", () => {
     trailerNumber.value = cleanTrailerNumber(trailerNumber.value);
-    saveTrailerNumber();
+    saveDailyAssignment();
   });
 
-  trailerNumber.addEventListener("change", saveTrailerNumber);
+  trailerNumber.addEventListener("change", saveDailyAssignment);
 
   document.querySelectorAll("[data-digit]").forEach(button => {
     button.addEventListener("click", () => {
@@ -2210,7 +2206,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=34", { cache: "no-store" })
+  fetch("stores.json?v=35", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
