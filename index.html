@@ -868,12 +868,12 @@
 
     <section id="adminPanel" class="admin-panel" hidden>
       <div class="admin-header"><h2 id="adminTitle" class="admin-title"></h2><button id="adminClose" class="admin-close" type="button">×</button></div>
-      <div class="admin-profile"><div class="admin-profile-grid">
+      <div id="adminProfileSection" class="admin-profile"><div class="admin-profile-grid">
         <label><span id="adminDriverNameLabel"></span><input id="adminDriverName" type="text" value="Andrzej"></label>
         <label><span id="adminDriverPhoneLabel"></span><input id="adminDriverPhone" type="tel" inputmode="tel" value="45155270"></label>
         <label><span id="adminDriverAliasesLabel"></span><input id="adminDriverAliases" type="text" value="Andrzej, Osowski, A. Osowski"></label>
       </div></div>
-      <div class="admin-toolbar">
+      <div id="adminToolbar" class="admin-toolbar">
         <label class="admin-file-label primary"><span id="adminImportLabel"></span><input id="adminImportFile" type="file" accept=".xlsx,.xls" hidden></label>
         <button id="adminDeletePlan" type="button"></button>
       </div>
@@ -910,12 +910,14 @@
   const ADMIN_PROFILES = {
     "4878": {
       id: "andrzej",
+      role: "admin",
       name: "Andrzej",
       phone: "45155270",
       aliases: ["Andrzej", "Osowski", "A. Osowski"]
     },
     "4567": {
       id: "kamil",
+      role: "driver",
       name: "Kamil",
       phone: "95707161",
       aliases: ["Kamil"]
@@ -989,7 +991,7 @@
       locationDenied: "Brak dostępu do lokalizacji. Możesz wyszukać sklep ręcznie albo spróbować ponownie.",
       locationUnavailable: "Nie udało się ustalić lokalizacji. Spróbuj ponownie.",
       locationNoCoordinates: "W bazie nie znaleziono sklepów ze współrzędnymi.",
-      adminTitle:"Panel administratora — plan transportów",adminPinTitle:"Dostęp administratora",adminPinDescription:"Wpisz czterocyfrowy PIN.",adminPinCancel:"Anuluj",adminPinConfirm:"Otwórz",adminPinError:"Nieprawidłowy PIN.",
+      adminTitle:"Panel administratora — plan transportów",adminDriverPlanTitle:name=>`Plan dostawy ${name}`,adminPinTitle:"Dostęp administratora",adminPinDescription:"Wpisz czterocyfrowy PIN.",adminPinCancel:"Anuluj",adminPinConfirm:"Otwórz",adminPinError:"Nieprawidłowy PIN.",
       adminDriverNameLabel:"Kierowca",adminDriverPhoneLabel:"Numer telefonu kierowcy",adminDriverAliasesLabel:"Inne zapisy imienia lub nazwiska (po przecinku)",adminImportLabel:"Wczytaj plan Excel",adminDeletePlan:"Usuń wczytany plan",
       adminNoPlan:"Nie wczytano planu transportów.",adminImportError:"Nie udało się odczytać arkusza. Sprawdź format pliku.",adminNoDriverRows:"W pliku nie znaleziono pozycji pasujących do profilu kierowcy.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} kursów, ${rows} sklepów, ${pallets} palet.`,adminCourse:number=>`Kurs ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Trasa: ${value}`,
@@ -1061,7 +1063,7 @@
       locationDenied: "Ingen tilgang til posisjon. Du kan søke manuelt eller prøve igjen.",
       locationUnavailable: "Posisjonen kunne ikke bestemmes. Prøv igjen.",
       locationNoCoordinates: "Ingen butikker med koordinater ble funnet i databasen.",
-      adminTitle:"Administrator — transportplan",adminPinTitle:"Administratortilgang",adminPinDescription:"Skriv inn den firesifrede PIN-koden.",adminPinCancel:"Avbryt",adminPinConfirm:"Åpne",adminPinError:"Feil PIN-kode.",
+      adminTitle:"Administrator — transportplan",adminDriverPlanTitle:name=>`Leveringsplan ${name}`,adminPinTitle:"Administratortilgang",adminPinDescription:"Skriv inn den firesifrede PIN-koden.",adminPinCancel:"Avbryt",adminPinConfirm:"Åpne",adminPinError:"Feil PIN-kode.",
       adminDriverNameLabel:"Sjåfør",adminDriverPhoneLabel:"Sjåførens telefonnummer",adminDriverAliasesLabel:"Andre skrivemåter for navn (kommaseparert)",adminImportLabel:"Les inn Excel-plan",adminDeletePlan:"Slett innlest plan",
       adminNoPlan:"Ingen transportplan er lest inn.",adminImportError:"Regnearket kunne ikke leses. Kontroller filformatet.",adminNoDriverRows:"Ingen poster i filen samsvarer med sjåførprofilen.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} turer, ${rows} butikker, ${pallets} paller.`,adminCourse:number=>`Tur ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Rute: ${value}`,
@@ -1133,7 +1135,7 @@
       locationDenied: "Location access is unavailable. Search manually or try again.",
       locationUnavailable: "Your location could not be determined. Try again.",
       locationNoCoordinates: "No stores with coordinates were found in the database.",
-      adminTitle:"Administrator — transport plan",adminPinTitle:"Administrator access",adminPinDescription:"Enter the four-digit PIN.",adminPinCancel:"Cancel",adminPinConfirm:"Open",adminPinError:"Incorrect PIN.",
+      adminTitle:"Administrator — transport plan",adminDriverPlanTitle:name=>`Delivery plan ${name}`,adminPinTitle:"Administrator access",adminPinDescription:"Enter the four-digit PIN.",adminPinCancel:"Cancel",adminPinConfirm:"Open",adminPinError:"Incorrect PIN.",
       adminDriverNameLabel:"Driver",adminDriverPhoneLabel:"Driver phone number",adminDriverAliasesLabel:"Other name spellings (comma-separated)",adminImportLabel:"Import Excel plan",adminDeletePlan:"Delete imported plan",
       adminNoPlan:"No transport plan has been imported.",adminImportError:"The spreadsheet could not be read. Check the file format.",adminNoDriverRows:"No rows in the file match the driver profile.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} trips, ${rows} stores, ${pallets} pallets.`,adminCourse:number=>`Trip ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Route: ${value}`,
@@ -1198,7 +1200,7 @@
   const useNearest = document.getElementById("useNearest");
   const retryLocation = document.getElementById("retryLocation");
   const footer = document.getElementById("footer");
-  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList");
+  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar");
 
 
   function currentLocalDateKey() {
@@ -1346,6 +1348,16 @@
     return true;
   }
 
+  function activeAdminDefinition() {
+    return Object.values(ADMIN_PROFILES).find(
+      profile => profile.id === activeAdminProfileId
+    ) || ADMIN_PROFILES["4878"];
+  }
+
+  function isActiveAdmin() {
+    return activeAdminDefinition().role === "admin";
+  }
+
   function saveAdminPlan(p){localStorage.setItem(ADMIN_PLAN_KEY,JSON.stringify(p));}
   function loadAdminPlan(){try{return JSON.parse(localStorage.getItem(ADMIN_PLAN_KEY)||"null");}catch{return null;}}
   function normalizeHeader(v){
@@ -1372,7 +1384,14 @@
   function applyAdminLanguage(){
     const t = translations[language];
     const profile = adminProfile();
-    adminTitle.textContent = `${t.adminTitle} — ${profile.name}`;
+    const adminMode = isActiveAdmin();
+
+    adminTitle.textContent = adminMode
+      ? `${t.adminTitle} — ${profile.name}`
+      : t.adminDriverPlanTitle(profile.name);
+
+    adminProfileSection.hidden = !adminMode;
+    adminToolbar.hidden = !adminMode;
 adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;renderAdminPlan();}
   function openAdminPin(){adminPinError.textContent="";adminPinInput.value="";adminPinOverlay.hidden=false;setTimeout(()=>adminPinInput.focus(),50);}
   function closeAdminPin(){adminPinOverlay.hidden=true;adminPinInput.value="";adminPinError.textContent="";}
@@ -1491,13 +1510,39 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
   const cancelAdminLongPress=()=>{clearTimeout(adminLongPressTimer);adminLongPressTimer=null;};
   brandMark.addEventListener("pointerdown",startAdminLongPress);brandMark.addEventListener("pointerup",cancelAdminLongPress);brandMark.addEventListener("pointercancel",cancelAdminLongPress);brandMark.addEventListener("pointerleave",cancelAdminLongPress);brandMark.addEventListener("contextmenu",e=>e.preventDefault());
   adminPinCancel.onclick=closeAdminPin;adminPinConfirm.onclick=unlockAdmin;adminPinInput.onkeydown=e=>{if(e.key==="Enter")unlockAdmin();if(e.key==="Escape")closeAdminPin();};adminClose.onclick=()=>{
-    saveAdminProfile();
+    if (isActiveAdmin()) saveAdminProfile();
     adminPanel.hidden=true;
     activeAdminProfileId="";
   };
-  [adminDriverName,adminDriverPhone,adminDriverAliases].forEach(i=>i.onchange=()=>{saveAdminProfile();renderAdminPlan();});
-  adminImportFile.onchange=async()=>{const t=translations[language],f=adminImportFile.files?.[0];if(!f)return;try{saveAdminProfile();saveAdminPlan(parseTransportWorkbook(await f.arrayBuffer(),f.name));renderAdminPlan();}catch{adminSummary.textContent=t.adminImportError;}finally{adminImportFile.value="";}};
-  adminDeletePlan.onclick=()=>{localStorage.removeItem(ADMIN_PLAN_KEY);renderAdminPlan();};
+  [adminDriverName,adminDriverPhone,adminDriverAliases].forEach(i=>i.onchange=()=>{
+    if (!isActiveAdmin()) return;
+    saveAdminProfile();
+    renderAdminPlan();
+  });
+  adminImportFile.onchange=async()=>{
+    if (!isActiveAdmin()) {
+      adminImportFile.value="";
+      return;
+    }
+
+    const t=translations[language],f=adminImportFile.files?.[0];
+    if(!f)return;
+
+    try{
+      saveAdminProfile();
+      saveAdminPlan(parseTransportWorkbook(await f.arrayBuffer(),f.name));
+      renderAdminPlan();
+    }catch{
+      adminSummary.textContent=t.adminImportError;
+    }finally{
+      adminImportFile.value="";
+    }
+  };
+  adminDeletePlan.onclick=()=>{
+    if (!isActiveAdmin()) return;
+    localStorage.removeItem(ADMIN_PLAN_KEY);
+    renderAdminPlan();
+  };
 
   document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);
