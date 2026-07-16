@@ -271,11 +271,11 @@
 
     .trailer-panel {
       display: grid;
-      grid-template-columns: 1fr 86px;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) 72px 72px;
+      gap: 8px;
       align-items: center;
       margin-bottom: 10px;
-      padding: 11px 12px;
+      padding: 10px 11px;
       border: 1px solid var(--border);
       border-radius: 14px;
       background: color-mix(in srgb, var(--green) 5%, transparent);
@@ -283,23 +283,40 @@
 
     .trailer-label {
       font-weight: 900;
+      line-height: 1.12;
     }
 
     .trailer-hint {
       margin-top: 3px;
       color: var(--muted);
-      font-size: .78rem;
+      font-size: .72rem;
+      line-height: 1.15;
     }
 
-    .trailer-input {
+    .trailer-field {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .trailer-field-label {
+      text-align: center;
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    .trailer-input,
+    .tour-input {
       width: 100%;
-      min-height: 48px;
+      min-height: 46px;
       border: 2px solid var(--green);
       border-radius: 11px;
       background: var(--surface);
       color: var(--text);
       text-align: center;
-      font-size: 1.35rem;
+      font-size: 1.18rem;
       font-weight: 950;
     }
 
@@ -721,16 +738,34 @@
         <div id="trailerLabel" class="trailer-label"></div>
         <div id="trailerHint" class="trailer-hint"></div>
       </div>
-      <input
-        id="trailerNumber"
-        class="trailer-input"
-        type="text"
-        inputmode="numeric"
-        pattern="[0-9]{1,2}"
-        maxlength="2"
-        autocomplete="off"
-        aria-label="Numer naczepy"
-      >
+
+      <label class="trailer-field">
+        <span id="tourFieldLabel" class="trailer-field-label"></span>
+        <input
+          id="tourNumber"
+          class="tour-input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{1,2}"
+          maxlength="2"
+          autocomplete="off"
+          aria-label="Numer turu"
+        >
+      </label>
+
+      <label class="trailer-field">
+        <span id="trailerFieldLabel" class="trailer-field-label"></span>
+        <input
+          id="trailerNumber"
+          class="trailer-input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{1,2}"
+          maxlength="2"
+          autocomplete="off"
+          aria-label="Numer naczepy"
+        >
+      </label>
     </section>
 
     <div class="main-actions">
@@ -801,6 +836,7 @@
   const DB_CONTACTS = "privateContacts";
   const LANGUAGE_KEY = "europris_language_v6";
   const TRAILER_KEY_PREFIX = "europris_trailer_";
+  const TOUR_KEY_PREFIX = "europris_tour_";
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
 
@@ -809,11 +845,16 @@
       title: "Potwierdzenie dostawy Europris",
       description: "Wpisz numer sklepu albo zacznij wpisywać jego nazwę.",
       placeholder: "Numer lub nazwa sklepu",
-      trailerLabel: "Aktualna naczepa",
-      trailerHint: "Wpisz wewnętrzny numer 1–2 cyfry",
+      trailerLabel: "Aktualny tur i naczepa",
+      trailerHint: "Wpisz numery wewnętrzne",
+      tourFieldLabel: "Tur",
+      trailerFieldLabel: "Naczepa",
       trailerRequired: "Przed zapisaniem dostawy wpisz numer naczepy.",
+      tourRequired: "Przed zapisaniem dostawy wpisz numer turu.",
       trailerUnnamed: "Bez numeru naczepy",
+      tourUnnamed: "Bez numeru turu",
       trailerTitle: number => `Naczepa ${number}`,
+      tourTitle: number => `Tur ${number}`,
       trailerDeliveries: count => `${count} dostaw`,
       open: "Otwórz stronę dostawy",
       openSave: "Otwórz i zapisz dostawę",
@@ -866,11 +907,16 @@
       title: "Bekreftelse av levering til Europris",
       description: "Skriv inn butikknummeret eller begynn å skrive butikknavnet.",
       placeholder: "Butikknummer eller butikknavn",
-      trailerLabel: "Aktuell tilhenger",
-      trailerHint: "Skriv inn internt nummer, 1–2 sifre",
+      trailerLabel: "Aktuell tur og tilhenger",
+      trailerHint: "Skriv inn interne numre",
+      tourFieldLabel: "Tur",
+      trailerFieldLabel: "Tilhenger",
       trailerRequired: "Skriv inn tilhengernummeret før leveringen lagres.",
+      tourRequired: "Skriv inn turnummeret før leveringen lagres.",
       trailerUnnamed: "Uten tilhengernummer",
+      tourUnnamed: "Uten turnummer",
       trailerTitle: number => `Tilhenger ${number}`,
+      tourTitle: number => `Tur ${number}`,
       trailerDeliveries: count => `${count} leveringer`,
       open: "Åpne leveringssiden",
       openSave: "Åpne og lagre levering",
@@ -923,11 +969,16 @@
       title: "Europris delivery confirmation",
       description: "Enter the store number or start typing the store name.",
       placeholder: "Store number or store name",
-      trailerLabel: "Current trailer",
-      trailerHint: "Enter the 1–2 digit internal number",
+      trailerLabel: "Current tour and trailer",
+      trailerHint: "Enter the internal numbers",
+      tourFieldLabel: "Tour",
+      trailerFieldLabel: "Trailer",
       trailerRequired: "Enter the trailer number before saving the delivery.",
+      tourRequired: "Enter the tour number before saving the delivery.",
       trailerUnnamed: "No trailer number",
+      tourUnnamed: "No tour number",
       trailerTitle: number => `Trailer ${number}`,
+      tourTitle: number => `Tour ${number}`,
       trailerDeliveries: count => `${count} deliveries`,
       open: "Open delivery page",
       openSave: "Open and save delivery",
@@ -990,9 +1041,12 @@
   let nearestDistanceMeters = null;
   let nearestWasAutoSelected = false;
   let locationRequestedThisLaunch = false;
+  const tourNumber = document.getElementById("tourNumber");
   const trailerNumber = document.getElementById("trailerNumber");
   const trailerLabel = document.getElementById("trailerLabel");
   const trailerHint = document.getElementById("trailerHint");
+  const tourFieldLabel = document.getElementById("tourFieldLabel");
+  const trailerFieldLabel = document.getElementById("trailerFieldLabel");
   const search = document.getElementById("search");
   const results = document.getElementById("results");
   const selectedNumber = document.getElementById("selectedNumber");
@@ -1043,7 +1097,15 @@
     return `${TRAILER_KEY_PREFIX}${currentLocalDateKey()}`;
   }
 
+  function tourStorageKey() {
+    return `${TOUR_KEY_PREFIX}${currentLocalDateKey()}`;
+  }
+
   function cleanTrailerNumber(value) {
+    return String(value || "").replace(/\D/g, "").slice(0, 2);
+  }
+
+  function cleanTourNumber(value) {
     return String(value || "").replace(/\D/g, "").slice(0, 2);
   }
 
@@ -1051,6 +1113,14 @@
     trailerNumber.value = cleanTrailerNumber(
       localStorage.getItem(trailerStorageKey()) || ""
     );
+  }
+
+  function loadTourNumber() {
+    tourNumber.value = cleanTourNumber(
+      localStorage.getItem(tourStorageKey()) || "1"
+    );
+
+    if (!tourNumber.value) tourNumber.value = "1";
   }
 
   function saveTrailerNumber() {
@@ -1061,6 +1131,17 @@
       localStorage.setItem(trailerStorageKey(), value);
     } else {
       localStorage.removeItem(trailerStorageKey());
+    }
+  }
+
+  function saveTourNumber() {
+    const value = cleanTourNumber(tourNumber.value);
+    tourNumber.value = value;
+
+    if (value) {
+      localStorage.setItem(tourStorageKey(), value);
+    } else {
+      localStorage.removeItem(tourStorageKey());
     }
   }
 
@@ -1131,6 +1212,8 @@
     document.getElementById("description").textContent = text.description;
     trailerLabel.textContent = text.trailerLabel;
     trailerHint.textContent = text.trailerHint;
+    tourFieldLabel.textContent = text.tourFieldLabel;
+    trailerFieldLabel.textContent = text.trailerFieldLabel;
     openButton.textContent = text.open;
     openSaveButton.textContent = text.openSave;
     navigateButton.textContent = text.navigate;
@@ -1422,13 +1505,14 @@
     return result;
   }
 
-  async function addDelivery(store, trailer) {
+  async function addDelivery(store, trailer, tour) {
     const now = new Date();
     const entry = {
       id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       storeNumber: String(store.number),
       storeName: cleanStoreName(store.name),
       trailerNumber: cleanTrailerNumber(trailer),
+      tourNumber: cleanTourNumber(tour),
       address: String(store.address || ""),
       phone: String(store.phone || ""),
       latitude: Number(store.latitude),
@@ -1562,104 +1646,134 @@
       header.append(heading, count);
       dayCard.appendChild(header);
 
-      const trailerGroups = new Map();
+      const tourGroups = new Map();
 
       for (const item of dayEntries) {
-        const trailerKey = cleanTrailerNumber(item.trailerNumber) || "";
-        if (!trailerGroups.has(trailerKey)) trailerGroups.set(trailerKey, []);
-        trailerGroups.get(trailerKey).push(item);
+        const tourKey = cleanTourNumber(item.tourNumber) || "";
+        if (!tourGroups.has(tourKey)) tourGroups.set(tourKey, []);
+        tourGroups.get(tourKey).push(item);
       }
 
-      for (const [trailerKey, trailerEntries] of trailerGroups) {
-        const trailerSection = document.createElement("section");
-        trailerSection.className = "history-trailer";
+      for (const [tourKey, tourEntries] of tourGroups) {
+        const tourSection = document.createElement("section");
+        tourSection.className = "history-trailer";
 
-        const trailerHeader = document.createElement("div");
-        trailerHeader.className = "history-trailer-header";
+        const tourHeader = document.createElement("div");
+        tourHeader.className = "history-trailer-header";
 
-        const trailerTitle = document.createElement("div");
-        trailerTitle.textContent = trailerKey
-          ? text.trailerTitle(trailerKey)
-          : text.trailerUnnamed;
+        const tourTitle = document.createElement("div");
+        tourTitle.textContent = tourKey
+          ? text.tourTitle(tourKey)
+          : text.tourUnnamed;
 
-        const trailerCount = document.createElement("div");
-        trailerCount.className = "history-trailer-count";
-        trailerCount.textContent = text.trailerDeliveries(trailerEntries.length);
+        const tourCount = document.createElement("div");
+        tourCount.className = "history-trailer-count";
+        tourCount.textContent = text.trailerDeliveries(tourEntries.length);
 
-        trailerHeader.append(trailerTitle, trailerCount);
+        tourHeader.append(tourTitle, tourCount);
+        tourSection.appendChild(tourHeader);
 
-        const dayList = document.createElement("div");
-        dayList.className = "history-day-list";
+        const trailerGroups = new Map();
 
-        for (const item of trailerEntries) {
-          const card = document.createElement("article");
-          card.className = "history-item";
-
-          const main = document.createElement("div");
-          main.className = "history-item-main";
-
-          const store = document.createElement("div");
-          store.className = "history-item-number";
-          store.textContent = `${item.storeNumber} — ${item.storeName}`;
-
-          const time = document.createElement("div");
-          time.className = "history-item-date";
-          time.textContent = new Intl.DateTimeFormat(
-            language === "no" ? "nb-NO" : language,
-            { hour: "2-digit", minute: "2-digit" }
-          ).format(new Date(item.createdAt));
-
-          const address = document.createElement("div");
-          address.textContent = item.address || "";
-
-          const actions = document.createElement("div");
-          actions.className = "history-item-actions";
-
-          const page = document.createElement("button");
-          page.type = "button";
-          page.textContent = text.historyOpen;
-          page.addEventListener("click", () => {
-            window.open(deliveryUrl(item.storeNumber), "_blank", "noopener,noreferrer");
-          });
-
-          const map = document.createElement("button");
-          map.type = "button";
-          map.textContent = text.historyMap;
-          map.disabled =
-            !Number.isFinite(Number(item.latitude)) ||
-            !Number.isFinite(Number(item.longitude));
-          map.addEventListener("click", () => {
-            if (!map.disabled) {
-              window.open(mapsUrl(item), "_blank", "noopener,noreferrer");
-            }
-          });
-
-          const call = document.createElement("button");
-          call.type = "button";
-          call.textContent = text.historyCall;
-          const digits = String(item.phone || "").replace(/\D/g, "");
-          call.disabled = !/^\d{8}$/.test(digits);
-          call.addEventListener("click", () => {
-            if (!call.disabled) window.location.href = `tel:+47${digits}`;
-          });
-
-          const remove = document.createElement("button");
-          remove.type = "button";
-          remove.className = "delete";
-          remove.textContent = text.historyDelete;
-          remove.addEventListener("click", async () => {
-            await deleteDelivery(item.id);
-            await renderHistory();
-          });
-
-          actions.append(page, map, call, remove);
-          main.append(store, time, address);
-          card.append(main, actions);
-          dayList.appendChild(card);
+        for (const item of tourEntries) {
+          const trailerKey = cleanTrailerNumber(item.trailerNumber) || "";
+          if (!trailerGroups.has(trailerKey)) trailerGroups.set(trailerKey, []);
+          trailerGroups.get(trailerKey).push(item);
         }
 
-        trailerSection.append(trailerHeader, dayList);
-        dayCard.appendChild(trailerSection);
+        for (const [trailerKey, trailerEntries] of trailerGroups) {
+          const trailerSection = document.createElement("section");
+          trailerSection.className = "history-trailer";
+
+          const trailerHeader = document.createElement("div");
+          trailerHeader.className = "history-trailer-header";
+
+          const trailerTitle = document.createElement("div");
+          trailerTitle.textContent = trailerKey
+            ? text.trailerTitle(trailerKey)
+            : text.trailerUnnamed;
+
+          const trailerCount = document.createElement("div");
+          trailerCount.className = "history-trailer-count";
+          trailerCount.textContent = text.trailerDeliveries(trailerEntries.length);
+
+          trailerHeader.append(trailerTitle, trailerCount);
+
+          const dayList = document.createElement("div");
+          dayList.className = "history-day-list";
+
+          for (const item of trailerEntries) {
+            const card = document.createElement("article");
+            card.className = "history-item";
+
+            const main = document.createElement("div");
+            main.className = "history-item-main";
+
+            const store = document.createElement("div");
+            store.className = "history-item-number";
+            store.textContent = `${item.storeNumber} — ${item.storeName}`;
+
+            const time = document.createElement("div");
+            time.className = "history-item-date";
+            time.textContent = new Intl.DateTimeFormat(
+              language === "no" ? "nb-NO" : language,
+              { hour: "2-digit", minute: "2-digit" }
+            ).format(new Date(item.createdAt));
+
+            const address = document.createElement("div");
+            address.textContent = item.address || "";
+
+            const actions = document.createElement("div");
+            actions.className = "history-item-actions";
+
+            const page = document.createElement("button");
+            page.type = "button";
+            page.textContent = text.historyOpen;
+            page.addEventListener("click", () => {
+              window.open(deliveryUrl(item.storeNumber), "_blank", "noopener,noreferrer");
+            });
+
+            const map = document.createElement("button");
+            map.type = "button";
+            map.textContent = text.historyMap;
+            map.disabled =
+              !Number.isFinite(Number(item.latitude)) ||
+              !Number.isFinite(Number(item.longitude));
+            map.addEventListener("click", () => {
+              if (!map.disabled) {
+                window.open(mapsUrl(item), "_blank", "noopener,noreferrer");
+              }
+            });
+
+            const call = document.createElement("button");
+            call.type = "button";
+            call.textContent = text.historyCall;
+            const digits = String(item.phone || "").replace(/\D/g, "");
+            call.disabled = !/^\d{8}$/.test(digits);
+            call.addEventListener("click", () => {
+              if (!call.disabled) window.location.href = `tel:+47${digits}`;
+            });
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "delete";
+            remove.textContent = text.historyDelete;
+            remove.addEventListener("click", async () => {
+              await deleteDelivery(item.id);
+              await renderHistory();
+            });
+
+            actions.append(page, map, call, remove);
+            main.append(store, time, address);
+            card.append(main, actions);
+            dayList.appendChild(card);
+          }
+
+          trailerSection.append(trailerHeader, dayList);
+          tourSection.appendChild(trailerSection);
+        }
+
+        dayCard.appendChild(tourSection);
       }
 
       historyList.appendChild(dayCard);
@@ -1698,6 +1812,7 @@
           hour: "2-digit",
           minute: "2-digit"
         }),
+        "Tur": String(item.tourNumber || ""),
         "Naczepa": String(item.trailerNumber || ""),
         "Numer sklepu": String(item.storeNumber || ""),
         "Nazwa sklepu": String(item.storeName || ""),
@@ -1710,6 +1825,7 @@
       header: [
         "Data",
         "Godzina",
+        "Tur",
         "Naczepa",
         "Numer sklepu",
         "Nazwa sklepu",
@@ -1721,6 +1837,7 @@
     worksheet["!cols"] = [
       { wch: 13 },
       { wch: 10 },
+      { wch: 8 },
       { wch: 10 },
       { wch: 14 },
       { wch: 25 },
@@ -1729,14 +1846,46 @@
     ];
 
     worksheet["!autofilter"] = {
-      ref: worksheet["!ref"] || "A1:G1"
+      ref: worksheet["!ref"] || "A1:H1"
     };
+
+    // Naprzemienne tło kolejnych dni: biały / jasnoszary.
+    // Styl zostaje zapisany przez wersję biblioteki dołączoną do projektu.
+    let previousDay = "";
+    let dayBand = 0;
+
+    entries.forEach((item, index) => {
+      const dayKey = localDateKey(item.createdAt);
+      if (dayKey !== previousDay) {
+        if (previousDay) dayBand += 1;
+        previousDay = dayKey;
+      }
+
+      if (dayBand % 2 === 1) {
+        const excelRow = index + 2;
+
+        for (let column = 0; column < 8; column += 1) {
+          const address = XLSX.utils.encode_cell({ r: excelRow - 1, c: column });
+          if (!worksheet[address]) continue;
+
+          worksheet[address].s = {
+            ...(worksheet[address].s || {}),
+            fill: {
+              patternType: "solid",
+              fgColor: { rgb: "E7E7E7" },
+              bgColor: { rgb: "E7E7E7" }
+            }
+          };
+        }
+      }
+    });
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Dostawy");
 
     XLSX.writeFile(workbook, `europris-dostawy-${month}.xlsx`, {
-      compression: true
+      compression: true,
+      cellStyles: true
     });
   }
 
@@ -1747,7 +1896,7 @@
     downloadFile(
       `europris-kopia-${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify({
-        version: 3,
+        version: 4,
         deliveries,
         privateContacts
       }, null, 2),
@@ -1809,6 +1958,13 @@
       return;
     }
 
+    const tour = cleanTourNumber(tourNumber.value);
+    if (!/^\d{1,2}$/.test(tour)) {
+      error.textContent = translations[language].tourRequired;
+      tourNumber.focus();
+      return;
+    }
+
     const trailer = cleanTrailerNumber(trailerNumber.value);
     if (!/^\d{1,2}$/.test(trailer)) {
       error.textContent = translations[language].trailerRequired;
@@ -1816,10 +1972,11 @@
       return;
     }
 
+    saveTourNumber();
     saveTrailerNumber();
 
     try {
-      await addDelivery(currentStore, trailer);
+      await addDelivery(currentStore, trailer, tour);
       error.textContent = translations[language].historySaved;
       if (!historyPanel.hidden) await renderHistory();
     } catch {
@@ -1903,6 +2060,13 @@
 
     window.location.assign(url);
   }
+
+  tourNumber.addEventListener("input", () => {
+    tourNumber.value = cleanTourNumber(tourNumber.value);
+    saveTourNumber();
+  });
+
+  tourNumber.addEventListener("change", saveTourNumber);
 
   trailerNumber.addEventListener("input", () => {
     trailerNumber.value = cleanTrailerNumber(trailerNumber.value);
@@ -2017,6 +2181,7 @@
   });
 
 
+  loadTourNumber();
   loadTrailerNumber();
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
