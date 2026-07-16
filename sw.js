@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-stable-v43-role-permissions";
+const CACHE_NAME = "europris-app-stable-v44-admin-controls-hidden";
 
 const STATIC_FILES = [
   "./",

@@ -667,6 +667,11 @@
     .admin-header { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
     .admin-title { margin:0; color:var(--green); font-size:1.15rem; }
     .admin-close { width:38px; min-height:38px; border:1px solid var(--border); border-radius:10px; background:transparent; color:var(--text); font-size:1.3rem; }
+    .admin-profile[hidden],
+    .admin-toolbar[hidden] {
+      display: none !important;
+    }
+
     .admin-profile { padding:10px; border:1px solid var(--border); border-radius:12px; }
     .admin-profile-grid { grid-template-columns:1fr; }
     .admin-profile label { display:grid; gap:4px; color:var(--muted); font-size:.75rem; font-weight:800; }
@@ -1392,6 +1397,17 @@
 
     adminProfileSection.hidden = !adminMode;
     adminToolbar.hidden = !adminMode;
+
+    // Twarde ukrycie funkcji administracyjnych dla wszystkich profili
+    // poza profilem Andrzeja. Chroni również przed nadpisaniem przez CSS.
+    adminProfileSection.style.display = adminMode ? "" : "none";
+    adminToolbar.style.display = adminMode ? "" : "none";
+
+    adminImportFile.disabled = !adminMode;
+    adminDeletePlan.disabled = !adminMode;
+    adminDriverName.disabled = !adminMode;
+    adminDriverPhone.disabled = !adminMode;
+    adminDriverAliases.disabled = !adminMode;
 adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;renderAdminPlan();}
   function openAdminPin(){adminPinError.textContent="";adminPinInput.value="";adminPinOverlay.hidden=false;setTimeout(()=>adminPinInput.focus(),50);}
   function closeAdminPin(){adminPinOverlay.hidden=true;adminPinInput.value="";adminPinError.textContent="";}
@@ -1406,7 +1422,16 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     }
 
     closeAdminPin();
-    saveAdminProfile();
+
+    // Domyślnie ukryj funkcje administracyjne.
+    // applyAdminLanguage pokaże je wyłącznie dla roli admin.
+    adminProfileSection.hidden = true;
+    adminToolbar.hidden = true;
+    adminProfileSection.style.display = "none";
+    adminToolbar.style.display = "none";
+
+    if (isActiveAdmin()) saveAdminProfile();
+
     adminPanel.hidden = false;
     applyAdminLanguage();
     adminPanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1511,8 +1536,15 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
   brandMark.addEventListener("pointerdown",startAdminLongPress);brandMark.addEventListener("pointerup",cancelAdminLongPress);brandMark.addEventListener("pointercancel",cancelAdminLongPress);brandMark.addEventListener("pointerleave",cancelAdminLongPress);brandMark.addEventListener("contextmenu",e=>e.preventDefault());
   adminPinCancel.onclick=closeAdminPin;adminPinConfirm.onclick=unlockAdmin;adminPinInput.onkeydown=e=>{if(e.key==="Enter")unlockAdmin();if(e.key==="Escape")closeAdminPin();};adminClose.onclick=()=>{
     if (isActiveAdmin()) saveAdminProfile();
-    adminPanel.hidden=true;
-    activeAdminProfileId="";
+
+    adminPanel.hidden = true;
+    activeAdminProfileId = "";
+
+    adminImportFile.value = "";
+    adminProfileSection.hidden = true;
+    adminToolbar.hidden = true;
+    adminProfileSection.style.display = "none";
+    adminToolbar.style.display = "none";
   };
   [adminDriverName,adminDriverPhone,adminDriverAliases].forEach(i=>i.onchange=()=>{
     if (!isActiveAdmin()) return;
