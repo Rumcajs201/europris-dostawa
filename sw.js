@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-stable-v41-tour-grouping-fix";
+const CACHE_NAME = "europris-app-stable-v42-two-admin-profiles";
 
 const STATIC_FILES = [
   "./",

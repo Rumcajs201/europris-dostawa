@@ -907,8 +907,22 @@
   const ACTIVE_TRAILER_KEY = "europris_active_trailer";
   const MAX_RESULTS = 15;
   const MAX_NUMBER_LENGTH = 8;
-  const ADMIN_PIN = "4878";
-  const ADMIN_PROFILE_KEY = "europris_admin_profile_v1";
+  const ADMIN_PROFILES = {
+    "4878": {
+      id: "andrzej",
+      name: "Andrzej",
+      phone: "45155270",
+      aliases: ["Andrzej", "Osowski", "A. Osowski"]
+    },
+    "4567": {
+      id: "kamil",
+      name: "Kamil",
+      phone: "95707161",
+      aliases: ["Kamil"]
+    }
+  };
+  let activeAdminProfileId = "";
+  const ADMIN_PROFILE_KEY_PREFIX = "europris_admin_profile_v2_";
   const ADMIN_PLAN_KEY = "europris_admin_plan_v1";
 
   const translations = {
@@ -1272,9 +1286,66 @@
 
 
   function adminDigits(v){return String(v||"").replace(/\D/g,"");}
-  function adminProfile(){return{name:String(adminDriverName.value||"").trim(),phone:adminDigits(adminDriverPhone.value),aliases:String(adminDriverAliases.value||"").split(",").map(v=>v.trim()).filter(Boolean)};}
-  function saveAdminProfile(){localStorage.setItem(ADMIN_PROFILE_KEY,JSON.stringify(adminProfile()));}
-  function loadAdminProfile(){try{const s=JSON.parse(localStorage.getItem(ADMIN_PROFILE_KEY)||"null");if(s){adminDriverName.value=s.name||"Andrzej";adminDriverPhone.value=s.phone||"45155270";adminDriverAliases.value=Array.isArray(s.aliases)?s.aliases.join(", "):"Andrzej, Osowski, A. Osowski";}}catch{}}
+  function defaultAdminProfile(profileId = activeAdminProfileId) {
+    const entry = Object.values(ADMIN_PROFILES).find(profile => profile.id === profileId);
+    return entry || ADMIN_PROFILES["4878"];
+  }
+
+  function adminProfileStorageKey(profileId = activeAdminProfileId) {
+    return `${ADMIN_PROFILE_KEY_PREFIX}${profileId || "andrzej"}`;
+  }
+
+  function adminProfile(){
+    const fallback = defaultAdminProfile();
+    return {
+      id: activeAdminProfileId || fallback.id,
+      name: String(adminDriverName.value || fallback.name).trim(),
+      phone: adminDigits(adminDriverPhone.value || fallback.phone),
+      aliases: String(adminDriverAliases.value || fallback.aliases.join(","))
+        .split(",")
+        .map(value => value.trim())
+        .filter(Boolean)
+    };
+  }
+
+  function saveAdminProfile(){
+    if (!activeAdminProfileId) return;
+    localStorage.setItem(
+      adminProfileStorageKey(),
+      JSON.stringify(adminProfile())
+    );
+  }
+
+  function loadAdminProfile(profileId = activeAdminProfileId){
+    const fallback = defaultAdminProfile(profileId);
+
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(adminProfileStorageKey(profileId)) || "null"
+      );
+
+      const profile = saved || fallback;
+      adminDriverName.value = profile.name || fallback.name;
+      adminDriverPhone.value = profile.phone || fallback.phone;
+      adminDriverAliases.value = Array.isArray(profile.aliases)
+        ? profile.aliases.join(", ")
+        : fallback.aliases.join(", ");
+    } catch {
+      adminDriverName.value = fallback.name;
+      adminDriverPhone.value = fallback.phone;
+      adminDriverAliases.value = fallback.aliases.join(", ");
+    }
+  }
+
+  function activateAdminProfile(pin) {
+    const profile = ADMIN_PROFILES[pin];
+    if (!profile) return false;
+
+    activeAdminProfileId = profile.id;
+    loadAdminProfile(profile.id);
+    return true;
+  }
+
   function saveAdminPlan(p){localStorage.setItem(ADMIN_PLAN_KEY,JSON.stringify(p));}
   function loadAdminPlan(){try{return JSON.parse(localStorage.getItem(ADMIN_PLAN_KEY)||"null");}catch{return null;}}
   function normalizeHeader(v){
@@ -1298,10 +1369,29 @@
   function conflictInfo(a,b){const x=timeToMinutes(a),y=timeToMinutes(b);if(x==null||y==null)return{minutes:null,level:"medium"};const d=Math.abs(x-y);return{minutes:d,level:d<30?"high":d<=90?"medium":"low"};}
   async function selectStoreFromAdmin(r,course){const s=findStoreByNumber(r.storeNumber);tourNumber.value=String(course);saveDailyAssignment();if(s)await selectStore(s);else{search.value=r.storeNumber;currentNumber=r.storeNumber;currentName=r.storeName;currentStore=null;results.replaceChildren();await updateSelected();}adminPanel.hidden=true;window.scrollTo({top:0,behavior:"smooth"});}
   function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p=adminProfile();adminPlanList.replaceChildren();if(!plan?.rows?.length){adminSummary.textContent=t.adminNoPlan;adminPlanList.innerHTML=`<div class="admin-empty">${t.adminNoPlan}</div>`;return;}const own=plan.rows.filter(r=>matchesAdminDriver(r,p)),groups=adminCourseGroups(own),pal=own.reduce((s,r)=>s+(+r.pallets||0),0),date=own[0]?.deliveryDate||plan.rows[0]?.deliveryDate||"—";adminSummary.textContent=own.length?t.adminSummary(own.length,groups.length,pal,date):t.adminNoDriverRows;if(!own.length){adminPlanList.innerHTML=`<div class="admin-empty">${t.adminNoDriverRows}</div>`;return;}groups.forEach((g,ci)=>{const course=document.createElement("section");course.className="admin-course";const head=document.createElement("div");head.className="admin-course-header";head.innerHTML=`<div>${t.adminCourse(g.tourNumber)}</div><div>${g.rows[0]?.transportNumber?t.adminTransport(g.rows[0].transportNumber):t.adminRoute(g.rows[0]?.route||"—")}</div>`;course.append(head);g.rows.forEach(r=>{const stop=document.createElement("article");stop.className="admin-stop";const title=document.createElement("div");title.className="admin-stop-title";title.textContent=`${r.deliverySequence||"—"}. ${r.storeNumber} — ${r.storeName}`;const meta=document.createElement("div");meta.className="admin-stop-meta";meta.textContent=[r.deadline&&t.adminDeadline(r.deadline),t.adminPallets(r.pallets||0),r.trailers?t.adminTrailers(r.trailers):"",r.route?t.adminRoute(r.route):"",r.info?t.adminInfo(r.info):""].filter(Boolean).join(" • ");const acts=document.createElement("div");acts.className="admin-card-actions";const sel=document.createElement("button");sel.className="primary";sel.textContent=t.adminSelectStore;sel.onclick=()=>void selectStoreFromAdmin(r,g.tourNumber);const map=document.createElement("button");map.textContent=t.adminMap;const store=findStoreByNumber(r.storeNumber);map.disabled=!hasValidCoordinates(store);map.onclick=()=>{if(store&&hasValidCoordinates(store)){saveDailyAssignment();window.location.assign(mapsUrl(store));}};acts.append(sel,map);stop.append(title,meta,acts);const peers=plan.rows.filter(q=>q.id!==r.id&&q.storeNumber===r.storeNumber&&q.deliveryDate===r.deliveryDate&&!matchesAdminDriver(q,p));if(peers.length||normalized(r.split).includes("split")){const box=document.createElement("div");box.className="admin-split";box.innerHTML=`<div class="admin-split-title">${t.adminSplitTitle}</div>`;peers.forEach(q=>{const inf=conflictInfo(r.deadline,q.deadline),peer=document.createElement("div");peer.className="admin-peer";const badge=inf.minutes==null?t.adminConflictMedium:`${t.adminTimeDifference(inf.minutes)} — ${inf.level==="high"?t.adminConflictHigh:inf.level==="medium"?t.adminConflictMedium:t.adminConflictLow}`;peer.innerHTML=`<div>${t.adminPeer(q.driver||"—",q.deadline||"—",q.pallets||0)}</div><div>${[q.phone?`☎ ${q.phone}`:"",q.transportNumber?t.adminTransport(q.transportNumber):"",q.route?t.adminRoute(q.route):""].filter(Boolean).join(" • ")}</div><span class="admin-conflict ${inf.level}">${badge}</span>`;box.append(peer);});if(!peers.length){const e=document.createElement("div");e.className="admin-peer";e.textContent="Split";box.append(e);}stop.append(box);}course.append(stop);});adminPlanList.append(course);});}
-  function applyAdminLanguage(){const t=translations[language];adminTitle.textContent=t.adminTitle;adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;renderAdminPlan();}
+  function applyAdminLanguage(){
+    const t = translations[language];
+    const profile = adminProfile();
+    adminTitle.textContent = `${t.adminTitle} — ${profile.name}`;
+adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;renderAdminPlan();}
   function openAdminPin(){adminPinError.textContent="";adminPinInput.value="";adminPinOverlay.hidden=false;setTimeout(()=>adminPinInput.focus(),50);}
   function closeAdminPin(){adminPinOverlay.hidden=true;adminPinInput.value="";adminPinError.textContent="";}
-  function unlockAdmin(){const t=translations[language];if(adminPinInput.value!==ADMIN_PIN){adminPinError.textContent=t.adminPinError;adminPinInput.select();return;}closeAdminPin();saveAdminProfile();adminPanel.hidden=false;applyAdminLanguage();adminPanel.scrollIntoView({behavior:"smooth",block:"start"});}
+  function unlockAdmin(){
+    const text = translations[language];
+    const pin = String(adminPinInput.value || "").trim();
+
+    if (!activateAdminProfile(pin)) {
+      adminPinError.textContent = text.adminPinError;
+      adminPinInput.select();
+      return;
+    }
+
+    closeAdminPin();
+    saveAdminProfile();
+    adminPanel.hidden = false;
+    applyAdminLanguage();
+    adminPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function normalized(value) {
     return String(value)
@@ -1400,7 +1490,11 @@
   const startAdminLongPress=e=>{if(e.pointerType==="mouse"&&e.button!==0)return;adminLongPressTriggered=false;clearTimeout(adminLongPressTimer);adminLongPressTimer=setTimeout(()=>{adminLongPressTriggered=true;openAdminPin();},1200);};
   const cancelAdminLongPress=()=>{clearTimeout(adminLongPressTimer);adminLongPressTimer=null;};
   brandMark.addEventListener("pointerdown",startAdminLongPress);brandMark.addEventListener("pointerup",cancelAdminLongPress);brandMark.addEventListener("pointercancel",cancelAdminLongPress);brandMark.addEventListener("pointerleave",cancelAdminLongPress);brandMark.addEventListener("contextmenu",e=>e.preventDefault());
-  adminPinCancel.onclick=closeAdminPin;adminPinConfirm.onclick=unlockAdmin;adminPinInput.onkeydown=e=>{if(e.key==="Enter")unlockAdmin();if(e.key==="Escape")closeAdminPin();};adminClose.onclick=()=>adminPanel.hidden=true;
+  adminPinCancel.onclick=closeAdminPin;adminPinConfirm.onclick=unlockAdmin;adminPinInput.onkeydown=e=>{if(e.key==="Enter")unlockAdmin();if(e.key==="Escape")closeAdminPin();};adminClose.onclick=()=>{
+    saveAdminProfile();
+    adminPanel.hidden=true;
+    activeAdminProfileId="";
+  };
   [adminDriverName,adminDriverPhone,adminDriverAliases].forEach(i=>i.onchange=()=>{saveAdminProfile();renderAdminPlan();});
   adminImportFile.onchange=async()=>{const t=translations[language],f=adminImportFile.files?.[0];if(!f)return;try{saveAdminProfile();saveAdminPlan(parseTransportWorkbook(await f.arrayBuffer(),f.name));renderAdminPlan();}catch{adminSummary.textContent=t.adminImportError;}finally{adminImportFile.value="";}};
   adminDeletePlan.onclick=()=>{localStorage.removeItem(ADMIN_PLAN_KEY);renderAdminPlan();};
@@ -2290,8 +2384,7 @@
   });
 
 
-  loadAdminProfile();
-    restoreDailyAssignment();
+  restoreDailyAssignment();
   historyMonth.value = new Date().toISOString().slice(0, 7);
   status.textContent = translations[language].loading;
   applyLanguage();
