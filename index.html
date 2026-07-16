@@ -860,6 +860,8 @@
       trailerTitle: number => `Naczepa ${number}`,
       tourTitle: number => `Kurs ${number}`,
       trailerDeliveries: count => `${count} dostaw`,
+      excelHeaders: ["Data", "Godzina", "Kurs", "Naczepa", "Nr sklepu", "Nazwa sklepu"],
+      excelFilePrefix: "Europris-Dostawy",
       open: "Otwórz stronę dostawy",
       openSave: "Otwórz i zapisz dostawę",
       navigate: "Nawiguj w Google Maps",
@@ -923,6 +925,8 @@
       trailerTitle: number => `Tilhenger ${number}`,
       tourTitle: number => `Tur ${number}`,
       trailerDeliveries: count => `${count} leveringer`,
+      excelHeaders: ["Dato", "Klokkeslett", "Tur", "Tilhenger", "Butikknr.", "Butikknavn"],
+      excelFilePrefix: "Europris-Leveringer",
       open: "Åpne leveringssiden",
       openSave: "Åpne og lagre levering",
       navigate: "Naviger i Google Maps",
@@ -986,6 +990,8 @@
       trailerTitle: number => `Trailer ${number}`,
       tourTitle: number => `Trip ${number}`,
       trailerDeliveries: count => `${count} deliveries`,
+      excelHeaders: ["Date", "Time", "Trip", "Trailer", "Store No.", "Store Name"],
+      excelFilePrefix: "Europris-Deliveries",
       open: "Open delivery page",
       openSave: "Open and save delivery",
       navigate: "Navigate in Google Maps",
@@ -1826,8 +1832,9 @@
     saveDailyAssignment();
     if (typeof XLSX==="undefined"){error.textContent=translations[language].historyImportError;return;}
     const month=historyMonth.value;
+    const text=translations[language];
     const entries=(await getAllDeliveries()).filter(i=>localDateKey(i.createdAt).slice(0,7)===month).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
-    const data=[["Data","Godzina","Kurs","Naczepa","Nr sklepu","Nazwa sklepu"]];
+    const data=[[...text.excelHeaders]];
     let prev="";
     for(const item of entries){
       const day=localDateKey(item.createdAt);
@@ -1850,7 +1857,7 @@
     ws["!autofilter"]={ref:"A1:F1"};
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,"Dostawy");
-    XLSX.writeFile(wb,`europris-dostawy-${month}.xlsx`,{compression:true});
+    XLSX.writeFile(wb,`${text.excelFilePrefix}-${month}.xlsx`,{compression:true});
     setTimeout(restoreDailyAssignment,250);
   }
 
