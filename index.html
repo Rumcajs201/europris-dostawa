@@ -845,16 +845,17 @@
       title: "Potwierdzenie dostawy Europris",
       description: "Wpisz numer sklepu albo zacznij wpisywać jego nazwę.",
       placeholder: "Numer lub nazwa sklepu",
-      trailerLabel: "Aktualny tur i naczepa",
+      trailerLabel: "Aktualny kurs i naczepa",
       trailerHint: "Wpisz numery wewnętrzne",
-      tourFieldLabel: "Tur",
+      tourFieldLabel: "Kurs",
       trailerFieldLabel: "Naczepa",
       trailerRequired: "Przed zapisaniem dostawy wpisz numer naczepy.",
-      tourRequired: "Przed zapisaniem dostawy wpisz numer turu.",
+      tourRequired: "Przed zapisaniem dostawy wpisz numer kursu.",
+      tourTrailerRequired: "Uzupełnij numer kursu i numer naczepy.",
       trailerUnnamed: "Bez numeru naczepy",
-      tourUnnamed: "Bez numeru turu",
+      tourUnnamed: "Bez numeru kursu",
       trailerTitle: number => `Naczepa ${number}`,
-      tourTitle: number => `Tur ${number}`,
+      tourTitle: number => `Kurs ${number}`,
       trailerDeliveries: count => `${count} dostaw`,
       open: "Otwórz stronę dostawy",
       openSave: "Otwórz i zapisz dostawę",
@@ -913,6 +914,7 @@
       trailerFieldLabel: "Tilhenger",
       trailerRequired: "Skriv inn tilhengernummeret før leveringen lagres.",
       tourRequired: "Skriv inn turnummeret før leveringen lagres.",
+      tourTrailerRequired: "Fyll inn turnummer og tilhengernummer.",
       trailerUnnamed: "Uten tilhengernummer",
       tourUnnamed: "Uten turnummer",
       trailerTitle: number => `Tilhenger ${number}`,
@@ -971,14 +973,15 @@
       placeholder: "Store number or store name",
       trailerLabel: "Current tour and trailer",
       trailerHint: "Enter the internal numbers",
-      tourFieldLabel: "Tour",
+      tourFieldLabel: "Trip",
       trailerFieldLabel: "Trailer",
       trailerRequired: "Enter the trailer number before saving the delivery.",
-      tourRequired: "Enter the tour number before saving the delivery.",
+      tourRequired: "Enter the trip number before saving the delivery.",
+      tourTrailerRequired: "Enter the trip number and trailer number.",
       trailerUnnamed: "No trailer number",
-      tourUnnamed: "No tour number",
+      tourUnnamed: "No trip number",
       trailerTitle: number => `Trailer ${number}`,
-      tourTitle: number => `Tour ${number}`,
+      tourTitle: number => `Trip ${number}`,
       trailerDeliveries: count => `${count} deliveries`,
       open: "Open delivery page",
       openSave: "Open and save delivery",
@@ -1117,10 +1120,8 @@
 
   function loadTourNumber() {
     tourNumber.value = cleanTourNumber(
-      localStorage.getItem(tourStorageKey()) || "1"
+      localStorage.getItem(tourStorageKey()) || ""
     );
-
-    if (!tourNumber.value) tourNumber.value = "1";
   }
 
   function saveTrailerNumber() {
@@ -1812,7 +1813,7 @@
           hour: "2-digit",
           minute: "2-digit"
         }),
-        "Tur": String(item.tourNumber || ""),
+        "Kurs": String(item.tourNumber || ""),
         "Naczepa": String(item.trailerNumber || ""),
         "Numer sklepu": String(item.storeNumber || ""),
         "Nazwa sklepu": String(item.storeName || ""),
@@ -1825,7 +1826,7 @@
       header: [
         "Data",
         "Godzina",
-        "Tur",
+        "Kurs",
         "Naczepa",
         "Numer sklepu",
         "Nazwa sklepu",
@@ -1896,7 +1897,7 @@
     downloadFile(
       `europris-kopia-${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify({
-        version: 4,
+        version: 5,
         deliveries,
         privateContacts
       }, null, 2),
@@ -1959,21 +1960,25 @@
     }
 
     const tour = cleanTourNumber(tourNumber.value);
-    if (!/^\d{1,2}$/.test(tour)) {
-      error.textContent = translations[language].tourRequired;
-      tourNumber.focus();
-      return;
-    }
-
     const trailer = cleanTrailerNumber(trailerNumber.value);
-    if (!/^\d{1,2}$/.test(trailer)) {
-      error.textContent = translations[language].trailerRequired;
-      trailerNumber.focus();
+
+    if (!/^\d{1,2}$/.test(tour) || !/^\d{1,2}$/.test(trailer)) {
+      error.textContent = translations[language].tourTrailerRequired;
+
+      if (!/^\d{1,2}$/.test(tour)) {
+        tourNumber.focus();
+      } else {
+        trailerNumber.focus();
+      }
       return;
     }
 
     saveTourNumber();
     saveTrailerNumber();
+
+    // Utrwal wartości na cały bieżący dzień.
+    localStorage.setItem(tourStorageKey(), tour);
+    localStorage.setItem(trailerStorageKey(), trailer);
 
     try {
       await addDelivery(currentStore, trailer, tour);
@@ -2188,7 +2193,7 @@
   applyLanguage();
   void updateSelected();
 
-  fetch("stores.json?v=28", { cache: "no-store" })
+  fetch("stores.json?v=33", { cache: "no-store" })
     .then(response => {
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
