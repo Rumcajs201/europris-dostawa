@@ -678,6 +678,15 @@
     .admin-profile input { min-height:42px; padding:7px 9px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-size:.95rem; }
     .admin-toolbar { grid-template-columns:1fr 1fr; margin-top:10px; }
     .admin-file-label { display:grid; place-items:center; cursor:pointer; }
+    .admin-sync-panel { display:grid; gap:9px; margin-top:10px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+    .admin-sync-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
+    .admin-sync-row label { display:grid; gap:4px; color:var(--muted); font-size:.78rem; font-weight:850; }
+    .admin-date-select { width:100%; min-height:43px; padding:7px 9px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-size:.95rem; font-weight:800; }
+    .admin-sync-button { min-height:43px; padding:8px 12px; border:1px solid var(--green); border-radius:9px; background:var(--green); color:white; font-weight:900; }
+    .admin-sync-status { min-height:20px; color:var(--muted); font-size:.8rem; line-height:1.35; }
+    .admin-sync-status.ok { color:#08783e; }
+    .admin-sync-status.error { color:#d71920; }
+    .admin-sync-status.loading { color:#9a6800; }
     .admin-summary { margin:12px 0; padding:10px; border-radius:11px; background:color-mix(in srgb,var(--green) 8%,transparent); line-height:1.45; font-weight:750; }
     .admin-plan-list { display:grid; gap:12px; }
     .admin-course { overflow:hidden; border:1px solid var(--border); border-radius:13px; background:var(--surface); }
@@ -891,6 +900,13 @@
         <label><span id="adminDriverPhoneLabel"></span><input id="adminDriverPhone" type="tel" inputmode="tel" value="45155270"></label>
         <label><span id="adminDriverAliasesLabel"></span><input id="adminDriverAliases" type="text" value="Andrzej, Osowski, A. Osowski"></label>
       </div></div>
+      <div class="admin-sync-panel">
+        <div class="admin-sync-row">
+          <label><span id="adminDeliveryDateLabel"></span><select id="adminDeliveryDate" class="admin-date-select"></select></label>
+          <button id="adminSyncButton" class="admin-sync-button" type="button"></button>
+        </div>
+        <div id="adminSyncStatus" class="admin-sync-status"></div>
+      </div>
       <div id="adminToolbar" class="admin-toolbar">
         <label class="admin-file-label primary"><span id="adminImportLabel"></span><input id="adminImportFile" type="file" accept=".xlsx,.xls" hidden></label>
         <button id="adminDeletePlan" type="button"></button>
@@ -944,6 +960,10 @@
   let activeAdminProfileId = "";
   const ADMIN_PROFILE_KEY_PREFIX = "europris_admin_profile_v2_";
   const ADMIN_PLAN_KEY = "europris_admin_plan_v1";
+  const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
+  const ADMIN_API_TOKEN = "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
+  const ADMIN_LAST_DATE_KEY = "europris_admin_last_delivery_date_v1";
+  let adminApiDates = [];
 
   const translations = {
     pl: {
@@ -1010,7 +1030,7 @@
       locationUnavailable: "Nie udało się ustalić lokalizacji. Spróbuj ponownie.",
       locationNoCoordinates: "W bazie nie znaleziono sklepów ze współrzędnymi.",
       adminTitle:"Panel administratora — plan transportów",adminDriverPlanTitle:name=>`Plan dostawy ${name}`,adminPinTitle:"Dostęp administratora",adminPinDescription:"Wpisz czterocyfrowy PIN.",adminPinCancel:"Anuluj",adminPinConfirm:"Otwórz",adminPinError:"Nieprawidłowy PIN.",
-      adminDriverNameLabel:"Kierowca",adminDriverPhoneLabel:"Numer telefonu kierowcy",adminDriverAliasesLabel:"Inne zapisy imienia lub nazwiska (po przecinku)",adminImportLabel:"Wczytaj plan Excel",adminDeletePlan:"Usuń wczytany plan",
+      adminDriverNameLabel:"Kierowca",adminDriverPhoneLabel:"Numer telefonu kierowcy",adminDriverAliasesLabel:"Inne zapisy imienia lub nazwiska (po przecinku)",adminImportLabel:"Wczytaj plan Excel",adminDeletePlan:"Usuń wczytany plan",adminDeliveryDateLabel:"Dzień dostawy",adminSyncButton:"Pobierz plan",adminSyncLoading:"Pobieranie planów…",adminSyncOk:(date,time)=>`Plan ${date} pobrany. Aktualizacja: ${time}`,adminSyncNoPlan:date=>`Brak planu na dzień ${date}.`,adminSyncError:"Nie udało się połączyć z automatyzacją Google.",adminSyncNoDates:"Brak dostępnych planów.",
       adminNoPlan:"Nie wczytano planu transportów.",adminImportError:"Nie udało się odczytać arkusza. Sprawdź format pliku.",adminNoDriverRows:"W pliku nie znaleziono pozycji pasujących do profilu kierowcy.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} kursów, ${rows} sklepów, ${pallets} palet.`,adminCourse:number=>`Kurs ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Trasa: ${value}`,
       adminDeadline:value=>`Dostawa do: ${value}`,adminPallets:value=>`Palety: ${value}`,adminTrailers:value=>`Trallery: ${value}`,adminSequence:value=>`Kolejność: ${value}`,adminInfo:value=>`Uwagi: ${value}`,
@@ -1082,7 +1102,7 @@
       locationUnavailable: "Posisjonen kunne ikke bestemmes. Prøv igjen.",
       locationNoCoordinates: "Ingen butikker med koordinater ble funnet i databasen.",
       adminTitle:"Administrator — transportplan",adminDriverPlanTitle:name=>`Leveringsplan ${name}`,adminPinTitle:"Administratortilgang",adminPinDescription:"Skriv inn den firesifrede PIN-koden.",adminPinCancel:"Avbryt",adminPinConfirm:"Åpne",adminPinError:"Feil PIN-kode.",
-      adminDriverNameLabel:"Sjåfør",adminDriverPhoneLabel:"Sjåførens telefonnummer",adminDriverAliasesLabel:"Andre skrivemåter for navn (kommaseparert)",adminImportLabel:"Les inn Excel-plan",adminDeletePlan:"Slett innlest plan",
+      adminDriverNameLabel:"Sjåfør",adminDriverPhoneLabel:"Sjåførens telefonnummer",adminDriverAliasesLabel:"Andre skrivemåter for navn (kommaseparert)",adminImportLabel:"Les inn Excel-plan",adminDeletePlan:"Slett innlest plan",adminDeliveryDateLabel:"Leveringsdag",adminSyncButton:"Hent plan",adminSyncLoading:"Henter planer…",adminSyncOk:(date,time)=>`Plan ${date} er hentet. Oppdatert: ${time}`,adminSyncNoPlan:date=>`Ingen plan for ${date}.`,adminSyncError:"Kunne ikke koble til Google-automatiseringen.",adminSyncNoDates:"Ingen tilgjengelige planer.",
       adminNoPlan:"Ingen transportplan er lest inn.",adminImportError:"Regnearket kunne ikke leses. Kontroller filformatet.",adminNoDriverRows:"Ingen poster i filen samsvarer med sjåførprofilen.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} turer, ${rows} butikker, ${pallets} paller.`,adminCourse:number=>`Tur ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Rute: ${value}`,
       adminDeadline:value=>`Leveres innen: ${value}`,adminPallets:value=>`Paller: ${value}`,adminTrailers:value=>`Traller: ${value}`,adminSequence:value=>`Rekkefølge: ${value}`,adminInfo:value=>`Merknad: ${value}`,
@@ -1154,7 +1174,7 @@
       locationUnavailable: "Your location could not be determined. Try again.",
       locationNoCoordinates: "No stores with coordinates were found in the database.",
       adminTitle:"Administrator — transport plan",adminDriverPlanTitle:name=>`Delivery plan ${name}`,adminPinTitle:"Administrator access",adminPinDescription:"Enter the four-digit PIN.",adminPinCancel:"Cancel",adminPinConfirm:"Open",adminPinError:"Incorrect PIN.",
-      adminDriverNameLabel:"Driver",adminDriverPhoneLabel:"Driver phone number",adminDriverAliasesLabel:"Other name spellings (comma-separated)",adminImportLabel:"Import Excel plan",adminDeletePlan:"Delete imported plan",
+      adminDriverNameLabel:"Driver",adminDriverPhoneLabel:"Driver phone number",adminDriverAliasesLabel:"Other name spellings (comma-separated)",adminImportLabel:"Import Excel plan",adminDeletePlan:"Delete imported plan",adminDeliveryDateLabel:"Delivery date",adminSyncButton:"Load plan",adminSyncLoading:"Loading plans…",adminSyncOk:(date,time)=>`Plan ${date} loaded. Updated: ${time}`,adminSyncNoPlan:date=>`No plan for ${date}.`,adminSyncError:"Could not connect to Google automation.",adminSyncNoDates:"No plans available.",
       adminNoPlan:"No transport plan has been imported.",adminImportError:"The spreadsheet could not be read. Check the file format.",adminNoDriverRows:"No rows in the file match the driver profile.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} trips, ${rows} stores, ${pallets} pallets.`,adminCourse:number=>`Trip ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Route: ${value}`,
       adminDeadline:value=>`Deliver by: ${value}`,adminPallets:value=>`Pallets: ${value}`,adminTrailers:value=>`Trailers: ${value}`,adminSequence:value=>`Sequence: ${value}`,adminInfo:value=>`Notes: ${value}`,
@@ -1218,7 +1238,7 @@
   const useNearest = document.getElementById("useNearest");
   const retryLocation = document.getElementById("retryLocation");
   const footer = document.getElementById("footer");
-  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar");
+  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar"),adminDeliveryDateLabel=document.getElementById("adminDeliveryDateLabel"),adminDeliveryDate=document.getElementById("adminDeliveryDate"),adminSyncButton=document.getElementById("adminSyncButton"),adminSyncStatus=document.getElementById("adminSyncStatus");
 
 
   function currentLocalDateKey() {
@@ -1389,6 +1409,107 @@
   function excelDateKey(v){if(v instanceof Date&&!isNaN(v))return`${v.getFullYear()}-${String(v.getMonth()+1).padStart(2,"0")}-${String(v.getDate()).padStart(2,"0")}`;if(typeof v==="number"){const p=XLSX.SSF.parse_date_code(v);if(p)return`${p.y}-${String(p.m).padStart(2,"0")}-${String(p.d).padStart(2,"0")}`;}const t=String(v||"").trim(),m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);return m?`${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`:t;}
   function excelTime(v){if(v instanceof Date&&!isNaN(v))return`${String(v.getHours()).padStart(2,"0")}:${String(v.getMinutes()).padStart(2,"0")}`;if(typeof v==="number"){const p=XLSX.SSF.parse_date_code(v);if(p)return`${String(p.H||0).padStart(2,"0")}:${String(p.M||0).padStart(2,"0")}`;}const m=String(v||"").match(/(\d{1,2}):(\d{2})/);return m?`${m[1].padStart(2,"0")}:${m[2]}`:String(v||"").trim();}
   function timeToMinutes(v){const m=String(v||"").match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null;}
+  function adminJsonp(action, params = {}) {
+    return new Promise((resolve, reject) => {
+      const callbackName = `__europrisJsonp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement("script");
+      const cleanup = () => { delete window[callbackName]; script.remove(); };
+      const timeout = window.setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 20000);
+      window[callbackName] = data => { window.clearTimeout(timeout); cleanup(); resolve(data); };
+      const query = new URLSearchParams({ action, token: ADMIN_API_TOKEN, callback: callbackName, _: String(Date.now()), ...params });
+      script.src = `${ADMIN_API_URL}?${query.toString()}`;
+      script.onerror = () => { window.clearTimeout(timeout); cleanup(); reject(new Error("network")); };
+      document.head.appendChild(script);
+    });
+  }
+
+  function formatAdminDate(dateKey) {
+    const match = String(dateKey || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[3]}.${match[2]}.${match[1]}` : String(dateKey || "");
+  }
+
+  function formatAdminTimestamp(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+    return date.toLocaleString(language==="no"?"nb-NO":language==="en"?"en-GB":"pl-PL",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  }
+
+  function chooseDefaultAdminDate(dates) {
+    const saved = localStorage.getItem(ADMIN_LAST_DATE_KEY);
+    if (saved && dates.includes(saved)) return saved;
+    const today = currentLocalDateKey();
+    return dates.find(date => date >= today) || dates[dates.length - 1] || "";
+  }
+
+  function fillAdminDateOptions(items) {
+    const dates = items.map(item=>String(item.date||"")).filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date)).sort();
+    adminApiDates = dates;
+    const selected = chooseDefaultAdminDate(dates);
+    adminDeliveryDate.replaceChildren();
+    dates.forEach(date => {
+      const item = items.find(entry=>entry.date===date);
+      const option = document.createElement("option");
+      option.value = date;
+      option.textContent = `${formatAdminDate(date)}${item?.rows ? ` (${item.rows})` : ""}`;
+      option.selected = date === selected;
+      adminDeliveryDate.appendChild(option);
+    });
+    adminDeliveryDate.disabled = !dates.length;
+    adminSyncButton.disabled = !dates.length;
+    return selected;
+  }
+
+  async function loadAdminDatesAndPlan() {
+    const text = translations[language];
+    adminSyncStatus.className = "admin-sync-status loading";
+    adminSyncStatus.textContent = text.adminSyncLoading;
+    try {
+      const index = await adminJsonp("list");
+      if (!index?.ok || !Array.isArray(index.dates)) throw new Error("index");
+      const selected = fillAdminDateOptions(index.dates);
+      if (!selected) {
+        adminSyncStatus.className = "admin-sync-status error";
+        adminSyncStatus.textContent = text.adminSyncNoDates;
+        return;
+      }
+      await loadAdminPlanFromApi(selected);
+    } catch {
+      adminSyncStatus.className = "admin-sync-status error";
+      adminSyncStatus.textContent = text.adminSyncError;
+      renderAdminPlan();
+    }
+  }
+
+  async function loadAdminPlanFromApi(date) {
+    const text = translations[language];
+    const selectedDate = String(date || adminDeliveryDate.value || "");
+    if (!selectedDate) return;
+    localStorage.setItem(ADMIN_LAST_DATE_KEY, selectedDate);
+    adminSyncStatus.className = "admin-sync-status loading";
+    adminSyncStatus.textContent = text.adminSyncLoading;
+    adminSyncButton.disabled = true;
+    try {
+      const plan = await adminJsonp("plan", {date:selectedDate});
+      if (!plan?.ok || !Array.isArray(plan.rows)) {
+        localStorage.removeItem(ADMIN_PLAN_KEY);
+        adminSyncStatus.className = "admin-sync-status error";
+        adminSyncStatus.textContent = text.adminSyncNoPlan(formatAdminDate(selectedDate));
+        renderAdminPlan();
+        return;
+      }
+      saveAdminPlan(plan);
+      adminSyncStatus.className = "admin-sync-status ok";
+      adminSyncStatus.textContent = text.adminSyncOk(formatAdminDate(selectedDate),formatAdminTimestamp(plan.updatedAt));
+      renderAdminPlan();
+    } catch {
+      adminSyncStatus.className = "admin-sync-status error";
+      adminSyncStatus.textContent = text.adminSyncError;
+      renderAdminPlan();
+    } finally {
+      adminSyncButton.disabled = !adminApiDates.length;
+    }
+  }
+
   function parseTransportWorkbook(buf,fileName){const wb=XLSX.read(buf,{type:"array",cellDates:true}),ws=wb.Sheets[wb.SheetNames[0]],mx=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});const hi=mx.findIndex(r=>{
     const headers=r.map(normalizeHeader);
     return headers.includes("butikk nr") &&
@@ -1426,7 +1547,7 @@
     adminDriverName.disabled = !adminMode;
     adminDriverPhone.disabled = !adminMode;
     adminDriverAliases.disabled = !adminMode;
-adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;renderAdminPlan();}
+adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;adminDeliveryDateLabel.textContent=t.adminDeliveryDateLabel;adminSyncButton.textContent=t.adminSyncButton;renderAdminPlan();}
   function openAdminPin(){adminPinError.textContent="";adminPinInput.value="";adminPinOverlay.hidden=false;setTimeout(()=>adminPinInput.focus(),50);}
   function closeAdminPin(){adminPinOverlay.hidden=true;adminPinInput.value="";adminPinError.textContent="";}
   function unlockAdmin(){
@@ -1453,6 +1574,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     adminPanel.hidden = false;
     applyAdminLanguage();
     adminPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    void loadAdminDatesAndPlan();
   }
 
   function normalized(value) {
@@ -1593,6 +1715,9 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     localStorage.removeItem(ADMIN_PLAN_KEY);
     renderAdminPlan();
   };
+
+  adminSyncButton.addEventListener("click", () => { void loadAdminDatesAndPlan(); });
+  adminDeliveryDate.addEventListener("change", () => { void loadAdminPlanFromApi(adminDeliveryDate.value); });
 
   document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);
