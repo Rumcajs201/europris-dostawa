@@ -1,0 +1,24 @@
+INFORMACJA O PRYWATNOŚCI – EUROPRIS DOSTAWY
+
+Aplikacja zapisuje wyłącznie anonimowe i zagregowane informacje techniczne:
+- rodzaj urządzenia,
+- system operacyjny,
+- przeglądarkę,
+- sposób uruchomienia aplikacji (PWA lub przeglądarka),
+- wersję aplikacji,
+- język interfejsu,
+- klasę rozmiaru ekranu,
+- techniczne zdarzenia i błędy.
+
+Aplikacja nie zapisuje w statystykach:
+- imienia ani nazwiska,
+- kodu PIN,
+- adresu e-mail ani telefonu,
+- adresu IP,
+- dokładnej pozycji GPS,
+- numeru sklepu,
+- historii tras, dostaw, tury ani naczepy.
+
+Anonimowy identyfikator służący do liczenia urządzeń zmienia się każdego dnia.
+Surowe wpisy statystyczne są automatycznie usuwane po 35 dniach.
+Dane służą wyłącznie do poprawy działania aplikacji.
