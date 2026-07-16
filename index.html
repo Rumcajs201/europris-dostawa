@@ -679,7 +679,19 @@
     .admin-toolbar { grid-template-columns:1fr 1fr; margin-top:10px; }
     .admin-file-label { display:grid; place-items:center; cursor:pointer; }
     .admin-sync-panel { display:grid; gap:9px; margin-top:10px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
-    .admin-sync-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
+    .admin-sync-row { display:grid; grid-template-columns:1fr; gap:8px; align-items:end; }
+
+    .admin-date-select.plan-available {
+      border-color: #08783e;
+      color: #08783e;
+      font-weight: 950;
+    }
+
+    .admin-date-select.plan-missing {
+      border-color: #d71920;
+      color: #d71920;
+      font-weight: 950;
+    }
     .admin-sync-row label { display:grid; gap:4px; color:var(--muted); font-size:.78rem; font-weight:850; }
     .admin-date-select { width:100%; min-height:43px; padding:7px 9px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-size:.95rem; font-weight:800; }
     .admin-sync-button { min-height:43px; padding:8px 12px; border:1px solid var(--green); border-radius:9px; background:var(--green); color:white; font-weight:900; }
@@ -903,7 +915,6 @@
       <div class="admin-sync-panel">
         <div class="admin-sync-row">
           <label><span id="adminDeliveryDateLabel"></span><select id="adminDeliveryDate" class="admin-date-select"></select></label>
-          <button id="adminSyncButton" class="admin-sync-button" type="button"></button>
         </div>
         <div id="adminSyncStatus" class="admin-sync-status"></div>
       </div>
@@ -1238,7 +1249,7 @@
   const useNearest = document.getElementById("useNearest");
   const retryLocation = document.getElementById("retryLocation");
   const footer = document.getElementById("footer");
-  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar"),adminDeliveryDateLabel=document.getElementById("adminDeliveryDateLabel"),adminDeliveryDate=document.getElementById("adminDeliveryDate"),adminSyncButton=document.getElementById("adminSyncButton"),adminSyncStatus=document.getElementById("adminSyncStatus");
+  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar"),adminDeliveryDateLabel=document.getElementById("adminDeliveryDateLabel"),adminDeliveryDate=document.getElementById("adminDeliveryDate"),adminSyncStatus=document.getElementById("adminSyncStatus");
 
 
   function currentLocalDateKey() {
@@ -1491,16 +1502,24 @@
       option.dataset.available = item ? "1" : "0";
       option.textContent = `${formatAdminDate(date)} — ${
         item ? text.adminPlanAvailable : text.adminPlanMissing
-      }${item?.rows ? ` (${item.rows})` : ""}`;
+      }`;
 
       option.selected = date === selected;
       adminDeliveryDate.appendChild(option);
     });
 
     adminDeliveryDate.disabled = false;
-    adminSyncButton.disabled = false;
+    updateAdminDateStatusColor();
 
     return selected;
+  }
+
+  function updateAdminDateStatusColor() {
+    const selectedOption = adminDeliveryDate.selectedOptions[0];
+    const available = selectedOption?.dataset.available === "1";
+
+    adminDeliveryDate.classList.toggle("plan-available", available);
+    adminDeliveryDate.classList.toggle("plan-missing", !available);
   }
 
   async function loadAdminDatesAndPlan() {
@@ -1511,6 +1530,7 @@
       const index = await adminJsonp("list");
       if (!index?.ok || !Array.isArray(index.dates)) throw new Error("index");
       const selected = fillAdminDateOptions(index.dates);
+      updateAdminDateStatusColor();
       await loadAdminPlanFromApi(selected);
     } catch {
       adminSyncStatus.className = "admin-sync-status error";
@@ -1541,7 +1561,6 @@
     }
     adminSyncStatus.className = "admin-sync-status loading";
     adminSyncStatus.textContent = text.adminSyncLoading;
-    adminSyncButton.disabled = true;
     try {
       const plan = await adminJsonp("plan", {date:selectedDate});
       if (!plan?.ok || !Array.isArray(plan.rows)) {
@@ -1560,7 +1579,6 @@
       adminSyncStatus.textContent = text.adminSyncError;
       renderAdminPlan();
     } finally {
-      adminSyncButton.disabled = false;
     }
   }
 
@@ -1601,7 +1619,7 @@
     adminDriverName.disabled = !adminMode;
     adminDriverPhone.disabled = !adminMode;
     adminDriverAliases.disabled = !adminMode;
-adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;adminDeliveryDateLabel.textContent=t.adminDeliveryDateLabel;adminSyncButton.textContent=t.adminSyncButton;renderAdminPlan();}
+adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.adminPinDescription;adminPinCancel.textContent=t.adminPinCancel;adminPinConfirm.textContent=t.adminPinConfirm;adminDriverNameLabel.textContent=t.adminDriverNameLabel;adminDriverPhoneLabel.textContent=t.adminDriverPhoneLabel;adminDriverAliasesLabel.textContent=t.adminDriverAliasesLabel;adminImportLabel.textContent=t.adminImportLabel;adminDeletePlan.textContent=t.adminDeletePlan;adminDeliveryDateLabel.textContent=t.adminDeliveryDateLabel;renderAdminPlan();}
   function openAdminPin(){adminPinError.textContent="";adminPinInput.value="";adminPinOverlay.hidden=false;setTimeout(()=>adminPinInput.focus(),50);}
   function closeAdminPin(){adminPinOverlay.hidden=true;adminPinInput.value="";adminPinError.textContent="";}
   function unlockAdmin(){
@@ -1770,8 +1788,10 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     renderAdminPlan();
   };
 
-  adminSyncButton.addEventListener("click", () => { void loadAdminDatesAndPlan(); });
-  adminDeliveryDate.addEventListener("change", () => { void loadAdminPlanFromApi(adminDeliveryDate.value); });
+  adminDeliveryDate.addEventListener("change", () => {
+    updateAdminDateStatusColor();
+    void loadAdminPlanFromApi(adminDeliveryDate.value);
+  });
 
   document.querySelectorAll("[data-lang]").forEach(button => {
       button.classList.toggle("active", button.dataset.lang === language);

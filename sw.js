@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-stable-v47-six-day-range";
+const CACHE_NAME = "europris-app-stable-v48-date-status-colors";
 
 const STATIC_FILES = [
   "./",
