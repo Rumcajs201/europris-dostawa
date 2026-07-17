@@ -2077,7 +2077,9 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
 
     return {
       pallets: Number(row?.pallets) || 0,
-      trailerCount: Number(row?.trailers) || 0
+      // Liczba naczep wynika wyłącznie z numeru tury:
+      // jedna tura = jedna naczepa.
+      trailerCount: String(tour || "").trim() ? 1 : 0
     };
   }
 
@@ -2411,7 +2413,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
 
         if (row) {
           item.pallets = Number(row.pallets) || 0;
-          item.trailerCount = Number(row.trailers) || 0;
+          item.trailerCount = String(item.tourNumber || row.tour12 || "").trim() ? 1 : 0;
         }
       }
     }
@@ -2420,20 +2422,17 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
   }
 
   function monthlyTrailerTotal(entries) {
-    const assignments = new Map();
+    const uniqueDayTours = new Set();
 
     for (const item of entries) {
       const day = localDateKey(item.createdAt);
-      const trailer = String(item.trailerNumber || "").trim();
       const tour = String(item.tourNumber || "").trim();
-      const key = `${day}|${tour}|${trailer || "unknown"}`;
-      const planned = Number(item.trailerCount) || 0;
 
-      if (!assignments.has(key)) assignments.set(key, planned || 1);
-      else assignments.set(key, Math.max(assignments.get(key), planned || 1));
+      if (!tour) continue;
+      uniqueDayTours.add(`${day}|${tour}`);
     }
 
-    return [...assignments.values()].reduce((sum, value) => sum + value, 0);
+    return uniqueDayTours.size;
   }
 
   async function exportExcel() {
@@ -2453,6 +2452,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
 
     const data = [[...text.excelHeaders]];
     let previousDay = "";
+    const countedDayTours = new Set();
 
     for (const item of entries) {
       const day = localDateKey(item.createdAt);
@@ -2464,15 +2464,21 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       previousDay = day;
       const date = new Date(item.createdAt);
 
+      const tour = String(item.tourNumber || "").trim();
+      const dayTourKey = tour ? `${day}|${tour}` : "";
+      const trailerValue = dayTourKey && !countedDayTours.has(dayTourKey) ? 1 : "";
+
+      if (dayTourKey) countedDayTours.add(dayTourKey);
+
       data.push([
         date.toLocaleDateString(language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL"),
         date.toLocaleTimeString(language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL", { hour: "2-digit", minute: "2-digit" }),
-        String(item.tourNumber || ""),
+        tour,
         String(item.trailerNumber || ""),
         String(item.storeNumber || ""),
         String(item.storeName || ""),
         Number(item.pallets) || 0,
-        Number(item.trailerCount) || 0
+        trailerValue
       ]);
     }
 
