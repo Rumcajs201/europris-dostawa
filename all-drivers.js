@@ -11,9 +11,12 @@ function text(){
 }
 function plan(){try{const p=JSON.parse(localStorage.getItem(PLAN_KEY)||"null");return p&&Array.isArray(p.rows)?p:null;}catch{return null;}}
 function trailerCount(rows){
- const explicit=rows.reduce((m,r)=>Math.max(m,Number(r.trailers)||0),0);
- if(explicit)return explicit;
- return new Set(rows.map(r=>String(r.transportNumber||"").trim()).filter(Boolean)).size;
+ // Jedna unikalna tura oznacza jedną naczepę.
+ // Nie używamy kolumny "Traller", bo zawiera inne dane operacyjne.
+ const tours=new Set(
+   rows.map(r=>String(r.tour12||"").trim()).filter(Boolean)
+ );
+ return tours.size;
 }
 function groups(rows){
  const map=new Map();
@@ -66,7 +69,7 @@ function details(g,t,target){
    const seq=document.createElement("div");seq.className=`selected-driver-sequence tour-color-${tourGroup.tour}`;seq.textContent=String(r.deliverySequence||i+1);
    const c=document.createElement("div"),store=document.createElement("div"),meta=document.createElement("div");c.className="selected-driver-stop-content";store.className="selected-driver-store";meta.className="selected-driver-meta";
    store.textContent=`${r.storeNumber||"—"} — ${r.storeName||"—"}`;
-   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`,Number(r.trailers)>0?`${t.tra}: ${Number(r.trailers)}`:""].filter(Boolean).join(" • ");
+   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`].filter(Boolean).join(" • ");
    c.append(store,meta);stop.append(seq,c);section.append(stop);});
    stops.append(section);
  });card.append(stops);target.append(card);
