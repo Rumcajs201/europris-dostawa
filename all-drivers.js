@@ -1,293 +1,87 @@
 (() => {
-  "use strict";
-
-  const PLAN_KEY = "europris_admin_plan_v1";
-  const PANEL_ID = "allDriversPanelV502";
-
-  function digits(value) {
-    return String(value || "").replace(/\D/g, "");
-  }
-
-  function norm(value) {
-    return String(value || "")
-      .toLocaleLowerCase("nb-NO")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim();
-  }
-
-  function languageCode() {
-    const value = document.documentElement.lang || "pl";
-    if (value.startsWith("nb") || value.startsWith("no")) return "no";
-    if (value.startsWith("en")) return "en";
-    return "pl";
-  }
-
-  function labels() {
-    const lang = languageCode();
-    if (lang === "no") return {
-      title: "Sjåfører og biler",
-      choose: "Velg sjåfør / bil",
-      placeholder: "Trykk for å velge sjåfør / bil",
-      noPlan: "Ingen plan for valgt dag.",
-      stores: n => `${n} butikker`,
-      pallets: n => `${n} paller`,
-      unknown: "Ukjent sjåfør / bil",
-      phone: "Telefon",
-      deadline: "Tid",
-      palletsLabel: "Paller",
-      details: "Detaljer"
-    };
-    if (lang === "en") return {
-      title: "Drivers and vehicles",
-      choose: "Select driver / vehicle",
-      placeholder: "Tap to select a driver / vehicle",
-      noPlan: "No plan for the selected day.",
-      stores: n => `${n} stores`,
-      pallets: n => `${n} pallets`,
-      unknown: "Unknown driver / vehicle",
-      phone: "Phone",
-      deadline: "Time",
-      palletsLabel: "Pallets",
-      details: "Details"
-    };
-    return {
-      title: "Kierowcy i auta",
-      choose: "Wybierz kierowcę / auto",
-      placeholder: "Kliknij, aby wybrać kierowcę / auto",
-      noPlan: "Brak planu na wybrany dzień.",
-      stores: n => `${n} sklepów`,
-      pallets: n => `${n} palet`,
-      unknown: "Nieznany kierowca / auto",
-      phone: "Telefon",
-      deadline: "Godzina",
-      palletsLabel: "Palety",
-      details: "Szczegóły"
-    };
-  }
-
-  function readPlan() {
-    try {
-      const plan = JSON.parse(localStorage.getItem(PLAN_KEY) || "null");
-      return plan && Array.isArray(plan.rows) ? plan : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function groupRows(rows) {
-    const map = new Map();
-
-    rows.forEach((row, index) => {
-      const name = String(row.driver || row.carrier || "").trim();
-      const phone = digits(row.phone);
-      const key = `${norm(name || "unknown")}|${phone}`;
-
-      if (!map.has(key)) {
-        map.set(key, { key, name, phone, rows: [] });
-      }
-
-      const group = map.get(key);
-      if (!group.phone && phone) group.phone = phone;
-      group.rows.push({ ...row, __index: index });
-    });
-
-    return [...map.values()]
-      .map(group => ({
-        ...group,
-        rows: group.rows.sort((a, b) =>
-          String(a.deadline || "").localeCompare(String(b.deadline || "")) ||
-          Number(a.deliverySequence || 0) - Number(b.deliverySequence || 0)
-        )
-      }))
-      .sort((a, b) => norm(a.name).localeCompare(norm(b.name), "nb"));
-  }
-
-  function telHref(phone) {
-    const value = digits(phone);
-    if (!value) return "";
-    return value.length === 8 ? `tel:+47${value}` : `tel:+${value}`;
-  }
-
-  function compactStoreList(group) {
-    return group.rows
-      .map(row => {
-        const number = String(row.storeNumber || "").trim();
-        const name = String(row.storeName || "").trim();
-        return number && name ? `${number} ${name}` : (number || name || "—");
-      })
-      .join(" • ");
-  }
-
-  function createPanel() {
-    let panel = document.getElementById(PANEL_ID);
-    if (panel) return panel;
-
-    const oldPanel = document.getElementById("allDriversPanelV501");
-    if (oldPanel) oldPanel.remove();
-
-    const adminPanel = document.getElementById("adminPanel");
-    const planList = document.getElementById("adminPlanList");
-    if (!adminPanel || !planList) return null;
-
-    panel = document.createElement("section");
-    panel.id = PANEL_ID;
-    panel.className = "all-drivers-panel compact";
-    planList.insertAdjacentElement("afterend", panel);
-    return panel;
-  }
-
-  function renderSelected(group, text, target) {
-    target.replaceChildren();
-
-    if (!group) {
-      target.hidden = true;
-      return;
-    }
-
-    target.hidden = false;
-
-    const card = document.createElement("section");
-    card.className = "selected-driver-card";
-
-    const head = document.createElement("div");
-    head.className = "selected-driver-head";
-
-    const left = document.createElement("div");
-
-    const name = document.createElement("div");
-    name.className = "selected-driver-name";
-    name.textContent = group.name || text.unknown;
-    left.append(name);
-
-    if (group.phone) {
-      const phone = document.createElement("a");
-      phone.className = "selected-driver-phone";
-      phone.href = telHref(group.phone);
-      phone.textContent = `☎ ${group.phone}`;
-      left.append(phone);
-    }
-
-    const pallets = group.rows.reduce((sum, row) => sum + (Number(row.pallets) || 0), 0);
-
-    const summary = document.createElement("div");
-    summary.className = "selected-driver-summary";
-    summary.innerHTML = `<span>${text.stores(group.rows.length)}</span><span>${text.pallets(pallets)}</span>`;
-
-    head.append(left, summary);
-    card.append(head);
-
-    const stops = document.createElement("div");
-    stops.className = "selected-driver-stops";
-
-    group.rows.forEach(row => {
-      const stop = document.createElement("article");
-      stop.className = "selected-driver-stop";
-
-      const store = document.createElement("div");
-      store.className = "selected-driver-store";
-      store.textContent = `${row.storeNumber || "—"} — ${row.storeName || "—"}`;
-
-      const meta = document.createElement("div");
-      meta.className = "selected-driver-meta";
-      meta.textContent = [
-        row.deadline ? `${text.deadline}: ${row.deadline}` : "",
-        `${text.palletsLabel}: ${Number(row.pallets) || 0}`
-      ].filter(Boolean).join(" • ");
-
-      stop.append(store, meta);
-      stops.append(stop);
-    });
-
-    card.append(stops);
-    target.append(card);
-  }
-
-  function render() {
-    const panel = createPanel();
-    if (!panel) return;
-
-    const text = labels();
-    const plan = readPlan();
-    panel.replaceChildren();
-
-    const title = document.createElement("h3");
-    title.className = "all-drivers-title";
-    title.textContent = text.title;
-    panel.append(title);
-
-    if (!plan?.rows?.length) {
-      const empty = document.createElement("div");
-      empty.className = "all-drivers-empty";
-      empty.textContent = text.noPlan;
-      panel.append(empty);
-      return;
-    }
-
-    const groups = groupRows(plan.rows);
-
-    const select = document.createElement("select");
-    select.className = "all-drivers-select compact";
-    select.setAttribute("aria-label", text.choose);
-
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = text.placeholder;
-    placeholder.selected = true;
-    select.append(placeholder);
-
-    groups.forEach(group => {
-      const option = document.createElement("option");
-      option.value = group.key;
-      const stores = compactStoreList(group);
-      option.textContent = `${group.name || text.unknown} — ${stores}`;
-      select.append(option);
-    });
-
-    panel.append(select);
-
-    const selected = document.createElement("div");
-    selected.className = "selected-driver-details";
-    selected.hidden = true;
-    panel.append(selected);
-
-    select.addEventListener("change", () => {
-      const group = groups.find(item => item.key === select.value) || null;
-      renderSelected(group, text, selected);
-    });
-  }
-
-  function panelVisible() {
-    const adminPanel = document.getElementById("adminPanel");
-    return adminPanel && !adminPanel.hidden;
-  }
-
-  function refreshWhenVisible() {
-    if (panelVisible()) render();
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    createPanel();
-    refreshWhenVisible();
-
-    const adminPanel = document.getElementById("adminPanel");
-    if (adminPanel) {
-      new MutationObserver(refreshWhenVisible)
-        .observe(adminPanel, { attributes: true, attributeFilter: ["hidden"] });
-    }
-
-    document.getElementById("adminDeliveryDate")
-      ?.addEventListener("change", () => {
-        window.setTimeout(refreshWhenVisible, 500);
-        window.setTimeout(refreshWhenVisible, 1600);
-      });
-
-    document.querySelectorAll("[data-lang]").forEach(button => {
-      button.addEventListener("click", () => window.setTimeout(refreshWhenVisible, 0));
-    });
-
-    window.setInterval(refreshWhenVisible, 2500);
-  });
-
-  window.EuroprisAllDrivers = Object.freeze({ render });
+"use strict";
+const PLAN_KEY="europris_admin_plan_v1", PANEL_ID="allDriversPanelV503";
+const digits=v=>String(v||"").replace(/\D/g,"");
+const norm=v=>String(v||"").toLocaleLowerCase("nb-NO").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+function lang(){const v=document.documentElement.lang||"pl";return v.startsWith("nb")||v.startsWith("no")?"no":v.startsWith("en")?"en":"pl";}
+function text(){
+ if(lang()==="no")return{title:"Sjåfører og biler",open:"Åpne sjåførliste",none:"Ingen plan for valgt dag.",unknown:"Ukjent sjåfør / bil",stores:n=>`${n} butikker`,pallets:n=>`${n} paller`,trailers:n=>n===1?"1 tilhenger":`${n} tilhengere`,noTrailer:"Ingen tilhengerdata",time:"Tid",pal:"Paller",tra:"Tilhengere"};
+ if(lang()==="en")return{title:"Drivers and vehicles",open:"Open driver list",none:"No plan for the selected day.",unknown:"Unknown driver / vehicle",stores:n=>`${n} stores`,pallets:n=>`${n} pallets`,trailers:n=>n===1?"1 trailer":`${n} trailers`,noTrailer:"No trailer data",time:"Time",pal:"Pallets",tra:"Trailers"};
+ return{title:"Kierowcy i auta",open:"Rozwiń listę kierowców",none:"Brak planu na wybrany dzień.",unknown:"Nieznany kierowca / auto",stores:n=>`${n} sklepów`,pallets:n=>`${n} palet`,trailers:n=>n===1?"1 naczepa":`${n} naczepy`,noTrailer:"Brak danych o naczepach",time:"Godzina",pal:"Palety",tra:"Naczepy"};
+}
+function plan(){try{const p=JSON.parse(localStorage.getItem(PLAN_KEY)||"null");return p&&Array.isArray(p.rows)?p:null;}catch{return null;}}
+function trailerCount(rows){
+ const explicit=rows.reduce((m,r)=>Math.max(m,Number(r.trailers)||0),0);
+ if(explicit)return explicit;
+ return new Set(rows.map(r=>String(r.transportNumber||"").trim()).filter(Boolean)).size;
+}
+function groups(rows){
+ const map=new Map();
+ rows.forEach((r,i)=>{const name=String(r.driver||r.carrier||"").trim(),phone=digits(r.phone),key=`${norm(name||"unknown")}|${phone}`;if(!map.has(key))map.set(key,{key,name,phone,rows:[]});const g=map.get(key);if(!g.phone&&phone)g.phone=phone;g.rows.push({...r,__index:i});});
+ return [...map.values()].map(g=>({...g,trailerCount:trailerCount(g.rows),rows:g.rows.sort((a,b)=>String(a.deadline||"").localeCompare(String(b.deadline||""))||Number(a.deliverySequence||0)-Number(b.deliverySequence||0))})).sort((a,b)=>norm(a.name).localeCompare(norm(b.name),"nb"));
+}
+function tel(phone){const d=digits(phone);return d?(d.length===8?`tel:+47${d}`:`tel:+${d}`):"";}
+function storesLine(g,limit=4){const a=g.rows.map(r=>{const n=String(r.storeNumber||"").trim(),s=String(r.storeName||"").trim();return n&&s?`${n} ${s}`:(n||s||"—");}),v=a.slice(0,limit),left=a.length-v.length;return left?`${v.join(" • ")} • +${left}`:v.join(" • ");}
+function trailerVisual(count,t){
+ const w=document.createElement("div");w.className="driver-trailer-visual";
+ if(!count){const e=document.createElement("span");e.className="driver-trailer-empty";e.textContent=t.noTrailer;w.append(e);return w;}
+ const icons=document.createElement("div");icons.className="driver-trailer-icons";
+ const shown=Math.min(count,4);for(let i=0;i<shown;i++){const s=document.createElement("span");s.className="driver-trailer-icon";icons.append(s);}
+ if(count>shown){const m=document.createElement("span");m.className="driver-trailer-more";m.textContent=`+${count-shown}`;icons.append(m);}
+ const l=document.createElement("span");l.className="driver-trailer-label";l.textContent=t.trailers(count);w.append(icons,l);return w;
+}
+function createPanel(){
+ let p=document.getElementById(PANEL_ID);if(p)return p;
+ document.getElementById("allDriversPanelV501")?.remove();document.getElementById("allDriversPanelV502")?.remove();
+ const list=document.getElementById("adminPlanList");if(!list)return null;
+ p=document.createElement("section");p.id=PANEL_ID;p.className="all-drivers-panel";list.insertAdjacentElement("afterend",p);return p;
+}
+function details(g,t,target){
+ target.replaceChildren();if(!g){target.hidden=true;return;}target.hidden=false;
+ const card=document.createElement("section");card.className="selected-driver-card";
+ const head=document.createElement("div");head.className="selected-driver-head";
+ const ident=document.createElement("div"),name=document.createElement("div");name.className="selected-driver-name";name.textContent=g.name||t.unknown;ident.append(name);
+ if(g.phone){const a=document.createElement("a");a.className="selected-driver-phone";a.href=tel(g.phone);a.textContent=`☎ ${g.phone}`;ident.append(a);}
+ const totals=document.createElement("div");totals.className="selected-driver-totals";
+ const pal=g.rows.reduce((s,r)=>s+(Number(r.pallets)||0),0);
+ [t.stores(g.rows.length),t.pallets(pal)].forEach(v=>{const s=document.createElement("span");s.textContent=v;totals.append(s);});
+ totals.append(trailerVisual(g.trailerCount,t));head.append(ident,totals);card.append(head);
+ const stops=document.createElement("div");stops.className="selected-driver-stops";
+ g.rows.forEach((r,i)=>{const stop=document.createElement("article");stop.className="selected-driver-stop";
+ const seq=document.createElement("div");seq.className="selected-driver-sequence";seq.textContent=String(r.deliverySequence||i+1);
+ const c=document.createElement("div"),store=document.createElement("div"),meta=document.createElement("div");c.className="selected-driver-stop-content";store.className="selected-driver-store";meta.className="selected-driver-meta";
+ store.textContent=`${r.storeNumber||"—"} — ${r.storeName||"—"}`;
+ meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`,Number(r.trailers)>0?`${t.tra}: ${Number(r.trailers)}`:""].filter(Boolean).join(" • ");
+ c.append(store,meta);stop.append(seq,c);stops.append(stop);});card.append(stops);target.append(card);
+}
+function render(){
+ const panel=createPanel();if(!panel)return;
+ const selectedKey=panel.dataset.selectedKey||"", wasOpen=panel.dataset.dropdownOpen==="1", t=text(),p=plan();panel.replaceChildren();
+ const h=document.createElement("h3");h.className="all-drivers-title";h.textContent=t.title;panel.append(h);
+ if(!p?.rows?.length){const e=document.createElement("div");e.className="all-drivers-empty";e.textContent=t.none;panel.append(e);return;}
+ const gs=groups(p.rows), dropdown=document.createElement("div");dropdown.className="drivers-dropdown";
+ const trigger=document.createElement("button");trigger.type="button";trigger.className="drivers-dropdown-trigger";trigger.setAttribute("aria-expanded",wasOpen?"true":"false");
+ const tt=document.createElement("span");tt.className="drivers-dropdown-trigger-text";const prev=gs.find(g=>g.key===selectedKey);tt.textContent=prev?(prev.name||t.unknown):t.open;
+ const ar=document.createElement("span");ar.className="drivers-dropdown-arrow";ar.textContent="⌄";trigger.append(tt,ar);
+ const menu=document.createElement("div");menu.className="drivers-dropdown-menu";menu.hidden=!wasOpen;
+ const selected=document.createElement("div");selected.className="selected-driver-details";selected.hidden=true;
+ gs.forEach(g=>{const item=document.createElement("button");item.type="button";item.className="drivers-dropdown-item";
+ const top=document.createElement("div");top.className="drivers-dropdown-item-top";const nm=document.createElement("strong");nm.textContent=g.name||t.unknown;
+ const badges=document.createElement("div");badges.className="drivers-dropdown-item-badges";const pal=g.rows.reduce((s,r)=>s+(Number(r.pallets)||0),0);
+ [t.stores(g.rows.length),t.pallets(pal)].forEach(v=>{const s=document.createElement("span");s.textContent=v;badges.append(s);});top.append(nm,badges);
+ const st=document.createElement("div");st.className="drivers-dropdown-item-stores";st.textContent=storesLine(g);item.append(top,st,trailerVisual(g.trailerCount,t));
+ item.addEventListener("click",()=>{panel.dataset.selectedKey=g.key;panel.dataset.dropdownOpen="0";tt.textContent=g.name||t.unknown;menu.hidden=true;trigger.setAttribute("aria-expanded","false");details(g,t,selected);});menu.append(item);});
+ trigger.addEventListener("click",e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;panel.dataset.dropdownOpen=open?"1":"0";trigger.setAttribute("aria-expanded",open?"true":"false");});
+ menu.addEventListener("click",e=>e.stopPropagation());dropdown.append(trigger,menu);panel.append(dropdown,selected);if(prev)details(prev,t,selected);
+}
+function visible(){const p=document.getElementById("adminPanel");return p&&!p.hidden;}
+function refresh(){if(visible())render();}
+document.addEventListener("click",e=>{const p=document.getElementById(PANEL_ID);if(!p||p.contains(e.target))return;const m=p.querySelector(".drivers-dropdown-menu"),tr=p.querySelector(".drivers-dropdown-trigger");if(m&&!m.hidden){m.hidden=true;p.dataset.dropdownOpen="0";tr?.setAttribute("aria-expanded","false");}});
+document.addEventListener("DOMContentLoaded",()=>{createPanel();refresh();
+ const admin=document.getElementById("adminPanel");if(admin)new MutationObserver(refresh).observe(admin,{attributes:true,attributeFilter:["hidden"]});
+ const list=document.getElementById("adminPlanList");if(list){let timer=0;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(refresh,100);}).observe(list,{childList:true,subtree:true});}
+ document.getElementById("adminDeliveryDate")?.addEventListener("change",()=>{setTimeout(refresh,300);setTimeout(refresh,1200);});
+ document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setTimeout(refresh,0)));
+});
+window.EuroprisAllDrivers=Object.freeze({render});
 })();
