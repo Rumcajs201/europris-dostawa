@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-stable-v48-date-status-colors";
+const CACHE_NAME = "europris-app-v50-1-all-drivers-fixed";
 
 const STATIC_FILES = [
   "./",
@@ -7,6 +7,8 @@ const STATIC_FILES = [
   "./rumcajs-logo.png",
   "./manifest.webmanifest",
   "./stores.json",
+  "./all-drivers.js",
+  "./all-drivers.css",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
   "./europris-app-icon-512-v28.png"
