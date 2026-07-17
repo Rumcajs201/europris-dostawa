@@ -62,3 +62,9 @@
 }
 .selected-driver-sequence.tour-color-1{background:#08783e}
 .selected-driver-sequence.tour-color-2{background:#2563eb}
+
+.drivers-dropdown-return{padding:7px 9px;border-radius:8px;background:color-mix(in srgb,#2563eb 9%,transparent);color:#2563eb;font-size:.78rem;font-weight:850;line-height:1.35}
+.selected-driver-returns{border-top:2px solid #2563eb}
+.selected-driver-returns-header{padding:9px 12px;background:color-mix(in srgb,#2563eb 11%,transparent);color:#2563eb;font-weight:950}
+.selected-driver-return-item{padding:10px 12px;border-top:1px solid var(--border)}
+.selected-driver-return-meta{margin-top:4px;color:var(--muted);font-size:.82rem;line-height:1.4}

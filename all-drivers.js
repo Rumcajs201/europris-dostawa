@@ -5,9 +5,9 @@ const digits=v=>String(v||"").replace(/\D/g,"");
 const norm=v=>String(v||"").toLocaleLowerCase("nb-NO").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
 function lang(){const v=document.documentElement.lang||"pl";return v.startsWith("nb")||v.startsWith("no")?"no":v.startsWith("en")?"en":"pl";}
 function text(){
- if(lang()==="no")return{title:"Sjåfører og biler",open:"Åpne sjåførliste",none:"Ingen plan for valgt dag.",unknown:"Ukjent sjåfør / bil",stores:n=>`${n} butikker`,pallets:n=>`${n} paller`,trailers:n=>n===1?"1 tilhenger":`${n} tilhengere`,noTrailer:"Ingen tilhengerdata",time:"Tid",pal:"Paller",tra:"Tilhengere",tour:n=>`Tur ${n}`};
- if(lang()==="en")return{title:"Drivers and vehicles",open:"Open driver list",none:"No plan for the selected day.",unknown:"Unknown driver / vehicle",stores:n=>`${n} stores`,pallets:n=>`${n} pallets`,trailers:n=>n===1?"1 trailer":`${n} trailers`,noTrailer:"No trailer data",time:"Time",pal:"Pallets",tra:"Trailers",tour:n=>`Trip ${n}`};
- return{title:"Kierowcy i auta",open:"Rozwiń listę kierowców",none:"Brak planu na wybrany dzień.",unknown:"Nieznany kierowca / auto",stores:n=>`${n} sklepów`,pallets:n=>`${n} palet`,trailers:n=>n===1?"1 naczepa":`${n} naczepy`,noTrailer:"Brak danych o naczepach",time:"Godzina",pal:"Palety",tra:"Naczepy",tour:n=>`Tur ${n}`};
+ if(lang()==="no")return{title:"Sjåfører og biler",open:"Åpne sjåførliste",none:"Ingen plan for valgt dag.",unknown:"Ukjent sjåfør / bil",stores:n=>`${n} butikker`,pallets:n=>`${n} paller`,trailers:n=>n===1?"1 tilhenger":`${n} tilhengere`,noTrailer:"Ingen tilhengerdata",time:"Tid",pal:"Paller",tra:"Tilhengere",tour:n=>`Tur ${n}`,returnLoad:"Returlast",order:"Ordre",pickup:"Henting",emptyPallets:"Retur tompaller"};
+ if(lang()==="en")return{title:"Drivers and vehicles",open:"Open driver list",none:"No plan for the selected day.",unknown:"Unknown driver / vehicle",stores:n=>`${n} stores`,pallets:n=>`${n} pallets`,trailers:n=>n===1?"1 trailer":`${n} trailers`,noTrailer:"No trailer data",time:"Time",pal:"Pallets",tra:"Trailers",tour:n=>`Trip ${n}`,returnLoad:"Return load",order:"Order",pickup:"Pickup",emptyPallets:"Empty pallet return"};
+ return{title:"Kierowcy i auta",open:"Rozwiń listę kierowców",none:"Brak planu na wybrany dzień.",unknown:"Nieznany kierowca / auto",stores:n=>`${n} sklepów`,pallets:n=>`${n} palet`,trailers:n=>n===1?"1 naczepa":`${n} naczepy`,noTrailer:"Brak danych o naczepach",time:"Godzina",pal:"Palety",tra:"Naczepy",tour:n=>`Tur ${n}`,returnLoad:"Ładunek powrotny",order:"Zlecenie",pickup:"Odbiór",emptyPallets:"Powrót pustych palet"};
 }
 function plan(){try{const p=JSON.parse(localStorage.getItem(PLAN_KEY)||"null");return p&&Array.isArray(p.rows)?p:null;}catch{return null;}}
 function trailerCount(rows){
@@ -30,6 +30,8 @@ function rowsByTour(g){
  g.rows.forEach(r=>{const key=String(r.tour12||"").trim()||"1";if(!map.has(key))map.set(key,[]);map.get(key).push(r);});
  return [...map.entries()].map(([tour,rows])=>({tour,rows:rows.sort((a,b)=>String(a.deadline||"").localeCompare(String(b.deadline||""))||Number(a.deliverySequence||0)-Number(b.deliverySequence||0))})).sort((a,b)=>Number(a.tour)-Number(b.tour));
 }
+function groupReturnLoads(g){const map=new Map();g.rows.forEach(r=>(Array.isArray(r.returnLoads)?r.returnLoads:[]).forEach(load=>{const key=String(load.orderNumber||load.terminal||load.supplier||JSON.stringify(load));if(!map.has(key))map.set(key,load);}));return[...map.values()];}
+function returnEmptiesForRow(r,t){const raw=String(r.returnEmpties||"").trim();if(!raw||raw==="0"||raw==="32")return"";return`${t.emptyPallets}: ${raw}`;}
 function storesByTour(g,limit=4){
  return rowsByTour(g).map(group=>{
    const all=group.rows.map(r=>{const n=String(r.storeNumber||"").trim(),s=String(r.storeName||"").trim();return n&&s?`${n} ${s}`:(n||s||"—");});
@@ -69,10 +71,12 @@ function details(g,t,target){
    const seq=document.createElement("div");seq.className=`selected-driver-sequence tour-color-${tourGroup.tour}`;seq.textContent=String(r.deliverySequence||i+1);
    const c=document.createElement("div"),store=document.createElement("div"),meta=document.createElement("div");c.className="selected-driver-stop-content";store.className="selected-driver-store";meta.className="selected-driver-meta";
    store.textContent=`${r.storeNumber||"—"} — ${r.storeName||"—"}`;
-   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`].filter(Boolean).join(" • ");
+   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`,returnEmptiesForRow(r,t)].filter(Boolean).join(" • ");
    c.append(store,meta);stop.append(seq,c);section.append(stop);});
    stops.append(section);
- });card.append(stops);target.append(card);
+ });card.append(stops);
+ const loads=groupReturnLoads(g);if(loads.length){const returns=document.createElement("section");returns.className="selected-driver-returns";const rh=document.createElement("div");rh.className="selected-driver-returns-header";rh.textContent=`↩ ${t.returnLoad}`;returns.append(rh);loads.forEach(load=>{const item=document.createElement("div");item.className="selected-driver-return-item";const title=document.createElement("strong");title.textContent=load.terminal||load.supplier||t.returnLoad;const meta=document.createElement("div");meta.className="selected-driver-return-meta";meta.textContent=[load.orderNumber?`${t.order}: ${load.orderNumber}`:"",load.pallets?`${t.pal}: ${load.pallets}`:"",load.terminal?`${t.pickup}: ${load.terminal}`:"",load.supplier||""].filter(Boolean).join(" • ");item.append(title,meta);returns.append(item);});card.append(returns);}
+ target.append(card);
 }
 function render(){
  const panel=createPanel();if(!panel)return;
@@ -91,7 +95,7 @@ function render(){
  [t.stores(g.rows.length),t.pallets(pal)].forEach(v=>{const s=document.createElement("span");s.textContent=v;badges.append(s);});toursForGroup(g).forEach(v=>{const s=document.createElement("span");s.className="driver-tour-badge";s.textContent=t.tour(v);badges.append(s);});top.append(nm,badges);
  const preview=document.createElement("div");preview.className="drivers-dropdown-tour-preview";
  storesByTour(g).forEach(group=>{const section=document.createElement("div");section.className=`drivers-dropdown-tour-section tour-color-${group.tour}`;const title=document.createElement("div");title.className="drivers-dropdown-tour-title";title.textContent=t.tour(group.tour);const line=document.createElement("div");line.className="drivers-dropdown-item-stores";line.textContent=group.list;section.append(title,line);preview.append(section);});
- item.append(top,preview,trailerVisual(g.trailerCount,t));
+ item.append(top,preview,trailerVisual(g.trailerCount,t));const returnLoads=groupReturnLoads(g);if(returnLoads.length){const ret=document.createElement("div");ret.className="drivers-dropdown-return";const first=returnLoads[0];ret.textContent=`↩ ${t.returnLoad}: ${first.terminal||first.supplier||""}${first.orderNumber?` • ${t.order}: ${first.orderNumber}`:""}${first.pallets?` • ${t.pal}: ${first.pallets}`:""}`;item.append(ret);}
  item.addEventListener("click",()=>{panel.dataset.selectedKey=g.key;panel.dataset.dropdownOpen="0";tt.textContent=g.name||t.unknown;menu.hidden=true;trigger.setAttribute("aria-expanded","false");details(g,t,selected);});menu.append(item);});
  trigger.addEventListener("click",e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;panel.dataset.dropdownOpen=open?"1":"0";trigger.setAttribute("aria-expanded",open?"true":"false");});
  menu.addEventListener("click",e=>e.stopPropagation());dropdown.append(trigger,menu);panel.append(dropdown,selected);if(prev)details(prev,t,selected);
