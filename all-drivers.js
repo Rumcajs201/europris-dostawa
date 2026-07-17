@@ -22,7 +22,18 @@ function groups(rows){
 }
 function tel(phone){const d=digits(phone);return d?(d.length===8?`tel:+47${d}`:`tel:+${d}`):"";}
 function toursForGroup(g){return [...new Set(g.rows.map(r=>String(r.tour12||"").trim()).filter(Boolean))].sort((a,b)=>Number(a)-Number(b));}
-function storesLine(g,limit=4){const a=g.rows.map(r=>{const n=String(r.storeNumber||"").trim(),s=String(r.storeName||"").trim();return n&&s?`${n} ${s}`:(n||s||"—");}),v=a.slice(0,limit),left=a.length-v.length;return left?`${v.join(" • ")} • +${left}`:v.join(" • ");}
+function rowsByTour(g){
+ const map=new Map();
+ g.rows.forEach(r=>{const key=String(r.tour12||"").trim()||"1";if(!map.has(key))map.set(key,[]);map.get(key).push(r);});
+ return [...map.entries()].map(([tour,rows])=>({tour,rows:rows.sort((a,b)=>String(a.deadline||"").localeCompare(String(b.deadline||""))||Number(a.deliverySequence||0)-Number(b.deliverySequence||0))})).sort((a,b)=>Number(a.tour)-Number(b.tour));
+}
+function storesByTour(g,limit=4){
+ return rowsByTour(g).map(group=>{
+   const all=group.rows.map(r=>{const n=String(r.storeNumber||"").trim(),s=String(r.storeName||"").trim();return n&&s?`${n} ${s}`:(n||s||"—");});
+   const visible=all.slice(0,limit),left=all.length-visible.length;
+   return{tour:group.tour,list:left?`${visible.join(" • ")} • +${left}`:visible.join(" • ")};
+ });
+}
 function trailerVisual(count,t){
  const w=document.createElement("div");w.className="driver-trailer-visual";
  if(!count){const e=document.createElement("span");e.className="driver-trailer-empty";e.textContent=t.noTrailer;w.append(e);return w;}
@@ -48,12 +59,17 @@ function details(g,t,target){
  [t.stores(g.rows.length),t.pallets(pal)].forEach(v=>{const s=document.createElement("span");s.textContent=v;totals.append(s);});
  totals.append(trailerVisual(g.trailerCount,t));head.append(ident,totals);card.append(head);
  const stops=document.createElement("div");stops.className="selected-driver-stops";
- g.rows.forEach((r,i)=>{const stop=document.createElement("article");stop.className="selected-driver-stop";
- const seq=document.createElement("div");seq.className="selected-driver-sequence";seq.textContent=String(r.deliverySequence||i+1);
- const c=document.createElement("div"),store=document.createElement("div"),meta=document.createElement("div");c.className="selected-driver-stop-content";store.className="selected-driver-store";meta.className="selected-driver-meta";
- store.textContent=`${r.storeNumber||"—"} — ${r.storeName||"—"}`;
- meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`,Number(r.trailers)>0?`${t.tra}: ${Number(r.trailers)}`:""].filter(Boolean).join(" • ");
- c.append(store,meta);stop.append(seq,c);stops.append(stop);});card.append(stops);target.append(card);
+ rowsByTour(g).forEach(tourGroup=>{
+   const section=document.createElement("section");section.className=`selected-driver-tour-section tour-color-${tourGroup.tour}`;
+   const header=document.createElement("div");header.className="selected-driver-tour-header";header.textContent=t.tour(tourGroup.tour);section.append(header);
+   tourGroup.rows.forEach((r,i)=>{const stop=document.createElement("article");stop.className="selected-driver-stop";
+   const seq=document.createElement("div");seq.className=`selected-driver-sequence tour-color-${tourGroup.tour}`;seq.textContent=String(r.deliverySequence||i+1);
+   const c=document.createElement("div"),store=document.createElement("div"),meta=document.createElement("div");c.className="selected-driver-stop-content";store.className="selected-driver-store";meta.className="selected-driver-meta";
+   store.textContent=`${r.storeNumber||"—"} — ${r.storeName||"—"}`;
+   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`,Number(r.trailers)>0?`${t.tra}: ${Number(r.trailers)}`:""].filter(Boolean).join(" • ");
+   c.append(store,meta);stop.append(seq,c);section.append(stop);});
+   stops.append(section);
+ });card.append(stops);target.append(card);
 }
 function render(){
  const panel=createPanel();if(!panel)return;
@@ -70,7 +86,9 @@ function render(){
  const top=document.createElement("div");top.className="drivers-dropdown-item-top";const nm=document.createElement("strong");nm.textContent=g.name||t.unknown;
  const badges=document.createElement("div");badges.className="drivers-dropdown-item-badges";const pal=g.rows.reduce((s,r)=>s+(Number(r.pallets)||0),0);
  [t.stores(g.rows.length),t.pallets(pal)].forEach(v=>{const s=document.createElement("span");s.textContent=v;badges.append(s);});toursForGroup(g).forEach(v=>{const s=document.createElement("span");s.className="driver-tour-badge";s.textContent=t.tour(v);badges.append(s);});top.append(nm,badges);
- const st=document.createElement("div");st.className="drivers-dropdown-item-stores";st.textContent=storesLine(g);item.append(top,st,trailerVisual(g.trailerCount,t));
+ const preview=document.createElement("div");preview.className="drivers-dropdown-tour-preview";
+ storesByTour(g).forEach(group=>{const section=document.createElement("div");section.className=`drivers-dropdown-tour-section tour-color-${group.tour}`;const title=document.createElement("div");title.className="drivers-dropdown-tour-title";title.textContent=t.tour(group.tour);const line=document.createElement("div");line.className="drivers-dropdown-item-stores";line.textContent=group.list;section.append(title,line);preview.append(section);});
+ item.append(top,preview,trailerVisual(g.trailerCount,t));
  item.addEventListener("click",()=>{panel.dataset.selectedKey=g.key;panel.dataset.dropdownOpen="0";tt.textContent=g.name||t.unknown;menu.hidden=true;trigger.setAttribute("aria-expanded","false");details(g,t,selected);});menu.append(item);});
  trigger.addEventListener("click",e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;panel.dataset.dropdownOpen=open?"1":"0";trigger.setAttribute("aria-expanded",open?"true":"false");});
  menu.addEventListener("click",e=>e.stopPropagation());dropdown.append(trigger,menu);panel.append(dropdown,selected);if(prev)details(prev,t,selected);

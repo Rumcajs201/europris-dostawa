@@ -38,3 +38,27 @@
 .selected-driver-meta{margin-top:5px;color:var(--muted);font-size:.84rem;line-height:1.35}
 .all-drivers-empty{padding:14px 8px;color:var(--muted);text-align:center}
 .driver-tour-badge{background:color-mix(in srgb,#2563eb 12%,transparent)!important;color:#2563eb!important}
+
+.drivers-dropdown-tour-preview{display:grid;gap:7px}
+.drivers-dropdown-tour-section{padding:7px 9px;border-left:3px solid var(--green);border-radius:8px;background:color-mix(in srgb,var(--green) 5%,transparent)}
+.drivers-dropdown-tour-title{margin-bottom:3px;color:var(--green);font-size:.76rem;font-weight:950;text-transform:uppercase;letter-spacing:.03em}
+.selected-driver-tour-section{border-top:1px solid var(--border)}
+.selected-driver-tour-section:first-child{border-top:0}
+.selected-driver-tour-header{padding:9px 12px;background:color-mix(in srgb,var(--green) 12%,transparent);color:var(--green);font-size:.86rem;font-weight:950;text-transform:uppercase;letter-spacing:.03em}
+.selected-driver-tour-section .selected-driver-stop:first-of-type{border-top:0}
+
+/* v50.6 — kolory tur */
+.drivers-dropdown-tour-section.tour-color-1,
+.selected-driver-tour-section.tour-color-1 .selected-driver-tour-header{
+  border-color:#08783e;
+  background:color-mix(in srgb,#08783e 10%,transparent);
+  color:#08783e;
+}
+.drivers-dropdown-tour-section.tour-color-2,
+.selected-driver-tour-section.tour-color-2 .selected-driver-tour-header{
+  border-color:#2563eb;
+  background:color-mix(in srgb,#2563eb 10%,transparent);
+  color:#2563eb;
+}
+.selected-driver-sequence.tour-color-1{background:#08783e}
+.selected-driver-sequence.tour-color-2{background:#2563eb}

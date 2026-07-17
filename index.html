@@ -744,7 +744,7 @@
       line-height: 1.35;
     }
   </style>
-  <link rel="stylesheet" href="all-drivers.css?v=50.4">
+  <link rel="stylesheet" href="all-drivers.css?v=50.6">
 </head>
 
 <body>
@@ -994,7 +994,7 @@
       trailerTitle: number => `Naczepa ${number}`,
       tourTitle: number => `Kurs ${number}`,
       trailerDeliveries: count => `${count} dostaw`,
-      excelHeaders: ["Data", "Godzina", "Kurs", "Naczepa", "Nr sklepu", "Nazwa sklepu"],
+      excelHeaders: ["Data", "Godzina", "Kurs", "Naczepa", "Nr sklepu", "Nazwa sklepu", "Liczba palet", "Liczba naczep"],
       excelFilePrefix: "Europris-Dostawy",
       open: "Otwórz stronę dostawy",
       openSave: "Otwórz i zapisz dostawę",
@@ -1066,7 +1066,7 @@
       trailerTitle: number => `Tilhenger ${number}`,
       tourTitle: number => `Tur ${number}`,
       trailerDeliveries: count => `${count} leveringer`,
-      excelHeaders: ["Dato", "Klokkeslett", "Tur", "Tilhenger", "Butikknr.", "Butikknavn"],
+      excelHeaders: ["Dato", "Klokkeslett", "Tur", "Tilhenger", "Butikknr.", "Butikknavn", "Antall paller", "Antall tilhengere"],
       excelFilePrefix: "Europris-Leveringer",
       open: "Åpne leveringssiden",
       openSave: "Åpne og lagre levering",
@@ -1138,7 +1138,7 @@
       trailerTitle: number => `Trailer ${number}`,
       tourTitle: number => `Trip ${number}`,
       trailerDeliveries: count => `${count} deliveries`,
-      excelHeaders: ["Date", "Time", "Trip", "Trailer", "Store No.", "Store Name"],
+      excelHeaders: ["Date", "Time", "Trip", "Trailer", "Store No.", "Store Name", "Pallets", "Trailers"],
       excelFilePrefix: "Europris-Deliveries",
       open: "Open delivery page",
       openSave: "Open and save delivery",
@@ -2062,8 +2062,28 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     return result;
   }
 
+  function deliveryPlanMetrics(storeNumber, tour) {
+    const plan = loadAdminPlan();
+    if (!plan?.rows?.length) return { pallets: 0, trailerCount: 0 };
+
+    const profile = adminProfile();
+    const candidates = plan.rows.filter(row =>
+      String(row.storeNumber || "") === String(storeNumber || "") &&
+      String(row.tour12 || "1") === String(tour || "1")
+    );
+
+    const own = candidates.filter(row => matchesAdminDriver(row, profile));
+    const row = own[0] || candidates[0];
+
+    return {
+      pallets: Number(row?.pallets) || 0,
+      trailerCount: Number(row?.trailers) || 0
+    };
+  }
+
   async function addDelivery(store, trailer, tour) {
     const now = new Date();
+    const metrics = deliveryPlanMetrics(store.number, tour);
     const entry = {
       id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       storeNumber: String(store.number),
@@ -2074,6 +2094,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       phone: String(store.phone || ""),
       latitude: Number(store.latitude),
       longitude: Number(store.longitude),
+      pallets: metrics.pallets,
+      trailerCount: metrics.trailerCount,
       createdAt: now.toISOString(),
       month: now.toISOString().slice(0, 7)
     };
@@ -2349,37 +2371,137 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     URL.revokeObjectURL(url);
   }
 
+  async function tryLoadPlanForHistoryDate(dateKey) {
+    const cached = loadAdminPlan();
+    if (cached?.rows?.some(row => String(row.deliveryDate || "") === dateKey)) {
+      return cached;
+    }
+
+    try {
+      const remote = await adminJsonp("plan", { date: dateKey });
+      return remote?.ok && Array.isArray(remote.rows) ? remote : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function enrichHistoryEntries(entries) {
+    const profile = adminProfile();
+    const byDate = new Map();
+
+    for (const item of entries) {
+      const day = localDateKey(item.createdAt);
+      if (!byDate.has(day)) byDate.set(day, []);
+      byDate.get(day).push(item);
+    }
+
+    for (const [day, dayEntries] of byDate) {
+      const plan = await tryLoadPlanForHistoryDate(day);
+      if (!plan?.rows?.length) continue;
+
+      for (const item of dayEntries) {
+        if ((Number(item.pallets) || 0) > 0 || (Number(item.trailerCount) || 0) > 0) continue;
+
+        const candidates = plan.rows.filter(row =>
+          String(row.storeNumber || "") === String(item.storeNumber || "") &&
+          String(row.tour12 || "1") === String(item.tourNumber || "1")
+        );
+        const own = candidates.filter(row => matchesAdminDriver(row, profile));
+        const row = own[0] || candidates[0];
+
+        if (row) {
+          item.pallets = Number(row.pallets) || 0;
+          item.trailerCount = Number(row.trailers) || 0;
+        }
+      }
+    }
+
+    return entries;
+  }
+
+  function monthlyTrailerTotal(entries) {
+    const assignments = new Map();
+
+    for (const item of entries) {
+      const day = localDateKey(item.createdAt);
+      const trailer = String(item.trailerNumber || "").trim();
+      const tour = String(item.tourNumber || "").trim();
+      const key = `${day}|${tour}|${trailer || "unknown"}`;
+      const planned = Number(item.trailerCount) || 0;
+
+      if (!assignments.has(key)) assignments.set(key, planned || 1);
+      else assignments.set(key, Math.max(assignments.get(key), planned || 1));
+    }
+
+    return [...assignments.values()].reduce((sum, value) => sum + value, 0);
+  }
+
   async function exportExcel() {
     saveDailyAssignment();
-    if (typeof XLSX==="undefined"){error.textContent=translations[language].historyImportError;return;}
-    const month=historyMonth.value;
-    const text=translations[language];
-    const entries=(await getAllDeliveries()).filter(i=>localDateKey(i.createdAt).slice(0,7)===month).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
-    const data=[[...text.excelHeaders]];
-    let prev="";
-    for(const item of entries){
-      const day=localDateKey(item.createdAt);
-      if(prev && day!==prev){
-        data.push(["────────","────────","────────","────────","────────","────────────────"]);
+    if (typeof XLSX === "undefined") {
+      error.textContent = translations[language].historyImportError;
+      return;
+    }
+
+    const month = historyMonth.value;
+    const text = translations[language];
+    let entries = (await getAllDeliveries())
+      .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
+      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+
+    entries = await enrichHistoryEntries(entries);
+
+    const data = [[...text.excelHeaders]];
+    let previousDay = "";
+
+    for (const item of entries) {
+      const day = localDateKey(item.createdAt);
+
+      if (previousDay && day !== previousDay) {
+        data.push(["────────", "────────", "────────", "────────", "────────", "────────────────", "────────", "────────"]);
       }
-      prev=day;
-      const d=new Date(item.createdAt);
+
+      previousDay = day;
+      const date = new Date(item.createdAt);
+
       data.push([
-        d.toLocaleDateString("pl-PL"),
-        d.toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"}),
-        String(item.tourNumber||""),
-        String(item.trailerNumber||""),
-        String(item.storeNumber||""),
-        String(item.storeName||"")
+        date.toLocaleDateString(language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL"),
+        date.toLocaleTimeString(language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL", { hour: "2-digit", minute: "2-digit" }),
+        String(item.tourNumber || ""),
+        String(item.trailerNumber || ""),
+        String(item.storeNumber || ""),
+        String(item.storeName || ""),
+        Number(item.pallets) || 0,
+        Number(item.trailerCount) || 0
       ]);
     }
-    const ws=XLSX.utils.aoa_to_sheet(data);
-    ws["!cols"]=[{wch:13},{wch:10},{wch:8},{wch:10},{wch:14},{wch:28}];
-    ws["!autofilter"]={ref:"A1:F1"};
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,"Dostawy");
-    XLSX.writeFile(wb,`${text.excelFilePrefix}-${month}.xlsx`,{compression:true});
-    setTimeout(restoreDailyAssignment,250);
+
+    const totalPallets = entries.reduce((sum, item) => sum + (Number(item.pallets) || 0), 0);
+    const totalTrailers = monthlyTrailerTotal(entries);
+
+    data.push([]);
+    data.push([
+      language === "no" ? "MÅNEDSSUM" : language === "en" ? "MONTH TOTAL" : "PODSUMOWANIE MIESIĄCA",
+      "",
+      "",
+      "",
+      "",
+      "",
+      totalPallets,
+      totalTrailers
+    ]);
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    worksheet["!cols"] = [
+      { wch: 13 }, { wch: 10 }, { wch: 8 }, { wch: 10 },
+      { wch: 14 }, { wch: 28 }, { wch: 14 }, { wch: 16 }
+    ];
+    worksheet["!autofilter"] = { ref: "A1:H1" };
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, language === "no" ? "Leveringer" : language === "en" ? "Deliveries" : "Dostawy");
+    XLSX.writeFile(workbook, `${text.excelFilePrefix}-${month}.xlsx`, { compression: true });
+    setTimeout(restoreDailyAssignment, 250);
   }
 
   async function exportJson() {
@@ -2390,7 +2512,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     downloadFile(
       `europris-kopia-${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify({
-        version: 5,
+        version: 6,
         deliveries,
         privateContacts
       }, null, 2),
@@ -2751,6 +2873,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
   }
 })();
 </script>
-  <script src="all-drivers.js?v=50.4"></script>
+  <script src="all-drivers.js?v=50.6"></script>
 </body>
 </html>
