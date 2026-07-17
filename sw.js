@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v50-6-tour-colors-excel-metrics";
+const CACHE_NAME = "europris-app-v50-7-compact-excel-columns";
 
 const STATIC_FILES = [
   "./",

@@ -2493,10 +2493,34 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
 
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     worksheet["!cols"] = [
-      { wch: 13 }, { wch: 10 }, { wch: 8 }, { wch: 10 },
-      { wch: 14 }, { wch: 28 }, { wch: 14 }, { wch: 16 }
+      { wch: 11 }, // Data
+      { wch: 7 },  // Godzina
+      { wch: 4 },  // Tura
+      { wch: 4 },  // Naczepa
+      { wch: 8 },  // Nr sklepu
+      { wch: 26 }, // Nazwa sklepu
+      { wch: 4 },  // Palety
+      { wch: 4 }   // Liczba naczep
     ];
     worksheet["!autofilter"] = { ref: "A1:H1" };
+
+    // Wyśrodkowanie krótkich kolumn: Tura, Naczepa, Palety, Naczepy.
+    const centeredColumns = ["C", "D", "G", "H"];
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    centeredColumns.forEach(columnLetter => {
+      const columnIndex = XLSX.utils.decode_col(columnLetter);
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        const address = XLSX.utils.encode_cell({ r: row, c: columnIndex });
+        const cell = worksheet[address];
+        if (!cell) continue;
+        cell.s = cell.s || {};
+        cell.s.alignment = {
+          ...(cell.s.alignment || {}),
+          horizontal: "center",
+          vertical: "center"
+        };
+      }
+    });
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, language === "no" ? "Leveringer" : language === "en" ? "Deliveries" : "Dostawy");
