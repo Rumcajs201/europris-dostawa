@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const EUROPRIS_ANALYTICS_VERSION = "v49";
+  const EUROPRIS_ANALYTICS_VERSION = "v56";
   const EUROPRIS_ANALYTICS_ENDPOINT =
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const EUROPRIS_ANALYTICS_TOKEN =
@@ -39,21 +39,30 @@
     ].join("-");
   }
 
-  function sessionSeed() {
-    const key = "europris_stats_random_seed_v1";
-    let seed = sessionStorage.getItem(key);
-    if (!seed) {
-      const bytes = new Uint32Array(4);
+  function installationId() {
+    // Losowy identyfikator instalacji. Nie korzysta z numeru telefonu,
+    // konta, GPS, IP, IMEI ani innych identyfikatorów sprzętowych.
+    const key = "europris_stats_installation_id_v1";
+    try {
+      let id = localStorage.getItem(key);
+      if (id && /^[a-f0-9]{24}$/.test(id)) return id;
+
+      const bytes = new Uint8Array(12);
       crypto.getRandomValues(bytes);
-      seed = Array.from(bytes, n => n.toString(36)).join("-");
-      sessionStorage.setItem(key, seed);
+      id = Array.from(bytes, value => value.toString(16).padStart(2, "0")).join("");
+      localStorage.setItem(key, id);
+      return id;
+    } catch {
+      // Tryb awaryjny dla przeglądarek blokujących localStorage.
+      const bytes = new Uint32Array(3);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes, value => value.toString(16).padStart(8, "0")).join("");
     }
-    return seed;
   }
 
   function dailyAnonymousId() {
-    // Zmienia się każdego dnia i nie pozwala budować długiej historii urządzenia.
-    return simpleHash(`${dayKey()}|${sessionSeed()}|${screen.width}x${screen.height}`);
+    // Osobny identyfikator do liczenia unikalnych urządzeń w konkretnym dniu.
+    return simpleHash(`${dayKey()}|${installationId()}`);
   }
 
   function detectOS() {
@@ -123,6 +132,7 @@
       event: eventName,
       day: dayKey(),
       anonymousDayId: dailyAnonymousId(),
+      installationId: installationId(),
       os: detectOS(),
       browser: detectBrowser(),
       device: detectDeviceType(),

@@ -19,3 +19,47 @@
 .stats-bar-track{height:7px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--border) 70%,transparent)}
 .stats-bar-track span{display:block;height:100%;border-radius:inherit;background:var(--green)}
 .stats-generated{margin-top:9px;color:var(--muted);font-size:.68rem;text-align:right}
+
+/* v56 — aktywność anonimowych instalacji */
+.stats-device-activity{
+  margin-top:10px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:11px;
+}
+.stats-device-activity h4{
+  margin:0 0 8px;
+  color:var(--text);
+  font-size:.84rem;
+}
+.stats-device-table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.stats-device-table{
+  width:100%;
+  min-width:500px;
+  border-collapse:collapse;
+  font-size:.72rem;
+}
+.stats-device-table th,
+.stats-device-table td{
+  padding:7px 6px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  white-space:nowrap;
+}
+.stats-device-table th{
+  color:var(--green);
+  font-size:.68rem;
+}
+.stats-device-table td:nth-child(2),
+.stats-device-table th:nth-child(2){
+  text-align:center;
+}
+.stats-privacy-note{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:.65rem;
+  line-height:1.35;
+}

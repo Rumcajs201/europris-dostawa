@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v55-1-hidden-menu-repair";
+const CACHE_NAME = "europris-app-v56-anonymous-device-activity";
 
 const STATIC_FILES = [
   "./",
