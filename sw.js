@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v50-all-drivers";
+const CACHE_NAME = "europris-app-v57-1-direct-geolocation-prompt";
 
 const STATIC_FILES = [
   "./",
@@ -7,10 +7,13 @@ const STATIC_FILES = [
   "./rumcajs-logo.png",
   "./manifest.webmanifest",
   "./stores.json",
-  "./PRYWATNOSC_STATYSTYKI.txt",
   "./stats.css",
   "./stats-panel.js",
   "./analytics.js",
+  "./weather-humor.js",
+  "./weather-humor.css",
+  "./all-drivers.js",
+  "./all-drivers.css",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
   "./europris-app-icon-512-v28.png"
