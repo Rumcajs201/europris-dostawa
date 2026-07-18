@@ -1,84 +1,11 @@
 (() => {
-  "use strict";
-
-  const ENDPOINT =
-    "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
-  const TOKEN = "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[ch]));
-  }
-
-  function rows(obj) {
-    return Object.entries(obj || {})
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) =>
-        `<div class="stats-row"><span>${escapeHtml(name)}</span><strong>${Number(count) || 0}</strong></div>`
-      ).join("") || `<div class="stats-empty">Brak danych</div>`;
-  }
-
-  function card(title, content) {
-    return `<section class="stats-card"><h3>${escapeHtml(title)}</h3>${content}</section>`;
-  }
-
-  function summaryTile(label, value) {
-    return `<div class="stats-tile"><strong>${Number(value) || 0}</strong><span>${escapeHtml(label)}</span></div>`;
-  }
-
-  function render(root, data) {
-    const summary = data.summary || {};
-    root.innerHTML = `
-      <div class="stats-toolbar">
-        <div>
-          <h2>Statystyki aplikacji</h2>
-          <p>Anonimowe dane techniczne. Bez GPS, IP, nazwisk, PIN-ów i historii tras.</p>
-        </div>
-        <button type="button" id="statsRefresh">Odśwież</button>
-      </div>
-
-      <div class="stats-tiles">
-        ${summaryTile("Aktywne urządzenia dzisiaj", summary.devicesToday)}
-        ${summaryTile("Uruchomienia dzisiaj", summary.opensToday)}
-        ${summaryTile("Aktywne urządzenia 7 dni", summary.devices7d)}
-        ${summaryTile("Aktywne urządzenia 30 dni", summary.devices30d)}
-      </div>
-
-      <div class="stats-grid">
-        ${card("Systemy operacyjne – 30 dni", rows(data.os))}
-        ${card("Typ urządzenia – 30 dni", rows(data.device))}
-        ${card("Przeglądarki – 30 dni", rows(data.browser))}
-        ${card("Sposób uruchomienia – 30 dni", rows(data.displayMode))}
-        ${card("Wersje aplikacji – 30 dni", rows(data.version))}
-        ${card("Języki – 30 dni", rows(data.language))}
-        ${card("Klasy ekranu – 30 dni", rows(data.screenClass))}
-        ${card("Zdarzenia – 30 dni", rows(data.events))}
-      </div>
-
-      <p class="stats-updated">Ostatnia aktualizacja: ${escapeHtml(data.generatedAt || "—")}</p>
-    `;
-
-    root.querySelector("#statsRefresh")?.addEventListener("click", () => load(root));
-  }
-
-  async function load(root) {
-    root.innerHTML = `<div class="stats-loading">Pobieranie statystyk…</div>`;
-    try {
-      const url = `${ENDPOINT}?action=stats_summary&token=${encodeURIComponent(TOKEN)}&_=${Date.now()}`;
-      const response = await fetch(url, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      if (!data || data.ok !== true) throw new Error(data?.error || "Błąd API");
-      render(root, data);
-    } catch (error) {
-      root.innerHTML = `
-        <div class="stats-error">
-          Nie udało się pobrać statystyk.<br>
-          <small>${escapeHtml(error.message)}</small>
-        </div>`;
-    }
-  }
-
-  window.EuroprisStatsPanel = Object.freeze({ load });
+"use strict";
+const API="https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
+const TOKEN="hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
+function lang(){const v=document.documentElement.lang||"pl";return v.startsWith("no")||v.startsWith("nb")?"no":v.startsWith("en")?"en":"pl";}
+function labels(){if(lang()==="no")return{loading:"Laster statistikk…",error:"Kunne ikke laste statistikken.",a:"Enheter i dag",b:"Åpninger i dag",c:"Enheter — 7 dager",d:"Enheter — 30 dager",os:"Operativsystemer",br:"Nettlesere",dev:"Enhetstyper",mode:"PWA / nettleser",lng:"Språk",ver:"Appversjoner",ev:"Tekniske hendelser",none:"Ingen data",updated:"Oppdatert"};if(lang()==="en")return{loading:"Loading statistics…",error:"Unable to load statistics.",a:"Devices today",b:"Opens today",c:"Devices — 7 days",d:"Devices — 30 days",os:"Operating systems",br:"Browsers",dev:"Device types",mode:"PWA / browser",lng:"Languages",ver:"App versions",ev:"Technical events",none:"No data",updated:"Updated"};return{loading:"Ładowanie statystyk…",error:"Nie udało się pobrać statystyk.",a:"Urządzenia dzisiaj",b:"Uruchomienia dzisiaj",c:"Urządzenia — 7 dni",d:"Urządzenia — 30 dni",os:"Systemy operacyjne",br:"Przeglądarki",dev:"Typy urządzeń",mode:"PWA / przeglądarka",lng:"Języki",ver:"Wersje aplikacji",ev:"Zdarzenia techniczne",none:"Brak danych",updated:"Aktualizacja"};}
+const metric=(l,v)=>`<div class="stats-metric"><strong>${Number(v)||0}</strong><span>${l}</span></div>`;
+function chart(title,obj,none){const entries=Object.entries(obj||{}).sort((a,b)=>Number(b[1])-Number(a[1]));if(!entries.length)return`<section class="stats-chart"><h4>${title}</h4><div class="stats-empty">${none}</div></section>`;const max=Math.max(...entries.map(([,v])=>Number(v)||0),1);return`<section class="stats-chart"><h4>${title}</h4><div class="stats-bars">${entries.map(([n,v])=>`<div class="stats-bar-row"><div class="stats-bar-label"><span>${n}</span><strong>${v}</strong></div><div class="stats-bar-track"><span style="width:${Math.max(4,Math.round((Number(v)/max)*100))}%"></span></div></div>`).join("")}</div></section>`;}
+async function load(container,force=false){if(!container)return;if(!force&&container.dataset.loaded==="1")return;const t=labels();container.innerHTML=`<div class="stats-loading">${t.loading}</div>`;try{const response=await fetch(`${API}?action=stats_summary&token=${encodeURIComponent(TOKEN)}`,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();if(!data.ok)throw new Error(data.error||"API");const s=data.summary||{};container.innerHTML=`<div class="stats-metrics">${metric(t.a,s.devicesToday)}${metric(t.b,s.opensToday)}${metric(t.c,s.devices7d)}${metric(t.d,s.devices30d)}</div><div class="stats-grid">${chart(t.os,data.os,t.none)}${chart(t.dev,data.device,t.none)}${chart(t.br,data.browser,t.none)}${chart(t.mode,data.displayMode,t.none)}${chart(t.lng,data.language,t.none)}${chart(t.ver,data.version,t.none)}${chart(t.ev,data.events,t.none)}</div><div class="stats-generated">${t.updated}: ${data.generatedAt||"—"}</div>`;container.dataset.loaded="1";}catch(error){console.error("Europris stats:",error);container.innerHTML=`<div class="stats-error">${t.error}</div>`;}}
+window.EuroprisStatsPanel=Object.freeze({load});
 })();

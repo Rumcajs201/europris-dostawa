@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v53-humor-weather";
+const CACHE_NAME = "europris-app-v55-admin-stats";
 
 const STATIC_FILES = [
   "./",
@@ -7,6 +7,9 @@ const STATIC_FILES = [
   "./rumcajs-logo.png",
   "./manifest.webmanifest",
   "./stores.json",
+  "./stats.css",
+  "./stats-panel.js",
+  "./analytics.js",
   "./weather-humor.js",
   "./weather-humor.css",
   "./all-drivers.js",

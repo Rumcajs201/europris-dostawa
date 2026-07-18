@@ -751,6 +751,7 @@
   </style>
   <link rel="stylesheet" href="all-drivers.css?v=51.0">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
+  <link rel="stylesheet" href="stats.css?v=55.0">
 </head>
 
 <body>
@@ -901,6 +902,7 @@
       <div class="history-controls">
         <input id="historyMonth" type="month">
         <button id="historyPrint" type="button"></button>
+        <button id="historyPrintSummary" type="button"></button>
         <button id="historyCsv" type="button"></button>
         <button id="historyJson" type="button"></button>
         <button id="historyImport" type="button"></button>
@@ -931,6 +933,16 @@
       </div>
       <div id="adminSummary" class="admin-summary"></div>
       <div id="adminPlanList" class="admin-plan-list"></div>
+      <section id="adminStatsPanel" class="stats-panel" hidden>
+        <div class="stats-panel-header">
+          <div>
+            <h3 id="adminStatsTitle" class="stats-panel-title">Statystyki aplikacji</h3>
+            <p id="adminStatsDescription" class="stats-panel-description">Anonimowe dane techniczne i użycie aplikacji.</p>
+          </div>
+          <button id="adminStatsRefresh" type="button" class="stats-refresh-button">Odśwież</button>
+        </div>
+        <div id="adminStatsContent" class="stats-content"><div class="stats-loading">Ładowanie statystyk…</div></div>
+      </section>
     </section>
     <div id="status" class="status"></div>
   </section>
@@ -1024,7 +1036,8 @@
       privateInvalid: "Wpisz prawidłowy numer telefonu.",
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
-      historyPrint: "Drukuj zestawienie miesiąca",
+      historyPrint: "Drukuj raport szczegółowy",
+      historyPrintSummary: "Drukuj podsumowanie miesiąca A4",
       historyCsv: "Eksport do Excel (.xlsx)",
       historyJson: "Kopia JSON",
       historyImport: "Importuj kopię",
@@ -1058,7 +1071,7 @@
       adminDriverNameLabel:"Kierowca",adminDriverPhoneLabel:"Numer telefonu kierowcy",adminDriverAliasesLabel:"Inne zapisy imienia lub nazwiska (po przecinku)",adminImportLabel:"Wczytaj plan Excel",adminDeletePlan:"Usuń wczytany plan",adminDeliveryDateLabel:"Dzień dostawy",adminSyncButton:"Pobierz plan",adminSyncLoading:"Pobieranie planów…",adminSyncOk:(date,time)=>`Plan ${date} pobrany. Aktualizacja: ${time}`,adminSyncNoPlan:date=>`Brak planu na dzień ${date}.`,adminSyncError:"Nie udało się połączyć z automatyzacją Google.",adminSyncNoDates:"Brak dostępnych planów.",adminPlanAvailable:"Plan dostępny",adminPlanMissing:"Brak planu",
       adminNoPlan:"Nie wczytano planu transportów.",adminImportError:"Nie udało się odczytać arkusza. Sprawdź format pliku.",adminNoDriverRows:"W pliku nie znaleziono pozycji pasujących do profilu kierowcy.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} kursów, ${rows} sklepów, ${pallets} palet.`,adminCourse:number=>`Kurs ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Trasa: ${value}`,
-      adminDeadline:value=>`Dostawa do: ${value}`,adminPallets:value=>`Palety: ${value}`,adminTrailers:value=>`Trallery: ${value}`,adminSequence:value=>`Kolejność: ${value}`,adminInfo:value=>`Uwagi: ${value}`,adminReturnEmpties:value=>`Powrót pustych palet: ${value} sztaple`,adminReturnLoads:"Ładunek powrotny",adminReturnOrder:value=>`Zlecenie: ${value}`,adminReturnPallets:value=>`Palety: ${value}`,adminReturnTerminal:value=>`Odbiór: ${value}`,adminReturnSupplier:value=>`Ładunek: ${value}`,
+      adminDeadline:value=>`Dostawa do: ${value}`,adminPallets:value=>`Palety: ${value}`,adminTrailers:value=>`Trallery: ${value}`,adminSequence:value=>`Kolejność: ${value}`,adminInfo:value=>`Uwagi: ${value}`,adminStatsTitle:"Statystyki aplikacji",adminStatsDescription:"Anonimowe dane techniczne i użycie aplikacji.",adminStatsRefresh:"Odśwież",adminReturnEmpties:value=>`Powrót pustych palet: ${value} sztaple`,adminReturnLoads:"Ładunek powrotny",adminReturnOrder:value=>`Zlecenie: ${value}`,adminReturnPallets:value=>`Palety: ${value}`,adminReturnTerminal:value=>`Odbiór: ${value}`,adminReturnSupplier:value=>`Ładunek: ${value}`,
       adminSelectStore:"Wybierz sklep",adminMap:"Google Maps",adminSplitTitle:"Split / inni kierowcy do tego sklepu",adminPeer:(driver,time,pallets)=>`${driver} — do ${time}, ${pallets} palet`,
       adminTimeDifference:minutes=>`Różnica planowanych godzin: ${minutes} min`,adminConflictHigh:"Duże ryzyko kolizji",adminConflictMedium:"Możliwa kolizja",adminConflictLow:"Duży odstęp czasu",adminPlanDeleted:"Plan został usunięty.",
       footer: "Zbudowane przez Rumcajsa przy pomocy sztucznej inteligencji."
@@ -1096,7 +1109,8 @@
       privateInvalid: "Skriv inn et gyldig telefonnummer.",
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
-      historyPrint: "Skriv ut månedsoversikt",
+      historyPrint: "Skriv ut detaljert rapport",
+      historyPrintSummary: "Skriv ut månedssammendrag A4",
       historyCsv: "Eksporter til Excel (.xlsx)",
       historyJson: "JSON-sikkerhetskopi",
       historyImport: "Importer sikkerhetskopi",
@@ -1130,7 +1144,7 @@
       adminDriverNameLabel:"Sjåfør",adminDriverPhoneLabel:"Sjåførens telefonnummer",adminDriverAliasesLabel:"Andre skrivemåter for navn (kommaseparert)",adminImportLabel:"Les inn Excel-plan",adminDeletePlan:"Slett innlest plan",adminDeliveryDateLabel:"Leveringsdag",adminSyncButton:"Hent plan",adminSyncLoading:"Henter planer…",adminSyncOk:(date,time)=>`Plan ${date} er hentet. Oppdatert: ${time}`,adminSyncNoPlan:date=>`Ingen plan for ${date}.`,adminSyncError:"Kunne ikke koble til Google-automatiseringen.",adminSyncNoDates:"Ingen tilgjengelige planer.",adminPlanAvailable:"Plan tilgjengelig",adminPlanMissing:"Ingen plan",
       adminNoPlan:"Ingen transportplan er lest inn.",adminImportError:"Regnearket kunne ikke leses. Kontroller filformatet.",adminNoDriverRows:"Ingen poster i filen samsvarer med sjåførprofilen.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} turer, ${rows} butikker, ${pallets} paller.`,adminCourse:number=>`Tur ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Rute: ${value}`,
-      adminDeadline:value=>`Leveres innen: ${value}`,adminPallets:value=>`Paller: ${value}`,adminTrailers:value=>`Traller: ${value}`,adminSequence:value=>`Rekkefølge: ${value}`,adminInfo:value=>`Merknad: ${value}`,adminReturnEmpties:value=>`Retur tompaller: ${value} stabler`,adminReturnLoads:"Returlast",adminReturnOrder:value=>`Ordre: ${value}`,adminReturnPallets:value=>`Paller: ${value}`,adminReturnTerminal:value=>`Henting: ${value}`,adminReturnSupplier:value=>`Last: ${value}`,
+      adminDeadline:value=>`Leveres innen: ${value}`,adminPallets:value=>`Paller: ${value}`,adminTrailers:value=>`Traller: ${value}`,adminSequence:value=>`Rekkefølge: ${value}`,adminInfo:value=>`Merknad: ${value}`,adminStatsTitle:"Appstatistikk",adminStatsDescription:"Anonyme tekniske data og bruk av appen.",adminStatsRefresh:"Oppdater",adminReturnEmpties:value=>`Retur tompaller: ${value} stabler`,adminReturnLoads:"Returlast",adminReturnOrder:value=>`Ordre: ${value}`,adminReturnPallets:value=>`Paller: ${value}`,adminReturnTerminal:value=>`Henting: ${value}`,adminReturnSupplier:value=>`Last: ${value}`,
       adminSelectStore:"Velg butikk",adminMap:"Google Maps",adminSplitTitle:"Split / andre sjåfører til samme butikk",adminPeer:(driver,time,pallets)=>`${driver} — innen ${time}, ${pallets} paller`,
       adminTimeDifference:minutes=>`Forskjell mellom planlagte tider: ${minutes} min`,adminConflictHigh:"Stor kollisjonsfare",adminConflictMedium:"Mulig kollisjon",adminConflictLow:"God tidsavstand",adminPlanDeleted:"Planen er slettet.",
       footer: "Bygget av Rumcajs med hjelp av kunstig intelligens."
@@ -1168,7 +1182,8 @@
       privateInvalid: "Enter a valid phone number.",
       history: "Delivery history",
       historyTitle: "Delivery history",
-      historyPrint: "Print monthly report",
+      historyPrint: "Print detailed report",
+      historyPrintSummary: "Print monthly summary A4",
       historyCsv: "Export to Excel (.xlsx)",
       historyJson: "JSON backup",
       historyImport: "Import backup",
@@ -1202,7 +1217,7 @@
       adminDriverNameLabel:"Driver",adminDriverPhoneLabel:"Driver phone number",adminDriverAliasesLabel:"Other name spellings (comma-separated)",adminImportLabel:"Import Excel plan",adminDeletePlan:"Delete imported plan",adminDeliveryDateLabel:"Delivery date",adminSyncButton:"Load plan",adminSyncLoading:"Loading plans…",adminSyncOk:(date,time)=>`Plan ${date} loaded. Updated: ${time}`,adminSyncNoPlan:date=>`No plan for ${date}.`,adminSyncError:"Could not connect to Google automation.",adminSyncNoDates:"No plans available.",adminPlanAvailable:"Plan available",adminPlanMissing:"No plan",
       adminNoPlan:"No transport plan has been imported.",adminImportError:"The spreadsheet could not be read. Check the file format.",adminNoDriverRows:"No rows in the file match the driver profile.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} trips, ${rows} stores, ${pallets} pallets.`,adminCourse:number=>`Trip ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Route: ${value}`,
-      adminDeadline:value=>`Deliver by: ${value}`,adminPallets:value=>`Pallets: ${value}`,adminTrailers:value=>`Trailers: ${value}`,adminSequence:value=>`Sequence: ${value}`,adminInfo:value=>`Notes: ${value}`,adminReturnEmpties:value=>`Empty pallet return: ${value} stacks`,adminReturnLoads:"Return load",adminReturnOrder:value=>`Order: ${value}`,adminReturnPallets:value=>`Pallets: ${value}`,adminReturnTerminal:value=>`Pickup: ${value}`,adminReturnSupplier:value=>`Load: ${value}`,
+      adminDeadline:value=>`Deliver by: ${value}`,adminPallets:value=>`Pallets: ${value}`,adminTrailers:value=>`Trailers: ${value}`,adminSequence:value=>`Sequence: ${value}`,adminInfo:value=>`Notes: ${value}`,adminStatsTitle:"Application statistics",adminStatsDescription:"Anonymous technical data and application usage.",adminStatsRefresh:"Refresh",adminReturnEmpties:value=>`Empty pallet return: ${value} stacks`,adminReturnLoads:"Return load",adminReturnOrder:value=>`Order: ${value}`,adminReturnPallets:value=>`Pallets: ${value}`,adminReturnTerminal:value=>`Pickup: ${value}`,adminReturnSupplier:value=>`Load: ${value}`,
       adminSelectStore:"Select store",adminMap:"Google Maps",adminSplitTitle:"Split / other drivers for this store",adminPeer:(driver,time,pallets)=>`${driver} — by ${time}, ${pallets} pallets`,
       adminTimeDifference:minutes=>`Planned-time difference: ${minutes} min`,adminConflictHigh:"High collision risk",adminConflictMedium:"Possible collision",adminConflictLow:"Good time separation",adminPlanDeleted:"The plan has been deleted.",
       footer: "Built by Rumcajs with the help of artificial intelligence."
@@ -1250,11 +1265,17 @@
   const historyList = document.getElementById("historyList");
   const historySummary = document.getElementById("historySummary");
   const historyPrint = document.getElementById("historyPrint");
+  const historyPrintSummary = document.getElementById("historyPrintSummary");
   const historyCsv = document.getElementById("historyCsv");
   const historyJson = document.getElementById("historyJson");
   const historyImport = document.getElementById("historyImport");
   const historyImportFile = document.getElementById("historyImportFile");
   const historyClear = document.getElementById("historyClear");
+  const adminStatsPanel = document.getElementById("adminStatsPanel");
+  const adminStatsTitle = document.getElementById("adminStatsTitle");
+  const adminStatsDescription = document.getElementById("adminStatsDescription");
+  const adminStatsRefresh = document.getElementById("adminStatsRefresh");
+  const adminStatsContent = document.getElementById("adminStatsContent");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const locationHeading = document.getElementById("locationHeading");
@@ -1630,6 +1651,11 @@ function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p
     // poza profilem Andrzeja. Chroni również przed nadpisaniem przez CSS.
     adminProfileSection.style.display = adminMode ? "" : "none";
     adminToolbar.style.display = adminMode ? "" : "none";
+    adminStatsPanel.hidden = !adminMode;
+    adminStatsPanel.style.display = adminMode ? "" : "none";
+    if (adminMode && window.EuroprisStatsPanel) {
+      window.EuroprisStatsPanel.load(adminStatsContent);
+    }
 
     adminImportFile.disabled = !adminMode;
     adminDeletePlan.disabled = !adminMode;
@@ -1748,6 +1774,10 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     historyToggle.textContent = text.history;
     document.getElementById("historyTitle").textContent = text.historyTitle;
     historyPrint.textContent = text.historyPrint;
+    historyPrintSummary.textContent = text.historyPrintSummary;
+    adminStatsTitle.textContent = text.adminStatsTitle;
+    adminStatsDescription.textContent = text.adminStatsDescription;
+    adminStatsRefresh.textContent = text.adminStatsRefresh;
     historyCsv.textContent = text.historyCsv;
     historyJson.textContent = text.historyJson;
     historyImport.textContent = text.historyImport;
@@ -1774,6 +1804,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     adminToolbar.hidden = true;
     adminProfileSection.style.display = "none";
     adminToolbar.style.display = "none";
+    adminStatsPanel.hidden = true;
+    adminStatsPanel.style.display = "none";
   };
   [adminDriverName,adminDriverPhone,adminDriverAliases].forEach(i=>i.onchange=()=>{
     if (!isActiveAdmin()) return;
@@ -1804,6 +1836,12 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     localStorage.removeItem(ADMIN_PLAN_KEY);
     renderAdminPlan();
   };
+
+  adminStatsRefresh.addEventListener("click", () => {
+    if (isActiveAdmin() && window.EuroprisStatsPanel) {
+      window.EuroprisStatsPanel.load(adminStatsContent, true);
+    }
+  });
 
   adminDeliveryDate.addEventListener("change", () => {
     updateAdminDateStatusColor();
@@ -2418,7 +2456,9 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       if (!plan?.rows?.length) continue;
 
       for (const item of dayEntries) {
-        if ((Number(item.pallets) || 0) > 0 || (Number(item.trailerCount) || 0) > 0) continue;
+        // Uzupełniaj palety zawsze, gdy ich brakuje.
+        // Zapisana liczba naczep nie oznacza, że rekord ma już dane o paletach.
+        if ((Number(item.pallets) || 0) > 0) continue;
 
         const candidates = plan.rows.filter(row =>
           String(row.storeNumber || "") === String(item.storeNumber || "") &&
@@ -2449,6 +2489,213 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     }
 
     return uniqueDayTours.size;
+  }
+
+  function monthlySummaryLocale() {
+    if (language === "no") return "nb-NO";
+    if (language === "en") return "en-GB";
+    return "pl-PL";
+  }
+
+  function monthlySummaryLabels() {
+    if (language === "no") return {
+      title: "Månedssammendrag", date: "Dato", day: "Dag", tours: "Turer",
+      stores: "Butikker", pallets: "Paller", trailers: "Tilhengere",
+      workDays: "Arbeidsdager", totalStores: "Butikker totalt",
+      totalPallets: "Paller totalt", totalTrailers: "Tilhengere totalt",
+      averagePallets: "Gj.sn. paller / dag", averageStores: "Gj.sn. butikker / dag",
+      maxPallets: "Flest paller", maxStores: "Flest butikker",
+      noData: "Ingen leveringer i valgt måned."
+    };
+    if (language === "en") return {
+      title: "Monthly summary", date: "Date", day: "Day", tours: "Trips",
+      stores: "Stores", pallets: "Pallets", trailers: "Trailers",
+      workDays: "Working days", totalStores: "Total stores",
+      totalPallets: "Total pallets", totalTrailers: "Total trailers",
+      averagePallets: "Avg. pallets / day", averageStores: "Avg. stores / day",
+      maxPallets: "Most pallets", maxStores: "Most stores",
+      noData: "No deliveries in the selected month."
+    };
+    return {
+      title: "Podsumowanie miesiąca", date: "Data", day: "Dzień", tours: "Tury",
+      stores: "Sklepy", pallets: "Palety", trailers: "Naczepy",
+      workDays: "Dni pracy", totalStores: "Łącznie sklepów",
+      totalPallets: "Łącznie palet", totalTrailers: "Łącznie naczep",
+      averagePallets: "Śr. palet / dzień", averageStores: "Śr. sklepów / dzień",
+      maxPallets: "Najwięcej palet", maxStores: "Najwięcej sklepów",
+      noData: "Brak dostaw w wybranym miesiącu."
+    };
+  }
+
+  function escapePrintHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[character]));
+  }
+
+  async function buildMonthlySummaryRows(month) {
+    let entries = (await getAllDeliveries())
+      .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
+      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+
+    entries = await enrichHistoryEntries(entries);
+    const days = new Map();
+
+    for (const item of entries) {
+      const dateKey = localDateKey(item.createdAt);
+      if (!days.has(dateKey)) {
+        days.set(dateKey, { dateKey, stores: 0, pallets: 0, tours: new Set() });
+      }
+
+      const day = days.get(dateKey);
+      day.stores++;
+      day.pallets += Number(item.pallets) || 0;
+
+      const tour = String(item.tourNumber || "").trim();
+      if (tour) day.tours.add(tour);
+    }
+
+    return [...days.values()]
+      .sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+      .map(day => ({
+        dateKey: day.dateKey,
+        stores: day.stores,
+        pallets: day.pallets,
+        tours: [...day.tours].sort((a, b) => Number(a) - Number(b)),
+        trailers: day.tours.size
+      }));
+  }
+
+  async function printMonthlySummaryA4() {
+    saveDailyAssignment();
+
+    const labels = monthlySummaryLabels();
+    const month = historyMonth.value;
+    const rows = await buildMonthlySummaryRows(month);
+
+    if (!rows.length) {
+      error.textContent = labels.noData;
+      return;
+    }
+
+    const locale = monthlySummaryLocale();
+    const workDays = rows.length;
+    const totalStores = rows.reduce((sum, row) => sum + row.stores, 0);
+    const totalPallets = rows.reduce((sum, row) => sum + row.pallets, 0);
+    const totalTrailers = rows.reduce((sum, row) => sum + row.trailers, 0);
+    const maxPallets = rows.reduce((best, row) => row.pallets > best.pallets ? row : best, rows[0]);
+    const maxStores = rows.reduce((best, row) => row.stores > best.stores ? row : best, rows[0]);
+
+    const monthName = new Intl.DateTimeFormat(locale, {
+      month: "long", year: "numeric"
+    }).format(new Date(`${month}-15T12:00:00`));
+
+    const formatNumber = value => new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 0, maximumFractionDigits: 1
+    }).format(value);
+
+    const formatDate = dateKey => new Intl.DateTimeFormat(locale, {
+      day: "2-digit", month: "2-digit"
+    }).format(new Date(`${dateKey}T12:00:00`));
+
+    const formatDay = dateKey => new Intl.DateTimeFormat(locale, {
+      weekday: "short"
+    }).format(new Date(`${dateKey}T12:00:00`));
+
+    const tableRows = rows.map(row => `
+      <tr>
+        <td>${escapePrintHtml(formatDate(row.dateKey))}</td>
+        <td>${escapePrintHtml(formatDay(row.dateKey))}</td>
+        <td>${escapePrintHtml(row.tours.join(" + "))}</td>
+        <td>${row.stores}</td>
+        <td>${row.pallets}</td>
+        <td>${row.trailers}</td>
+      </tr>
+    `).join("");
+
+    const reportHtml = `<!doctype html>
+<html lang="${language}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapePrintHtml(labels.title)} — ${escapePrintHtml(monthName)}</title>
+<style>
+@page{size:A4 portrait;margin:8mm}
+*{box-sizing:border-box}
+body{margin:0;color:#111;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:8.5pt}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:10mm;margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #08783e}
+h1{margin:0;color:#08783e;font-size:15pt;line-height:1.1}
+.month{font-size:10pt;font-weight:700;text-transform:capitalize}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{border:.4pt solid #aaa;padding:1.15mm 1.2mm;text-align:center;line-height:1.05}
+th{color:#fff;background:#08783e;font-size:7.5pt;font-weight:700}
+tbody tr:nth-child(even) td{background:#f2f7f4}
+th:nth-child(1),td:nth-child(1){width:16%}
+th:nth-child(2),td:nth-child(2){width:14%}
+th:nth-child(3),td:nth-child(3){width:17%}
+th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5),th:nth-child(6),td:nth-child(6){width:17.66%}
+.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-top:3mm}
+.total{min-height:14mm;padding:2mm;border:.6pt solid #aaa;border-radius:2mm;text-align:center}
+.total strong{display:block;color:#08783e;font-size:14pt;line-height:1}
+.total span{display:block;margin-top:1mm;font-size:7pt;font-weight:700}
+.details{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-top:2mm;font-size:7pt}
+.detail{padding:1.5mm;border:.4pt solid #bbb;border-radius:1.5mm;text-align:center}
+.detail b{color:#08783e}
+footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
+@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+<div><h1>${escapePrintHtml(labels.title)}</h1><div class="month">${escapePrintHtml(monthName)}</div></div>
+<div>Europris Dostawy</div>
+</header>
+<table>
+<thead><tr>
+<th>${escapePrintHtml(labels.date)}</th>
+<th>${escapePrintHtml(labels.day)}</th>
+<th>${escapePrintHtml(labels.tours)}</th>
+<th>${escapePrintHtml(labels.stores)}</th>
+<th>${escapePrintHtml(labels.pallets)}</th>
+<th>${escapePrintHtml(labels.trailers)}</th>
+</tr></thead>
+<tbody>${tableRows}</tbody>
+</table>
+<section class="totals">
+<div class="total"><strong>${workDays}</strong><span>${escapePrintHtml(labels.workDays)}</span></div>
+<div class="total"><strong>${totalStores}</strong><span>${escapePrintHtml(labels.totalStores)}</span></div>
+<div class="total"><strong>${totalPallets}</strong><span>${escapePrintHtml(labels.totalPallets)}</span></div>
+<div class="total"><strong>${totalTrailers}</strong><span>${escapePrintHtml(labels.totalTrailers)}</span></div>
+</section>
+<section class="details">
+<div class="detail"><b>${escapePrintHtml(labels.averagePallets)}:</b><br>${formatNumber(totalPallets / workDays)}</div>
+<div class="detail"><b>${escapePrintHtml(labels.averageStores)}:</b><br>${formatNumber(totalStores / workDays)}</div>
+<div class="detail"><b>${escapePrintHtml(labels.maxPallets)}:</b><br>${maxPallets.pallets} — ${escapePrintHtml(formatDate(maxPallets.dateKey))}</div>
+<div class="detail"><b>${escapePrintHtml(labels.maxStores)}:</b><br>${maxStores.stores} — ${escapePrintHtml(formatDate(maxStores.dateKey))}</div>
+</section>
+<footer>${new Date().toLocaleString(locale)}</footer>
+  <script src="analytics.js?v=55.0"></script>
+  <script src="stats-panel.js?v=55.0"></script>
+</body>
+</html>`;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      error.textContent = language === "no"
+        ? "Nettleseren blokkerte utskriftsvinduet."
+        : language === "en"
+          ? "The browser blocked the print window."
+          : "Przeglądarka zablokowała okno wydruku.";
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(reportHtml);
+    printWindow.document.close();
+    window.setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 350);
   }
 
   async function exportExcel() {
@@ -2806,6 +3053,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
   historyClose.addEventListener("click", () => { historyPanel.hidden = true; });
   historyMonth.addEventListener("change", renderHistory);
   historyPrint.addEventListener("click", () => window.print());
+  historyPrintSummary.addEventListener("click", printMonthlySummaryA4);
   historyCsv.addEventListener("click", exportExcel);
   historyJson.addEventListener("click", exportJson);
   historyImport.addEventListener("click", () => historyImportFile.click());
