@@ -762,41 +762,10 @@
       width: 100%;
       margin-top: 8px;
     }
-
-    .gps-diagnostics {
-      margin-top: 14px;
-      padding: 12px;
-      border: 2px solid var(--green);
-      border-radius: 12px;
-    }
-    .gps-diagnostics[hidden] { display: none !important; }
-    .gps-diagnostics h3 { margin: 0; color: var(--green); font-size: 1rem; }
-    .gps-diagnostics p { margin: 5px 0 10px; color: var(--muted); font-size: .72rem; }
-    .gps-diagnostics button {
-      width: 100%;
-      min-height: 42px;
-      border: 0;
-      border-radius: 10px;
-      background: var(--green);
-      color: #fff;
-      font-weight: 900;
-    }
-    .gps-diagnostics-content { margin-top: 9px; font-size: .68rem; }
-    .gps-diagnostic-table { display: grid; gap: 5px; }
-    .gps-diagnostic-row {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      gap: 7px;
-      padding: 7px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-    .gps-diagnostic-row span { color: var(--muted); font-weight: 800; }
-    .gps-diagnostic-row strong { overflow-wrap: anywhere; }
 </style>
   <link rel="stylesheet" href="all-drivers.css?v=51.0">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.6">
+  <link rel="stylesheet" href="stats.css?v=57.7">
 </head>
 
 <body>
@@ -979,15 +948,6 @@
       </div>
       <div id="adminSummary" class="admin-summary"></div>
       <div id="adminPlanList" class="admin-plan-list"></div>
-      <section id="adminGpsDiagnostics" class="gps-diagnostics" hidden>
-        <h3>Diagnostyka GPS Safari/iPhone</h3>
-        <p>Pokazuje dokładny kod i komunikat błędu zwracany przez przeglądarkę.</p>
-        <button id="adminGpsDiagnosticsRun" type="button">Uruchom test GPS</button>
-        <div id="adminGpsDiagnosticsContent" class="gps-diagnostics-content">
-          Test nie został jeszcze uruchomiony.
-        </div>
-      </section>
-
       <section id="adminStatsPanel" class="stats-panel" hidden>
         <div class="stats-panel-header">
           <div>
@@ -1335,9 +1295,6 @@
   const adminStatsDescription = document.getElementById("adminStatsDescription");
   const adminStatsRefresh = document.getElementById("adminStatsRefresh");
   const adminStatsContent = document.getElementById("adminStatsContent");
-  const adminGpsDiagnostics = document.getElementById("adminGpsDiagnostics");
-  const adminGpsDiagnosticsRun = document.getElementById("adminGpsDiagnosticsRun");
-  const adminGpsDiagnosticsContent = document.getElementById("adminGpsDiagnosticsContent");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const locationHeading = document.getElementById("locationHeading");
@@ -1716,8 +1673,6 @@ function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p
     adminToolbar.style.display = adminMode ? "" : "none";
     adminStatsPanel.hidden = !adminMode;
     adminStatsPanel.style.display = adminMode ? "" : "none";
-    adminGpsDiagnostics.hidden = !adminMode;
-    adminGpsDiagnostics.style.display = adminMode ? "" : "none";
     if (adminMode && window.EuroprisStatsPanel) {
       window.EuroprisStatsPanel.load(adminStatsContent);
     }
@@ -1903,8 +1858,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     renderAdminPlan();
   };
 
-  adminGpsDiagnosticsRun.addEventListener("click", runAdminGpsDiagnostics);
-
   adminStatsRefresh.addEventListener("click", () => {
     if (isActiveAdmin() && window.EuroprisStatsPanel) {
       window.EuroprisStatsPanel.load(adminStatsContent, true);
@@ -2064,89 +2017,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     locationMessage.textContent = "";
     locationResult.textContent = text.locationSuggestion(best.store.number, name, distance);
     useNearest.hidden = false;
-  }
-
-  function gpsDiagnosticMode() {
-    if (navigator.standalone === true) return "iOS PWA";
-    if (window.matchMedia?.("(display-mode: standalone)")?.matches) return "PWA";
-    return "Przeglądarka";
-  }
-
-  function gpsErrorName(code) {
-    if (code === 1) return "PERMISSION_DENIED";
-    if (code === 2) return "POSITION_UNAVAILABLE";
-    if (code === 3) return "TIMEOUT";
-    return "UNKNOWN";
-  }
-
-  async function gpsPermissionState() {
-    if (!navigator.permissions?.query) return "Permissions API niedostępne";
-    try {
-      const result = await navigator.permissions.query({ name: "geolocation" });
-      return result.state || "unknown";
-    } catch (error) {
-      return "błąd: " + (error?.name || "unknown");
-    }
-  }
-
-  function gpsDiagnosticTable(rows) {
-    return `<div class="gps-diagnostic-table">${
-      rows.map(([label, value]) => `
-        <div class="gps-diagnostic-row">
-          <span>${String(label)}</span>
-          <strong>${String(value ?? "—")}</strong>
-        </div>`).join("")
-    }</div>`;
-  }
-
-  async function runAdminGpsDiagnostics() {
-    adminGpsDiagnosticsContent.textContent = "Trwa test GPS…";
-
-    const baseRows = [
-      ["Tryb uruchomienia", gpsDiagnosticMode()],
-      ["Secure Context", String(window.isSecureContext)],
-      ["navigator.geolocation", navigator.geolocation ? "OK" : "BRAK"],
-      ["Stan uprawnienia", await gpsPermissionState()],
-      ["navigator.standalone", String(navigator.standalone === true)],
-      ["Online", String(navigator.onLine)],
-      ["Platforma", navigator.platform || "—"],
-      ["User-Agent", navigator.userAgent || "—"]
-    ];
-
-    if (!navigator.geolocation) {
-      adminGpsDiagnosticsContent.innerHTML = gpsDiagnosticTable([
-        ...baseRows,
-        ["Wynik", "BŁĄD"],
-        ["Komunikat", "navigator.geolocation jest niedostępne"]
-      ]);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        adminGpsDiagnosticsContent.innerHTML = gpsDiagnosticTable([
-          ...baseRows,
-          ["Wynik", "SUKCES"],
-          ["Dokładność", Math.round(position.coords.accuracy) + " m"],
-          ["Szerokość", position.coords.latitude.toFixed(6)],
-          ["Długość", position.coords.longitude.toFixed(6)]
-        ]);
-      },
-      error => {
-        adminGpsDiagnosticsContent.innerHTML = gpsDiagnosticTable([
-          ...baseRows,
-          ["Wynik", "BŁĄD"],
-          ["Kod błędu", error?.code ?? "—"],
-          ["Nazwa błędu", gpsErrorName(error?.code)],
-          ["Komunikat Safari", error?.message || "—"]
-        ]);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0
-      }
-    );
   }
 
   function forceNearestStoreLocation() {
@@ -3328,31 +3198,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 
 
 
-  function loadEuroprisOptionalModules() {
-    if (window.__europrisOptionalModulesLoaded) return;
-    window.__europrisOptionalModulesLoaded = true;
 
-    const modules = [
-      "all-drivers.js?v=57.4",
-      "weather-humor.js?v=57.4",
-      "analytics.js?v=57.6",
-      "stats-panel.js?v=57.6"
-    ];
-
-    for (const source of modules) {
-      const script = document.createElement("script");
-      script.src = source;
-      script.defer = true;
-      document.body.appendChild(script);
-    }
-  }
-
-  /*
-    Najpierw uruchamia się baza sklepów i żądanie GPS jak w v50.4.
-    Dodatkowe moduły są ładowane chwilę później, aby nie konkurowały
-    z pytaniem iOS o lokalizację podczas startu PWA.
-  */
-  window.setTimeout(loadEuroprisOptionalModules, 2500);
 
 
   window.addEventListener("pageshow", restoreDailyAssignment);
@@ -3372,6 +3218,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>
-  <script src="weather-humor.js?v=53.0"></script></body>
+</script>  <script src="all-drivers.js?v=57.7"></script>
+  <script src="weather-humor.js?v=57.7"></script>
+  <script src="analytics.js?v=57.7"></script>
+  <script src="stats-panel.js?v=57.7"></script>
+</body>
 </html>
