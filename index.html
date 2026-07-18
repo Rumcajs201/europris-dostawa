@@ -751,7 +751,7 @@
   </style>
   <link rel="stylesheet" href="all-drivers.css?v=51.0">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.1">
+  <link rel="stylesheet" href="stats.css?v=57.2">
 </head>
 
 <body>
@@ -1999,29 +1999,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     useNearest.hidden = false;
   }
 
-  function resolveNearestPosition(position) {
-    const text = translations[language];
-    const best = findNearestStore(
-      position.coords.latitude,
-      position.coords.longitude
-    );
-
-    if (!best) {
-      locationMessage.textContent = text.locationNoCoordinates;
-      return;
-    }
-
-    showNearestResult(best);
-    window.EuroprisAnalytics?.track?.("gps_ok", "nearest_store");
-  }
-
-  function requestPosition(options) {
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
-    });
-  }
-
-  async function requestNearestStore() {
+  function requestNearestStore() {
     const text = translations[language];
 
     useNearest.hidden = true;
@@ -2029,59 +2007,41 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     nearestDistanceMeters = null;
     nearestWasAutoSelected = false;
     locationResult.textContent = "";
-
-    if (!window.isSecureContext || !navigator.geolocation) {
-      locationMessage.textContent = text.locationUnavailable;
-      window.EuroprisAnalytics?.track?.("gps_error", "unsupported");
-      return;
-    }
-
-    /*
-      Wywołujemy geolokalizację bez wcześniejszego sprawdzania Permissions API.
-      Dzięki temu przeglądarka sama pokaże standardowe pytanie „Zezwolić na
-      lokalizację?”, jeśli użytkownik jeszcze nie podjął decyzji.
-    */
     locationMessage.textContent = text.locationChecking;
 
-    try {
-      const position = await requestPosition({
-        enableHighAccuracy: false,
-        timeout: 15000,
-        maximumAge: 120000
-      });
-
-      resolveNearestPosition(position);
+    if (!navigator.geolocation) {
+      locationMessage.textContent = text.locationUnavailable;
       return;
-    } catch (firstError) {
-      if (firstError?.code === 1) {
-        locationMessage.textContent = text.locationDenied;
-        window.EuroprisAnalytics?.track?.("gps_denied", "permission_denied");
-        return;
-      }
     }
 
-    try {
-      locationMessage.textContent = text.locationChecking;
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const best = findNearestStore(
+          position.coords.latitude,
+          position.coords.longitude
+        );
 
-      const position = await requestPosition({
+        if (!best) {
+          locationMessage.textContent = text.locationNoCoordinates;
+          return;
+        }
+
+        showNearestResult(best);
+      },
+      geolocationError => {
+        locationMessage.textContent =
+          geolocationError.code === geolocationError.PERMISSION_DENIED
+            ? text.locationDenied
+            : text.locationUnavailable;
+      },
+      {
         enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0
-      });
-
-      resolveNearestPosition(position);
-    } catch (secondError) {
-      locationMessage.textContent =
-        secondError?.code === 1
-          ? text.locationDenied
-          : text.locationUnavailable;
-
-      window.EuroprisAnalytics?.track?.(
-        secondError?.code === 1 ? "gps_denied" : "gps_error",
-        `code_${secondError?.code || "unknown"}`
-      );
-    }
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
   }
+
 
   function openDatabase() {
     return new Promise((resolve, reject) => {
@@ -3208,7 +3168,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 </script>
   <script src="all-drivers.js?v=51.0"></script>
   <script src="weather-humor.js?v=53.0"></script>
-  <script src="analytics.js?v=57.1"></script>
-  <script src="stats-panel.js?v=57.1"></script>
+  <script src="analytics.js?v=57.2"></script>
+  <script src="stats-panel.js?v=57.2"></script>
 </body>
 </html>
