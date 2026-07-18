@@ -743,15 +743,56 @@
       text-align: center;
       line-height: 1.35;
     }
-.admin-return-loads{margin-top:12px;padding:11px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,#2563eb 6%,transparent)}
-.admin-return-loads-title{margin-bottom:8px;color:#2563eb;font-weight:950}
-.admin-return-load{padding:8px 0;border-top:1px solid var(--border)}
-.admin-return-load:first-of-type{border-top:0}
-.admin-return-load-meta{margin-top:4px;color:var(--muted);font-size:.82rem;line-height:1.4}
+
+    /* v50: wspólna lista wszystkich kierowców dla zalogowanych profili */
+    .all-drivers-list { display:grid; gap:10px; }
+    .driver-route {
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:13px;
+      background:var(--surface, var(--card));
+    }
+    .driver-route summary {
+      list-style:none;
+      cursor:pointer;
+      padding:12px;
+      background:color-mix(in srgb,var(--green) 9%,transparent);
+    }
+    .driver-route summary::-webkit-details-marker { display:none; }
+    .driver-route-summary {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+    }
+    .driver-route-name { color:var(--green); font-size:1rem; font-weight:950; }
+    .driver-route-count { color:var(--muted); font-size:.78rem; font-weight:850; text-align:right; }
+    .driver-route-phone {
+      display:inline-flex;
+      margin-top:6px;
+      color:var(--green);
+      font-weight:900;
+      text-decoration:none;
+    }
+    .driver-route-body { border-top:1px solid var(--border); }
+    .driver-stop {
+      padding:11px 12px;
+      border-top:1px solid var(--border);
+    }
+    .driver-stop:first-child { border-top:0; }
+    .driver-stop-title { font-weight:950; line-height:1.35; }
+    .driver-stop-meta { margin-top:5px; color:var(--muted); font-size:.84rem; line-height:1.4; }
+    .driver-day-summary {
+      margin:12px 0;
+      padding:10px;
+      border-radius:11px;
+      background:color-mix(in srgb,var(--green) 8%,transparent);
+      line-height:1.45;
+      font-weight:800;
+    }
+
   </style>
-  <link rel="stylesheet" href="all-drivers.css?v=51.0">
-  <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.1">
+  <link rel="stylesheet" href="stats.css?v=50">
 </head>
 
 <body>
@@ -902,7 +943,6 @@
       <div class="history-controls">
         <input id="historyMonth" type="month">
         <button id="historyPrint" type="button"></button>
-        <button id="historyPrintSummary" type="button"></button>
         <button id="historyCsv" type="button"></button>
         <button id="historyJson" type="button"></button>
         <button id="historyImport" type="button"></button>
@@ -933,16 +973,7 @@
       </div>
       <div id="adminSummary" class="admin-summary"></div>
       <div id="adminPlanList" class="admin-plan-list"></div>
-      <section id="adminStatsPanel" class="stats-panel" hidden>
-        <div class="stats-panel-header">
-          <div>
-            <h3 id="adminStatsTitle" class="stats-panel-title">Statystyki aplikacji</h3>
-            <p id="adminStatsDescription" class="stats-panel-description">Anonimowe dane techniczne i użycie aplikacji.</p>
-          </div>
-          <button id="adminStatsRefresh" type="button" class="stats-refresh-button">Odśwież</button>
-        </div>
-        <div id="adminStatsContent" class="stats-content"><div class="stats-loading">Ładowanie statystyk…</div></div>
-      </section>
+      <section id="adminStatsPanel" class="stats-panel" hidden></section>
     </section>
     <div id="status" class="status"></div>
   </section>
@@ -977,21 +1008,16 @@
       role: "admin",
       name: "Andrzej",
       phone: "45155270",
-      aliases: ["Andrzej", "Osowski", "A. Osowski"]
+      aliases: ["Andrzej", "Osowski", "A. Osowski"],
+      canViewAllDrivers: true
     },
     "4567": {
       id: "kamil",
       role: "driver",
       name: "Kamil",
       phone: "95707161",
-      aliases: ["Kamil"]
-    },
-    "5678": {
-      id: "lukasz",
-      role: "driver",
-      name: "Łukasz",
-      phone: "",
-      aliases: ["Bartek"]
+      aliases: ["Kamil"],
+      canViewAllDrivers: true
     }
   };
   let activeAdminProfileId = "";
@@ -1019,7 +1045,7 @@
       trailerTitle: number => `Naczepa ${number}`,
       tourTitle: number => `Kurs ${number}`,
       trailerDeliveries: count => `${count} dostaw`,
-      excelHeaders: ["Data", "Godzina", "Kurs", "Naczepa", "Nr sklepu", "Nazwa sklepu", "Liczba palet", "Liczba naczep"],
+      excelHeaders: ["Data", "Godzina", "Kurs", "Naczepa", "Nr sklepu", "Nazwa sklepu"],
       excelFilePrefix: "Europris-Dostawy",
       open: "Otwórz stronę dostawy",
       openSave: "Otwórz i zapisz dostawę",
@@ -1036,8 +1062,7 @@
       privateInvalid: "Wpisz prawidłowy numer telefonu.",
       history: "Historia dostaw",
       historyTitle: "Historia dostaw",
-      historyPrint: "Drukuj raport szczegółowy",
-      historyPrintSummary: "Drukuj podsumowanie miesiąca A4",
+      historyPrint: "Drukuj zestawienie miesiąca",
       historyCsv: "Eksport do Excel (.xlsx)",
       historyJson: "Kopia JSON",
       historyImport: "Importuj kopię",
@@ -1064,15 +1089,14 @@
       locationUse: "Wybierz ten sklep",
       locationAuto: (number, name, distance) => `Automatycznie wybrano: ${number} — ${name} (${distance}).`,
       locationSuggestion: (number, name, distance) => `Najbliżej jest: ${number} — ${name} (${distance}). Potwierdź wybór.`,
-      locationDenied: "Dostęp do lokalizacji jest zablokowany. W ustawieniach przeglądarki lub aplikacji włącz lokalizację dla tej strony, a potem kliknij „Sprawdź ponownie”.",
-      locationUnavailable: "Nie udało się ustalić lokalizacji. Sprawdź, czy GPS jest włączony, i spróbuj ponownie.",
-      locationPermissionPrompt: "Przeglądarka poprosi o zgodę na lokalizację. Wybierz „Zezwól”.",
+      locationDenied: "Brak dostępu do lokalizacji. Możesz wyszukać sklep ręcznie albo spróbować ponownie.",
+      locationUnavailable: "Nie udało się ustalić lokalizacji. Spróbuj ponownie.",
       locationNoCoordinates: "W bazie nie znaleziono sklepów ze współrzędnymi.",
       adminTitle:"Panel administratora — plan transportów",adminDriverPlanTitle:name=>`Plan dostawy ${name}`,adminPinTitle:"Dostęp administratora",adminPinDescription:"Wpisz czterocyfrowy PIN.",adminPinCancel:"Anuluj",adminPinConfirm:"Otwórz",adminPinError:"Nieprawidłowy PIN.",
       adminDriverNameLabel:"Kierowca",adminDriverPhoneLabel:"Numer telefonu kierowcy",adminDriverAliasesLabel:"Inne zapisy imienia lub nazwiska (po przecinku)",adminImportLabel:"Wczytaj plan Excel",adminDeletePlan:"Usuń wczytany plan",adminDeliveryDateLabel:"Dzień dostawy",adminSyncButton:"Pobierz plan",adminSyncLoading:"Pobieranie planów…",adminSyncOk:(date,time)=>`Plan ${date} pobrany. Aktualizacja: ${time}`,adminSyncNoPlan:date=>`Brak planu na dzień ${date}.`,adminSyncError:"Nie udało się połączyć z automatyzacją Google.",adminSyncNoDates:"Brak dostępnych planów.",adminPlanAvailable:"Plan dostępny",adminPlanMissing:"Brak planu",
       adminNoPlan:"Nie wczytano planu transportów.",adminImportError:"Nie udało się odczytać arkusza. Sprawdź format pliku.",adminNoDriverRows:"W pliku nie znaleziono pozycji pasujących do profilu kierowcy.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} kursów, ${rows} sklepów, ${pallets} palet.`,adminCourse:number=>`Kurs ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Trasa: ${value}`,
-      adminDeadline:value=>`Dostawa do: ${value}`,adminPallets:value=>`Palety: ${value}`,adminTrailers:value=>`Trallery: ${value}`,adminSequence:value=>`Kolejność: ${value}`,adminInfo:value=>`Uwagi: ${value}`,adminStatsTitle:"Statystyki aplikacji",adminStatsDescription:"Anonimowe dane techniczne i użycie aplikacji.",adminStatsRefresh:"Odśwież",adminReturnEmpties:value=>`Powrót pustych palet: ${value} sztaple`,adminReturnLoads:"Ładunek powrotny",adminReturnOrder:value=>`Zlecenie: ${value}`,adminReturnPallets:value=>`Palety: ${value}`,adminReturnTerminal:value=>`Odbiór: ${value}`,adminReturnSupplier:value=>`Ładunek: ${value}`,
+      adminDeadline:value=>`Dostawa do: ${value}`,adminPallets:value=>`Palety: ${value}`,adminTrailers:value=>`Trallery: ${value}`,adminSequence:value=>`Kolejność: ${value}`,adminInfo:value=>`Uwagi: ${value}`,
       adminSelectStore:"Wybierz sklep",adminMap:"Google Maps",adminSplitTitle:"Split / inni kierowcy do tego sklepu",adminPeer:(driver,time,pallets)=>`${driver} — do ${time}, ${pallets} palet`,
       adminTimeDifference:minutes=>`Różnica planowanych godzin: ${minutes} min`,adminConflictHigh:"Duże ryzyko kolizji",adminConflictMedium:"Możliwa kolizja",adminConflictLow:"Duży odstęp czasu",adminPlanDeleted:"Plan został usunięty.",
       footer: "Zbudowane przez Rumcajsa przy pomocy sztucznej inteligencji."
@@ -1093,7 +1117,7 @@
       trailerTitle: number => `Tilhenger ${number}`,
       tourTitle: number => `Tur ${number}`,
       trailerDeliveries: count => `${count} leveringer`,
-      excelHeaders: ["Dato", "Klokkeslett", "Tur", "Tilhenger", "Butikknr.", "Butikknavn", "Antall paller", "Antall tilhengere"],
+      excelHeaders: ["Dato", "Klokkeslett", "Tur", "Tilhenger", "Butikknr.", "Butikknavn"],
       excelFilePrefix: "Europris-Leveringer",
       open: "Åpne leveringssiden",
       openSave: "Åpne og lagre levering",
@@ -1110,8 +1134,7 @@
       privateInvalid: "Skriv inn et gyldig telefonnummer.",
       history: "Leveringshistorikk",
       historyTitle: "Leveringshistorikk",
-      historyPrint: "Skriv ut detaljert rapport",
-      historyPrintSummary: "Skriv ut månedssammendrag A4",
+      historyPrint: "Skriv ut månedsoversikt",
       historyCsv: "Eksporter til Excel (.xlsx)",
       historyJson: "JSON-sikkerhetskopi",
       historyImport: "Importer sikkerhetskopi",
@@ -1145,7 +1168,7 @@
       adminDriverNameLabel:"Sjåfør",adminDriverPhoneLabel:"Sjåførens telefonnummer",adminDriverAliasesLabel:"Andre skrivemåter for navn (kommaseparert)",adminImportLabel:"Les inn Excel-plan",adminDeletePlan:"Slett innlest plan",adminDeliveryDateLabel:"Leveringsdag",adminSyncButton:"Hent plan",adminSyncLoading:"Henter planer…",adminSyncOk:(date,time)=>`Plan ${date} er hentet. Oppdatert: ${time}`,adminSyncNoPlan:date=>`Ingen plan for ${date}.`,adminSyncError:"Kunne ikke koble til Google-automatiseringen.",adminSyncNoDates:"Ingen tilgjengelige planer.",adminPlanAvailable:"Plan tilgjengelig",adminPlanMissing:"Ingen plan",
       adminNoPlan:"Ingen transportplan er lest inn.",adminImportError:"Regnearket kunne ikke leses. Kontroller filformatet.",adminNoDriverRows:"Ingen poster i filen samsvarer med sjåførprofilen.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} turer, ${rows} butikker, ${pallets} paller.`,adminCourse:number=>`Tur ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Rute: ${value}`,
-      adminDeadline:value=>`Leveres innen: ${value}`,adminPallets:value=>`Paller: ${value}`,adminTrailers:value=>`Traller: ${value}`,adminSequence:value=>`Rekkefølge: ${value}`,adminInfo:value=>`Merknad: ${value}`,adminStatsTitle:"Appstatistikk",adminStatsDescription:"Anonyme tekniske data og bruk av appen.",adminStatsRefresh:"Oppdater",adminReturnEmpties:value=>`Retur tompaller: ${value} stabler`,adminReturnLoads:"Returlast",adminReturnOrder:value=>`Ordre: ${value}`,adminReturnPallets:value=>`Paller: ${value}`,adminReturnTerminal:value=>`Henting: ${value}`,adminReturnSupplier:value=>`Last: ${value}`,
+      adminDeadline:value=>`Leveres innen: ${value}`,adminPallets:value=>`Paller: ${value}`,adminTrailers:value=>`Traller: ${value}`,adminSequence:value=>`Rekkefølge: ${value}`,adminInfo:value=>`Merknad: ${value}`,
       adminSelectStore:"Velg butikk",adminMap:"Google Maps",adminSplitTitle:"Split / andre sjåfører til samme butikk",adminPeer:(driver,time,pallets)=>`${driver} — innen ${time}, ${pallets} paller`,
       adminTimeDifference:minutes=>`Forskjell mellom planlagte tider: ${minutes} min`,adminConflictHigh:"Stor kollisjonsfare",adminConflictMedium:"Mulig kollisjon",adminConflictLow:"God tidsavstand",adminPlanDeleted:"Planen er slettet.",
       footer: "Bygget av Rumcajs med hjelp av kunstig intelligens."
@@ -1166,7 +1189,7 @@
       trailerTitle: number => `Trailer ${number}`,
       tourTitle: number => `Trip ${number}`,
       trailerDeliveries: count => `${count} deliveries`,
-      excelHeaders: ["Date", "Time", "Trip", "Trailer", "Store No.", "Store Name", "Pallets", "Trailers"],
+      excelHeaders: ["Date", "Time", "Trip", "Trailer", "Store No.", "Store Name"],
       excelFilePrefix: "Europris-Deliveries",
       open: "Open delivery page",
       openSave: "Open and save delivery",
@@ -1183,8 +1206,7 @@
       privateInvalid: "Enter a valid phone number.",
       history: "Delivery history",
       historyTitle: "Delivery history",
-      historyPrint: "Print detailed report",
-      historyPrintSummary: "Print monthly summary A4",
+      historyPrint: "Print monthly report",
       historyCsv: "Export to Excel (.xlsx)",
       historyJson: "JSON backup",
       historyImport: "Import backup",
@@ -1218,7 +1240,7 @@
       adminDriverNameLabel:"Driver",adminDriverPhoneLabel:"Driver phone number",adminDriverAliasesLabel:"Other name spellings (comma-separated)",adminImportLabel:"Import Excel plan",adminDeletePlan:"Delete imported plan",adminDeliveryDateLabel:"Delivery date",adminSyncButton:"Load plan",adminSyncLoading:"Loading plans…",adminSyncOk:(date,time)=>`Plan ${date} loaded. Updated: ${time}`,adminSyncNoPlan:date=>`No plan for ${date}.`,adminSyncError:"Could not connect to Google automation.",adminSyncNoDates:"No plans available.",adminPlanAvailable:"Plan available",adminPlanMissing:"No plan",
       adminNoPlan:"No transport plan has been imported.",adminImportError:"The spreadsheet could not be read. Check the file format.",adminNoDriverRows:"No rows in the file match the driver profile.",
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} trips, ${rows} stores, ${pallets} pallets.`,adminCourse:number=>`Trip ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Route: ${value}`,
-      adminDeadline:value=>`Deliver by: ${value}`,adminPallets:value=>`Pallets: ${value}`,adminTrailers:value=>`Trailers: ${value}`,adminSequence:value=>`Sequence: ${value}`,adminInfo:value=>`Notes: ${value}`,adminStatsTitle:"Application statistics",adminStatsDescription:"Anonymous technical data and application usage.",adminStatsRefresh:"Refresh",adminReturnEmpties:value=>`Empty pallet return: ${value} stacks`,adminReturnLoads:"Return load",adminReturnOrder:value=>`Order: ${value}`,adminReturnPallets:value=>`Pallets: ${value}`,adminReturnTerminal:value=>`Pickup: ${value}`,adminReturnSupplier:value=>`Load: ${value}`,
+      adminDeadline:value=>`Deliver by: ${value}`,adminPallets:value=>`Pallets: ${value}`,adminTrailers:value=>`Trailers: ${value}`,adminSequence:value=>`Sequence: ${value}`,adminInfo:value=>`Notes: ${value}`,
       adminSelectStore:"Select store",adminMap:"Google Maps",adminSplitTitle:"Split / other drivers for this store",adminPeer:(driver,time,pallets)=>`${driver} — by ${time}, ${pallets} pallets`,
       adminTimeDifference:minutes=>`Planned-time difference: ${minutes} min`,adminConflictHigh:"High collision risk",adminConflictMedium:"Possible collision",adminConflictLow:"Good time separation",adminPlanDeleted:"The plan has been deleted.",
       footer: "Built by Rumcajs with the help of artificial intelligence."
@@ -1266,17 +1288,11 @@
   const historyList = document.getElementById("historyList");
   const historySummary = document.getElementById("historySummary");
   const historyPrint = document.getElementById("historyPrint");
-  const historyPrintSummary = document.getElementById("historyPrintSummary");
   const historyCsv = document.getElementById("historyCsv");
   const historyJson = document.getElementById("historyJson");
   const historyImport = document.getElementById("historyImport");
   const historyImportFile = document.getElementById("historyImportFile");
   const historyClear = document.getElementById("historyClear");
-  const adminStatsPanel = document.getElementById("adminStatsPanel");
-  const adminStatsTitle = document.getElementById("adminStatsTitle");
-  const adminStatsDescription = document.getElementById("adminStatsDescription");
-  const adminStatsRefresh = document.getElementById("adminStatsRefresh");
-  const adminStatsContent = document.getElementById("adminStatsContent");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const locationHeading = document.getElementById("locationHeading");
@@ -1285,7 +1301,7 @@
   const useNearest = document.getElementById("useNearest");
   const retryLocation = document.getElementById("retryLocation");
   const footer = document.getElementById("footer");
-  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar"),adminDeliveryDateLabel=document.getElementById("adminDeliveryDateLabel"),adminDeliveryDate=document.getElementById("adminDeliveryDate"),adminSyncStatus=document.getElementById("adminSyncStatus");
+  const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar"),adminDeliveryDateLabel=document.getElementById("adminDeliveryDateLabel"),adminDeliveryDate=document.getElementById("adminDeliveryDate"),adminSyncStatus=document.getElementById("adminSyncStatus"),adminStatsPanel=document.getElementById("adminStatsPanel");
 
 
   function currentLocalDateKey() {
@@ -1632,10 +1648,198 @@
     return Number(digits) >= 119000 ? digits : "";
   }
   async function selectStoreFromAdmin(r,course){const s=findStoreByNumber(r.storeNumber);tourNumber.value=String(course);saveDailyAssignment();if(s)await selectStore(s);else{search.value=r.storeNumber;currentNumber=r.storeNumber;currentName=r.storeName;currentStore=null;results.replaceChildren();await updateSelected();}adminPanel.hidden=true;window.scrollTo({top:0,behavior:"smooth"});}
-  function adminReturnEmptiesText(value,t){const raw=String(value||"").trim();if(!raw||raw==="0"||raw==="32")return"";return t.adminReturnEmpties(raw);}
-function uniqueReturnLoads(rows){const map=new Map();rows.forEach(row=>(Array.isArray(row.returnLoads)?row.returnLoads:[]).forEach(load=>{const key=String(load.orderNumber||load.terminal||load.supplier||JSON.stringify(load));if(!map.has(key))map.set(key,load);}));return[...map.values()];}
-function appendAdminReturnLoads(container,loads,t){if(!loads.length)return;const box=document.createElement("section");box.className="admin-return-loads";const title=document.createElement("div");title.className="admin-return-loads-title";title.textContent=`↩ ${t.adminReturnLoads}`;box.append(title);loads.forEach(load=>{const card=document.createElement("div");card.className="admin-return-load";const main=document.createElement("strong");main.textContent=load.terminal||load.supplier||t.adminReturnLoads;const meta=document.createElement("div");meta.className="admin-return-load-meta";meta.textContent=[load.orderNumber?t.adminReturnOrder(load.orderNumber):"",load.pallets?t.adminReturnPallets(load.pallets):"",load.terminal?t.adminReturnTerminal(load.terminal):"",load.supplier?t.adminReturnSupplier(load.supplier):""].filter(Boolean).join(" • ");card.append(main,meta);box.append(card);});container.append(box);}
-function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p=adminProfile();adminPlanList.replaceChildren();if(!plan?.rows?.length){adminSummary.textContent=t.adminNoPlan;adminPlanList.innerHTML=`<div class="admin-empty">${t.adminNoPlan}</div>`;return;}const own=plan.rows.filter(r=>matchesAdminDriver(r,p)),groups=adminCourseGroups(own),pal=own.reduce((s,r)=>s+(+r.pallets||0),0),date=own[0]?.deliveryDate||plan.rows[0]?.deliveryDate||"—";adminSummary.textContent=own.length?t.adminSummary(own.length,groups.length,pal,date):t.adminNoDriverRows;if(!own.length){adminPlanList.innerHTML=`<div class="admin-empty">${t.adminNoDriverRows}</div>`;return;}groups.forEach((g,ci)=>{const course=document.createElement("section");course.className="admin-course";const head=document.createElement("div");head.className="admin-course-header";const transportNumber=visibleTransportNumber(g.rows[0]?.transportNumber);head.innerHTML=`<div>${t.adminCourse(g.tourNumber)}</div><div>${transportNumber?t.adminTransport(transportNumber):""}</div>`;course.append(head);g.rows.forEach(r=>{const stop=document.createElement("article");stop.className="admin-stop";const title=document.createElement("div");title.className="admin-stop-title";title.textContent=`${r.deliverySequence||"—"}. ${r.storeNumber} — ${r.storeName}`;const meta=document.createElement("div");meta.className="admin-stop-meta";meta.textContent=[r.deadline&&t.adminDeadline(r.deadline),t.adminPallets(r.pallets||0),adminReturnEmptiesText(r.returnEmpties,t),visibleTransportNumber(r.transportNumber)?t.adminTransport(visibleTransportNumber(r.transportNumber)):"",r.info?t.adminInfo(r.info):""].filter(Boolean).join(" • ");const acts=document.createElement("div");acts.className="admin-card-actions";const sel=document.createElement("button");sel.className="primary";sel.textContent=t.adminSelectStore;sel.onclick=()=>void selectStoreFromAdmin(r,g.tourNumber);const map=document.createElement("button");map.textContent=t.adminMap;const store=findStoreByNumber(r.storeNumber);map.disabled=!hasValidCoordinates(store);map.onclick=()=>{if(store&&hasValidCoordinates(store)){saveDailyAssignment();window.location.assign(mapsUrl(store));}};acts.append(sel,map);stop.append(title,meta,acts);const peers=plan.rows.filter(q=>q.id!==r.id&&q.storeNumber===r.storeNumber&&q.deliveryDate===r.deliveryDate&&!matchesAdminDriver(q,p));if(peers.length||normalized(r.split).includes("split")){const box=document.createElement("div");box.className="admin-split";box.innerHTML=`<div class="admin-split-title">${t.adminSplitTitle}</div>`;peers.forEach(q=>{const inf=conflictInfo(r.deadline,q.deadline),peer=document.createElement("div");peer.className="admin-peer";const badge=inf.minutes==null?t.adminConflictMedium:`${t.adminTimeDifference(inf.minutes)} — ${inf.level==="high"?t.adminConflictHigh:inf.level==="medium"?t.adminConflictMedium:t.adminConflictLow}`;const peerMain=document.createElement("div");peerMain.textContent=t.adminPeer(q.driver||"—",q.deadline||"—",q.pallets||0);peer.append(peerMain);const peerTransport=visibleTransportNumber(q.transportNumber);if(peerTransport){const transportLine=document.createElement("div");transportLine.textContent=t.adminTransport(peerTransport);peer.append(transportLine);}if(q.phone){const phoneLink=document.createElement("a");phoneLink.className="admin-phone-link";phoneLink.href=`tel:+47${adminDigits(q.phone)}`;phoneLink.textContent=`☎ ${q.phone}`;peer.append(phoneLink);}const badgeElement=document.createElement("span");badgeElement.className=`admin-conflict ${inf.level}`;badgeElement.textContent=badge;peer.append(badgeElement);box.append(peer);});if(!peers.length){const e=document.createElement("div");e.className="admin-peer";e.textContent="Split";box.append(e);}stop.append(box);}course.append(stop);});adminPlanList.append(course);});appendAdminReturnLoads(adminPlanList,uniqueReturnLoads(own),t);}
+
+  function driverListText() {
+    if (language === "no") return {
+      title: "Alle sjåfører",
+      drivers: n => `${n} sjåfører / biler`,
+      stores: n => `${n} butikker`,
+      pallets: n => `${n} paller`,
+      phone: "Telefon",
+      noDriver: "Ukjent sjåfør / bil",
+      noPlan: "Ingen transportplan er tilgjengelig."
+    };
+    if (language === "en") return {
+      title: "All drivers",
+      drivers: n => `${n} drivers / vehicles`,
+      stores: n => `${n} stores`,
+      pallets: n => `${n} pallets`,
+      phone: "Phone",
+      noDriver: "Unknown driver / vehicle",
+      noPlan: "No transport plan is available."
+    };
+    return {
+      title: "Wszyscy kierowcy",
+      drivers: n => `${n} kierowców / aut`,
+      stores: n => `${n} sklepów`,
+      pallets: n => `${n} palet`,
+      phone: "Telefon",
+      noDriver: "Nieznany kierowca / auto",
+      noPlan: "Brak planu transportów."
+    };
+  }
+
+  function driverGroupKey(row) {
+    const name = String(row.driver || row.carrier || "").trim();
+    const phone = adminDigits(row.phone);
+    return `${normalized(name || "unknown")}|${phone}`;
+  }
+
+  function groupAllDrivers(rows) {
+    const groups = new Map();
+    rows.forEach(row => {
+      const key = driverGroupKey(row);
+      if (!groups.has(key)) {
+        groups.set(key, {
+          name: String(row.driver || row.carrier || "").trim(),
+          phone: adminDigits(row.phone),
+          rows: []
+        });
+      }
+      const group = groups.get(key);
+      if (!group.phone && row.phone) group.phone = adminDigits(row.phone);
+      group.rows.push(row);
+    });
+
+    return [...groups.values()]
+      .map(group => ({
+        ...group,
+        rows: group.rows.sort((a, b) =>
+          String(a.deadline || "").localeCompare(String(b.deadline || "")) ||
+          Number(a.deliverySequence || 0) - Number(b.deliverySequence || 0)
+        )
+      }))
+      .sort((a, b) => normalized(a.name).localeCompare(normalized(b.name), "nb"));
+  }
+
+  function telephoneHref(phone) {
+    const digits = adminDigits(phone);
+    if (!digits) return "";
+    return digits.length === 8 ? `tel:+47${digits}` : `tel:+${digits}`;
+  }
+
+  function renderAdminPlan() {
+    const t = translations[language];
+    const labels = driverListText();
+    const plan = loadAdminPlan();
+
+    adminPlanList.replaceChildren();
+
+    if (!plan?.rows?.length) {
+      adminSummary.textContent = labels.noPlan;
+      adminPlanList.innerHTML = `<div class="admin-empty">${labels.noPlan}</div>`;
+      return;
+    }
+
+    const definition = activeAdminDefinition();
+    const canViewAll = definition.canViewAllDrivers !== false;
+    const profile = adminProfile();
+    const visibleRows = canViewAll
+      ? plan.rows
+      : plan.rows.filter(row => matchesAdminDriver(row, profile));
+
+    if (!visibleRows.length) {
+      adminSummary.textContent = t.adminNoDriverRows;
+      adminPlanList.innerHTML = `<div class="admin-empty">${t.adminNoDriverRows}</div>`;
+      return;
+    }
+
+    const groups = groupAllDrivers(visibleRows);
+    const palletsTotal = visibleRows.reduce((sum, row) => sum + (+row.pallets || 0), 0);
+    const date = visibleRows[0]?.deliveryDate || plan.rows[0]?.deliveryDate || "—";
+
+    adminSummary.className = "admin-summary driver-day-summary";
+    adminSummary.textContent =
+      `${formatAdminDate(date)} • ${labels.drivers(groups.length)} • ` +
+      `${labels.stores(visibleRows.length)} • ${labels.pallets(palletsTotal)}`;
+
+    const list = document.createElement("div");
+    list.className = "all-drivers-list";
+
+    groups.forEach((group, index) => {
+      const details = document.createElement("details");
+      details.className = "driver-route";
+      details.open = groups.length === 1;
+
+      const summary = document.createElement("summary");
+      const summaryGrid = document.createElement("div");
+      summaryGrid.className = "driver-route-summary";
+
+      const left = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "driver-route-name";
+      name.textContent = group.name || labels.noDriver;
+      left.append(name);
+
+      if (group.phone) {
+        const phone = document.createElement("a");
+        phone.className = "driver-route-phone";
+        phone.href = telephoneHref(group.phone);
+        phone.textContent = `☎ ${group.phone}`;
+        phone.addEventListener("click", event => event.stopPropagation());
+        left.append(phone);
+      }
+
+      const count = document.createElement("div");
+      count.className = "driver-route-count";
+      const groupPallets = group.rows.reduce((sum, row) => sum + (+row.pallets || 0), 0);
+      count.textContent = `${labels.stores(group.rows.length)}\n${labels.pallets(groupPallets)}`;
+
+      summaryGrid.append(left, count);
+      summary.append(summaryGrid);
+      details.append(summary);
+
+      const body = document.createElement("div");
+      body.className = "driver-route-body";
+
+      group.rows.forEach(row => {
+        const stop = document.createElement("article");
+        stop.className = "driver-stop";
+
+        const title = document.createElement("div");
+        title.className = "driver-stop-title";
+        title.textContent = `${row.storeNumber || "—"} — ${row.storeName || "—"}`;
+
+        const meta = document.createElement("div");
+        meta.className = "driver-stop-meta";
+        meta.textContent = [
+          row.deadline ? t.adminDeadline(row.deadline) : "",
+          t.adminPallets(row.pallets || 0),
+          row.tour12 ? t.adminCourse(row.tour12) : "",
+          row.deliverySequence ? t.adminSequence(row.deliverySequence) : ""
+        ].filter(Boolean).join(" • ");
+
+        const actions = document.createElement("div");
+        actions.className = "admin-card-actions";
+
+        const selectButton = document.createElement("button");
+        selectButton.className = "primary";
+        selectButton.textContent = t.adminSelectStore;
+        selectButton.onclick = () => void selectStoreFromAdmin(row, row.tour12 || "1");
+
+        const mapButton = document.createElement("button");
+        mapButton.textContent = t.adminMap;
+        const store = findStoreByNumber(row.storeNumber);
+        mapButton.disabled = !hasValidCoordinates(store);
+        mapButton.onclick = () => {
+          if (store && hasValidCoordinates(store)) {
+            saveDailyAssignment();
+            window.location.assign(mapsUrl(store));
+          }
+        };
+
+        actions.append(selectButton, mapButton);
+        stop.append(title, meta, actions);
+        body.append(stop);
+      });
+
+      details.append(body);
+      list.append(details);
+    });
+
+    adminPlanList.append(list);
+  }
+
   function applyAdminLanguage(){
     const t = translations[language];
     const profile = adminProfile();
@@ -1643,7 +1847,7 @@ function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p
 
     adminTitle.textContent = adminMode
       ? `${t.adminTitle} — ${profile.name}`
-      : t.adminDriverPlanTitle(profile.name);
+      : driverListText().title;
 
     adminProfileSection.hidden = !adminMode;
     adminToolbar.hidden = !adminMode;
@@ -1655,7 +1859,7 @@ function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p
     adminStatsPanel.hidden = !adminMode;
     adminStatsPanel.style.display = adminMode ? "" : "none";
     if (adminMode && window.EuroprisStatsPanel) {
-      window.EuroprisStatsPanel.load(adminStatsContent);
+      window.EuroprisStatsPanel.load(adminStatsPanel);
     }
 
     adminImportFile.disabled = !adminMode;
@@ -1684,6 +1888,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     adminToolbar.hidden = true;
     adminProfileSection.style.display = "none";
     adminToolbar.style.display = "none";
+    adminStatsPanel.hidden = true;
+    adminStatsPanel.style.display = "none";
 
     if (isActiveAdmin()) saveAdminProfile();
 
@@ -1775,10 +1981,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     historyToggle.textContent = text.history;
     document.getElementById("historyTitle").textContent = text.historyTitle;
     historyPrint.textContent = text.historyPrint;
-    historyPrintSummary.textContent = text.historyPrintSummary;
-    adminStatsTitle.textContent = text.adminStatsTitle;
-    adminStatsDescription.textContent = text.adminStatsDescription;
-    adminStatsRefresh.textContent = text.adminStatsRefresh;
     historyCsv.textContent = text.historyCsv;
     historyJson.textContent = text.historyJson;
     historyImport.textContent = text.historyImport;
@@ -1837,12 +2039,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     localStorage.removeItem(ADMIN_PLAN_KEY);
     renderAdminPlan();
   };
-
-  adminStatsRefresh.addEventListener("click", () => {
-    if (isActiveAdmin() && window.EuroprisStatsPanel) {
-      window.EuroprisStatsPanel.load(adminStatsContent, true);
-    }
-  });
 
   adminDeliveryDate.addEventListener("change", () => {
     updateAdminDateStatusColor();
@@ -1999,29 +2195,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     useNearest.hidden = false;
   }
 
-  function resolveNearestPosition(position) {
-    const text = translations[language];
-    const best = findNearestStore(
-      position.coords.latitude,
-      position.coords.longitude
-    );
-
-    if (!best) {
-      locationMessage.textContent = text.locationNoCoordinates;
-      return;
-    }
-
-    showNearestResult(best);
-    window.EuroprisAnalytics?.track?.("gps_ok", "nearest_store");
-  }
-
-  function requestPosition(options) {
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
-    });
-  }
-
-  async function requestNearestStore() {
+  function requestNearestStore() {
     const text = translations[language];
 
     useNearest.hidden = true;
@@ -2029,59 +2203,41 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     nearestDistanceMeters = null;
     nearestWasAutoSelected = false;
     locationResult.textContent = "";
-
-    if (!window.isSecureContext || !navigator.geolocation) {
-      locationMessage.textContent = text.locationUnavailable;
-      window.EuroprisAnalytics?.track?.("gps_error", "unsupported");
-      return;
-    }
-
-    /*
-      Wywołujemy geolokalizację bez wcześniejszego sprawdzania Permissions API.
-      Dzięki temu przeglądarka sama pokaże standardowe pytanie „Zezwolić na
-      lokalizację?”, jeśli użytkownik jeszcze nie podjął decyzji.
-    */
     locationMessage.textContent = text.locationChecking;
 
-    try {
-      const position = await requestPosition({
-        enableHighAccuracy: false,
-        timeout: 15000,
-        maximumAge: 120000
-      });
-
-      resolveNearestPosition(position);
+    if (!navigator.geolocation) {
+      locationMessage.textContent = text.locationUnavailable;
       return;
-    } catch (firstError) {
-      if (firstError?.code === 1) {
-        locationMessage.textContent = text.locationDenied;
-        window.EuroprisAnalytics?.track?.("gps_denied", "permission_denied");
-        return;
-      }
     }
 
-    try {
-      locationMessage.textContent = text.locationChecking;
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const best = findNearestStore(
+          position.coords.latitude,
+          position.coords.longitude
+        );
 
-      const position = await requestPosition({
+        if (!best) {
+          locationMessage.textContent = text.locationNoCoordinates;
+          return;
+        }
+
+        showNearestResult(best);
+      },
+      geolocationError => {
+        locationMessage.textContent =
+          geolocationError.code === geolocationError.PERMISSION_DENIED
+            ? text.locationDenied
+            : text.locationUnavailable;
+      },
+      {
         enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0
-      });
-
-      resolveNearestPosition(position);
-    } catch (secondError) {
-      locationMessage.textContent =
-        secondError?.code === 1
-          ? text.locationDenied
-          : text.locationUnavailable;
-
-      window.EuroprisAnalytics?.track?.(
-        secondError?.code === 1 ? "gps_denied" : "gps_error",
-        `code_${secondError?.code || "unknown"}`
-      );
-    }
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
   }
+
 
   function openDatabase() {
     return new Promise((resolve, reject) => {
@@ -2157,30 +2313,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     return result;
   }
 
-  function deliveryPlanMetrics(storeNumber, tour) {
-    const plan = loadAdminPlan();
-    if (!plan?.rows?.length) return { pallets: 0, trailerCount: 0 };
-
-    const profile = adminProfile();
-    const candidates = plan.rows.filter(row =>
-      String(row.storeNumber || "") === String(storeNumber || "") &&
-      String(row.tour12 || "1") === String(tour || "1")
-    );
-
-    const own = candidates.filter(row => matchesAdminDriver(row, profile));
-    const row = own[0] || candidates[0];
-
-    return {
-      pallets: Number(row?.pallets) || 0,
-      // Liczba naczep wynika wyłącznie z numeru tury:
-      // jedna tura = jedna naczepa.
-      trailerCount: String(tour || "").trim() ? 1 : 0
-    };
-  }
-
   async function addDelivery(store, trailer, tour) {
     const now = new Date();
-    const metrics = deliveryPlanMetrics(store.number, tour);
     const entry = {
       id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       storeNumber: String(store.number),
@@ -2191,8 +2325,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       phone: String(store.phone || ""),
       latitude: Number(store.latitude),
       longitude: Number(store.longitude),
-      pallets: metrics.pallets,
-      trailerCount: metrics.trailerCount,
       createdAt: now.toISOString(),
       month: now.toISOString().slice(0, 7)
     };
@@ -2468,372 +2600,37 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     URL.revokeObjectURL(url);
   }
 
-  async function tryLoadPlanForHistoryDate(dateKey) {
-    const cached = loadAdminPlan();
-    if (cached?.rows?.some(row => String(row.deliveryDate || "") === dateKey)) {
-      return cached;
-    }
-
-    try {
-      const remote = await adminJsonp("plan", { date: dateKey });
-      return remote?.ok && Array.isArray(remote.rows) ? remote : null;
-    } catch {
-      return null;
-    }
-  }
-
-  async function enrichHistoryEntries(entries) {
-    const profile = adminProfile();
-    const byDate = new Map();
-
-    for (const item of entries) {
-      const day = localDateKey(item.createdAt);
-      if (!byDate.has(day)) byDate.set(day, []);
-      byDate.get(day).push(item);
-    }
-
-    for (const [day, dayEntries] of byDate) {
-      const plan = await tryLoadPlanForHistoryDate(day);
-      if (!plan?.rows?.length) continue;
-
-      for (const item of dayEntries) {
-        // Uzupełniaj palety zawsze, gdy ich brakuje.
-        // Zapisana liczba naczep nie oznacza, że rekord ma już dane o paletach.
-        if ((Number(item.pallets) || 0) > 0) continue;
-
-        const candidates = plan.rows.filter(row =>
-          String(row.storeNumber || "") === String(item.storeNumber || "") &&
-          String(row.tour12 || "1") === String(item.tourNumber || "1")
-        );
-        const own = candidates.filter(row => matchesAdminDriver(row, profile));
-        const row = own[0] || candidates[0];
-
-        if (row) {
-          item.pallets = Number(row.pallets) || 0;
-          item.trailerCount = String(item.tourNumber || row.tour12 || "").trim() ? 1 : 0;
-        }
-      }
-    }
-
-    return entries;
-  }
-
-  function monthlyTrailerTotal(entries) {
-    const uniqueDayTours = new Set();
-
-    for (const item of entries) {
-      const day = localDateKey(item.createdAt);
-      const tour = String(item.tourNumber || "").trim();
-
-      if (!tour) continue;
-      uniqueDayTours.add(`${day}|${tour}`);
-    }
-
-    return uniqueDayTours.size;
-  }
-
-  function monthlySummaryLocale() {
-    if (language === "no") return "nb-NO";
-    if (language === "en") return "en-GB";
-    return "pl-PL";
-  }
-
-  function monthlySummaryLabels() {
-    if (language === "no") return {
-      title: "Månedssammendrag", date: "Dato", day: "Dag", tours: "Turer",
-      stores: "Butikker", pallets: "Paller", trailers: "Tilhengere",
-      workDays: "Arbeidsdager", totalStores: "Butikker totalt",
-      totalPallets: "Paller totalt", totalTrailers: "Tilhengere totalt",
-      averagePallets: "Gj.sn. paller / dag", averageStores: "Gj.sn. butikker / dag",
-      maxPallets: "Flest paller", maxStores: "Flest butikker",
-      noData: "Ingen leveringer i valgt måned."
-    };
-    if (language === "en") return {
-      title: "Monthly summary", date: "Date", day: "Day", tours: "Trips",
-      stores: "Stores", pallets: "Pallets", trailers: "Trailers",
-      workDays: "Working days", totalStores: "Total stores",
-      totalPallets: "Total pallets", totalTrailers: "Total trailers",
-      averagePallets: "Avg. pallets / day", averageStores: "Avg. stores / day",
-      maxPallets: "Most pallets", maxStores: "Most stores",
-      noData: "No deliveries in the selected month."
-    };
-    return {
-      title: "Podsumowanie miesiąca", date: "Data", day: "Dzień", tours: "Tury",
-      stores: "Sklepy", pallets: "Palety", trailers: "Naczepy",
-      workDays: "Dni pracy", totalStores: "Łącznie sklepów",
-      totalPallets: "Łącznie palet", totalTrailers: "Łącznie naczep",
-      averagePallets: "Śr. palet / dzień", averageStores: "Śr. sklepów / dzień",
-      maxPallets: "Najwięcej palet", maxStores: "Najwięcej sklepów",
-      noData: "Brak dostaw w wybranym miesiącu."
-    };
-  }
-
-  function escapePrintHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, character => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[character]));
-  }
-
-  async function buildMonthlySummaryRows(month) {
-    let entries = (await getAllDeliveries())
-      .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
-      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
-
-    entries = await enrichHistoryEntries(entries);
-    const days = new Map();
-
-    for (const item of entries) {
-      const dateKey = localDateKey(item.createdAt);
-      if (!days.has(dateKey)) {
-        days.set(dateKey, { dateKey, stores: 0, pallets: 0, tours: new Set() });
-      }
-
-      const day = days.get(dateKey);
-      day.stores++;
-      day.pallets += Number(item.pallets) || 0;
-
-      const tour = String(item.tourNumber || "").trim();
-      if (tour) day.tours.add(tour);
-    }
-
-    return [...days.values()]
-      .sort((a, b) => a.dateKey.localeCompare(b.dateKey))
-      .map(day => ({
-        dateKey: day.dateKey,
-        stores: day.stores,
-        pallets: day.pallets,
-        tours: [...day.tours].sort((a, b) => Number(a) - Number(b)),
-        trailers: day.tours.size
-      }));
-  }
-
-  async function printMonthlySummaryA4() {
-    saveDailyAssignment();
-
-    const labels = monthlySummaryLabels();
-    const month = historyMonth.value;
-    const rows = await buildMonthlySummaryRows(month);
-
-    if (!rows.length) {
-      error.textContent = labels.noData;
-      return;
-    }
-
-    const locale = monthlySummaryLocale();
-    const workDays = rows.length;
-    const totalStores = rows.reduce((sum, row) => sum + row.stores, 0);
-    const totalPallets = rows.reduce((sum, row) => sum + row.pallets, 0);
-    const totalTrailers = rows.reduce((sum, row) => sum + row.trailers, 0);
-    const maxPallets = rows.reduce((best, row) => row.pallets > best.pallets ? row : best, rows[0]);
-    const maxStores = rows.reduce((best, row) => row.stores > best.stores ? row : best, rows[0]);
-
-    const monthName = new Intl.DateTimeFormat(locale, {
-      month: "long", year: "numeric"
-    }).format(new Date(`${month}-15T12:00:00`));
-
-    const formatNumber = value => new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 0, maximumFractionDigits: 1
-    }).format(value);
-
-    const formatDate = dateKey => new Intl.DateTimeFormat(locale, {
-      day: "2-digit", month: "2-digit"
-    }).format(new Date(`${dateKey}T12:00:00`));
-
-    const formatDay = dateKey => new Intl.DateTimeFormat(locale, {
-      weekday: "short"
-    }).format(new Date(`${dateKey}T12:00:00`));
-
-    const tableRows = rows.map(row => `
-      <tr>
-        <td>${escapePrintHtml(formatDate(row.dateKey))}</td>
-        <td>${escapePrintHtml(formatDay(row.dateKey))}</td>
-        <td>${escapePrintHtml(row.tours.join(" + "))}</td>
-        <td>${row.stores}</td>
-        <td>${row.pallets}</td>
-        <td>${row.trailers}</td>
-      </tr>
-    `).join("");
-
-    const reportHtml = `<!doctype html>
-<html lang="${language}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${escapePrintHtml(labels.title)} — ${escapePrintHtml(monthName)}</title>
-<style>
-@page{size:A4 portrait;margin:8mm}
-*{box-sizing:border-box}
-body{margin:0;color:#111;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:8.5pt}
-header{display:flex;justify-content:space-between;align-items:flex-end;gap:10mm;margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #08783e}
-h1{margin:0;color:#08783e;font-size:15pt;line-height:1.1}
-.month{font-size:10pt;font-weight:700;text-transform:capitalize}
-table{width:100%;border-collapse:collapse;table-layout:fixed}
-th,td{border:.4pt solid #aaa;padding:1.15mm 1.2mm;text-align:center;line-height:1.05}
-th{color:#fff;background:#08783e;font-size:7.5pt;font-weight:700}
-tbody tr:nth-child(even) td{background:#f2f7f4}
-th:nth-child(1),td:nth-child(1){width:16%}
-th:nth-child(2),td:nth-child(2){width:14%}
-th:nth-child(3),td:nth-child(3){width:17%}
-th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5),th:nth-child(6),td:nth-child(6){width:17.66%}
-.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-top:3mm}
-.total{min-height:14mm;padding:2mm;border:.6pt solid #aaa;border-radius:2mm;text-align:center}
-.total strong{display:block;color:#08783e;font-size:14pt;line-height:1}
-.total span{display:block;margin-top:1mm;font-size:7pt;font-weight:700}
-.details{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-top:2mm;font-size:7pt}
-.detail{padding:1.5mm;border:.4pt solid #bbb;border-radius:1.5mm;text-align:center}
-.detail b{color:#08783e}
-footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
-@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
-</style>
-</head>
-<body>
-<header>
-<div><h1>${escapePrintHtml(labels.title)}</h1><div class="month">${escapePrintHtml(monthName)}</div></div>
-<div>Europris Dostawy</div>
-</header>
-<table>
-<thead><tr>
-<th>${escapePrintHtml(labels.date)}</th>
-<th>${escapePrintHtml(labels.day)}</th>
-<th>${escapePrintHtml(labels.tours)}</th>
-<th>${escapePrintHtml(labels.stores)}</th>
-<th>${escapePrintHtml(labels.pallets)}</th>
-<th>${escapePrintHtml(labels.trailers)}</th>
-</tr></thead>
-<tbody>${tableRows}</tbody>
-</table>
-<section class="totals">
-<div class="total"><strong>${workDays}</strong><span>${escapePrintHtml(labels.workDays)}</span></div>
-<div class="total"><strong>${totalStores}</strong><span>${escapePrintHtml(labels.totalStores)}</span></div>
-<div class="total"><strong>${totalPallets}</strong><span>${escapePrintHtml(labels.totalPallets)}</span></div>
-<div class="total"><strong>${totalTrailers}</strong><span>${escapePrintHtml(labels.totalTrailers)}</span></div>
-</section>
-<section class="details">
-<div class="detail"><b>${escapePrintHtml(labels.averagePallets)}:</b><br>${formatNumber(totalPallets / workDays)}</div>
-<div class="detail"><b>${escapePrintHtml(labels.averageStores)}:</b><br>${formatNumber(totalStores / workDays)}</div>
-<div class="detail"><b>${escapePrintHtml(labels.maxPallets)}:</b><br>${maxPallets.pallets} — ${escapePrintHtml(formatDate(maxPallets.dateKey))}</div>
-<div class="detail"><b>${escapePrintHtml(labels.maxStores)}:</b><br>${maxStores.stores} — ${escapePrintHtml(formatDate(maxStores.dateKey))}</div>
-</section>
-<footer>${new Date().toLocaleString(locale)}</footer>
-</body>
-</html>`;
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      error.textContent = language === "no"
-        ? "Nettleseren blokkerte utskriftsvinduet."
-        : language === "en"
-          ? "The browser blocked the print window."
-          : "Przeglądarka zablokowała okno wydruku.";
-      return;
-    }
-
-    printWindow.document.open();
-    printWindow.document.write(reportHtml);
-    printWindow.document.close();
-    window.setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 350);
-  }
-
   async function exportExcel() {
     saveDailyAssignment();
-    if (typeof XLSX === "undefined") {
-      error.textContent = translations[language].historyImportError;
-      return;
-    }
-
-    const month = historyMonth.value;
-    const text = translations[language];
-    let entries = (await getAllDeliveries())
-      .filter(item => localDateKey(item.createdAt).slice(0, 7) === month)
-      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
-
-    entries = await enrichHistoryEntries(entries);
-
-    const data = [[...text.excelHeaders]];
-    let previousDay = "";
-    const countedDayTours = new Set();
-
-    for (const item of entries) {
-      const day = localDateKey(item.createdAt);
-
-      if (previousDay && day !== previousDay) {
-        data.push(["────────", "────────", "────────", "────────", "────────", "────────────────", "────────", "────────"]);
+    if (typeof XLSX==="undefined"){error.textContent=translations[language].historyImportError;return;}
+    const month=historyMonth.value;
+    const text=translations[language];
+    const entries=(await getAllDeliveries()).filter(i=>localDateKey(i.createdAt).slice(0,7)===month).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
+    const data=[[...text.excelHeaders]];
+    let prev="";
+    for(const item of entries){
+      const day=localDateKey(item.createdAt);
+      if(prev && day!==prev){
+        data.push(["────────","────────","────────","────────","────────","────────────────"]);
       }
-
-      previousDay = day;
-      const date = new Date(item.createdAt);
-
-      const tour = String(item.tourNumber || "").trim();
-      const dayTourKey = tour ? `${day}|${tour}` : "";
-      const trailerValue = dayTourKey && !countedDayTours.has(dayTourKey) ? 1 : "";
-
-      if (dayTourKey) countedDayTours.add(dayTourKey);
-
+      prev=day;
+      const d=new Date(item.createdAt);
       data.push([
-        date.toLocaleDateString(language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL"),
-        date.toLocaleTimeString(language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL", { hour: "2-digit", minute: "2-digit" }),
-        tour,
-        String(item.trailerNumber || ""),
-        String(item.storeNumber || ""),
-        String(item.storeName || ""),
-        Number(item.pallets) || 0,
-        trailerValue
+        d.toLocaleDateString("pl-PL"),
+        d.toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"}),
+        String(item.tourNumber||""),
+        String(item.trailerNumber||""),
+        String(item.storeNumber||""),
+        String(item.storeName||"")
       ]);
     }
-
-    const totalPallets = entries.reduce((sum, item) => sum + (Number(item.pallets) || 0), 0);
-    const totalTrailers = monthlyTrailerTotal(entries);
-
-    data.push([]);
-    data.push([
-      language === "no" ? "MÅNEDSSUM" : language === "en" ? "MONTH TOTAL" : "PODSUMOWANIE MIESIĄCA",
-      "",
-      "",
-      "",
-      "",
-      "",
-      totalPallets,
-      totalTrailers
-    ]);
-
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    worksheet["!cols"] = [
-      { wch: 11 }, // Data
-      { wch: 7 },  // Godzina
-      { wch: 4 },  // Tura
-      { wch: 4 },  // Naczepa
-      { wch: 8 },  // Nr sklepu
-      { wch: 26 }, // Nazwa sklepu
-      { wch: 4 },  // Palety
-      { wch: 4 }   // Liczba naczep
-    ];
-    worksheet["!autofilter"] = { ref: "A1:H1" };
-
-    // Wyśrodkowanie krótkich kolumn: Tura, Naczepa, Palety, Naczepy.
-    const centeredColumns = ["C", "D", "G", "H"];
-    const range = XLSX.utils.decode_range(worksheet["!ref"]);
-    centeredColumns.forEach(columnLetter => {
-      const columnIndex = XLSX.utils.decode_col(columnLetter);
-      for (let row = range.s.r; row <= range.e.r; row++) {
-        const address = XLSX.utils.encode_cell({ r: row, c: columnIndex });
-        const cell = worksheet[address];
-        if (!cell) continue;
-        cell.s = cell.s || {};
-        cell.s.alignment = {
-          ...(cell.s.alignment || {}),
-          horizontal: "center",
-          vertical: "center"
-        };
-      }
-    });
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, language === "no" ? "Leveringer" : language === "en" ? "Deliveries" : "Dostawy");
-    XLSX.writeFile(workbook, `${text.excelFilePrefix}-${month}.xlsx`, { compression: true });
-    setTimeout(restoreDailyAssignment, 250);
+    const ws=XLSX.utils.aoa_to_sheet(data);
+    ws["!cols"]=[{wch:13},{wch:10},{wch:8},{wch:10},{wch:14},{wch:28}];
+    ws["!autofilter"]={ref:"A1:F1"};
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Dostawy");
+    XLSX.writeFile(wb,`${text.excelFilePrefix}-${month}.xlsx`,{compression:true});
+    setTimeout(restoreDailyAssignment,250);
   }
 
   async function exportJson() {
@@ -2844,7 +2641,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     downloadFile(
       `europris-kopia-${new Date().toISOString().slice(0, 10)}.json`,
       JSON.stringify({
-        version: 6,
+        version: 5,
         deliveries,
         privateContacts
       }, null, 2),
@@ -3092,7 +2889,6 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   historyClose.addEventListener("click", () => { historyPanel.hidden = true; });
   historyMonth.addEventListener("change", renderHistory);
   historyPrint.addEventListener("click", () => window.print());
-  historyPrintSummary.addEventListener("click", printMonthlySummaryA4);
   historyCsv.addEventListener("click", exportExcel);
   historyJson.addEventListener("click", exportJson);
   historyImport.addEventListener("click", () => historyImportFile.click());
@@ -3206,9 +3002,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   }
 })();
 </script>
-  <script src="all-drivers.js?v=51.0"></script>
-  <script src="weather-humor.js?v=53.0"></script>
-  <script src="analytics.js?v=57.1"></script>
-  <script src="stats-panel.js?v=57.1"></script>
+<script src="analytics.js?v=50"></script>
+<script src="stats-panel.js?v=50"></script>
 </body>
 </html>
