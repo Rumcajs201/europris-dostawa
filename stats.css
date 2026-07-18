@@ -1,65 +1,178 @@
-.stats-panel{margin-top:16px;padding-top:14px;border-top:2px solid var(--green)}
+/* Europris v57 — zwijane, kompaktowe statystyki administratora */
+.stats-panel{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:2px solid var(--green);
+}
 .stats-panel[hidden]{display:none!important}
-.stats-panel-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:11px}
+.stats-panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:9px;
+}
 .stats-panel-title{margin:0;color:var(--green);font-size:1.08rem}
-.stats-panel-description{margin:4px 0 0;color:var(--muted);font-size:.8rem;line-height:1.35}
-.stats-refresh-button{min-height:38px;padding:0 10px;border:1px solid var(--green);border-radius:10px;background:transparent;color:var(--green);font-size:.78rem;font-weight:900}
-.stats-loading,.stats-error,.stats-empty{padding:12px;color:var(--muted);text-align:center;font-size:.82rem}
-.stats-error{color:#b91c1c}
-.stats-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.stats-metric{padding:11px 8px;border:1px solid var(--border);border-radius:11px;background:color-mix(in srgb,var(--green) 6%,transparent);text-align:center}
-.stats-metric strong{display:block;color:var(--green);font-size:1.45rem;line-height:1}
-.stats-metric span{display:block;margin-top:5px;color:var(--muted);font-size:.72rem;font-weight:800}
-.stats-grid{display:grid;gap:9px;margin-top:10px}
-.stats-chart{padding:10px;border:1px solid var(--border);border-radius:11px}
-.stats-chart h4{margin:0 0 8px;font-size:.84rem}
-.stats-bars{display:grid;gap:7px}
-.stats-bar-label{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:.72rem;font-weight:800}
-.stats-bar-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stats-bar-track{height:7px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--border) 70%,transparent)}
-.stats-bar-track span{display:block;height:100%;border-radius:inherit;background:var(--green)}
-.stats-generated{margin-top:9px;color:var(--muted);font-size:.68rem;text-align:right}
-
-/* v56 — aktywność anonimowych instalacji */
-.stats-device-activity{
-  margin-top:10px;
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:11px;
-}
-.stats-device-activity h4{
-  margin:0 0 8px;
-  color:var(--text);
-  font-size:.84rem;
-}
-.stats-device-table-wrap{
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-}
-.stats-device-table{
-  width:100%;
-  min-width:500px;
-  border-collapse:collapse;
-  font-size:.72rem;
-}
-.stats-device-table th,
-.stats-device-table td{
-  padding:7px 6px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-  white-space:nowrap;
-}
-.stats-device-table th{
+.stats-panel-description{margin:4px 0 0;color:var(--muted);font-size:.78rem;line-height:1.3}
+.stats-refresh-button{
+  min-height:36px;
+  padding:0 9px;
+  border:1px solid var(--green);
+  border-radius:9px;
+  background:transparent;
   color:var(--green);
-  font-size:.68rem;
+  font-size:.74rem;
+  font-weight:900;
 }
-.stats-device-table td:nth-child(2),
-.stats-device-table th:nth-child(2){
+.stats-main-toggle{
+  width:100%;
+  min-height:48px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  border:2px solid var(--green);
+  border-radius:11px;
+  background:var(--surface,var(--card));
+  color:var(--green);
+  text-align:left;
+  font-weight:950;
+}
+.stats-main-toggle b{
+  font-size:1.15rem;
+  transition:transform .15s ease;
+}
+.stats-main-toggle[aria-expanded="true"] b{transform:rotate(180deg)}
+.stats-content[hidden]{display:none!important}
+.stats-content{margin-top:9px}
+.stats-loading,.stats-error,.stats-empty{
+  padding:10px;
+  color:var(--muted);
+  text-align:center;
+  font-size:.78rem;
+}
+.stats-error{color:#b91c1c}
+.stats-metrics{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.stats-metric{
+  min-width:0;
+  padding:9px 6px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:color-mix(in srgb,var(--green) 6%,transparent);
   text-align:center;
 }
+.stats-metric strong{
+  display:block;
+  color:var(--green);
+  font-size:1.3rem;
+  line-height:1;
+}
+.stats-metric span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:.66rem;
+  font-weight:850;
+  line-height:1.2;
+}
+.stats-compact-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:8px;
+}
+.stats-compact-card{
+  min-width:0;
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:10px;
+}
+.stats-compact-card h4{
+  min-height:2.2em;
+  margin:0 0 6px;
+  color:var(--green);
+  font-size:.72rem;
+  line-height:1.1;
+}
+.stats-compact-list{display:grid;gap:4px}
+.stats-compact-row{
+  min-width:0;
+  display:flex;
+  justify-content:space-between;
+  gap:5px;
+  color:var(--muted);
+  font-size:.66rem;
+}
+.stats-compact-row span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.stats-compact-row strong{color:var(--text)}
+.stats-device-details{
+  margin-top:8px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+.stats-device-details summary{
+  padding:9px 10px;
+  color:var(--green);
+  font-size:.76rem;
+  font-weight:950;
+  cursor:pointer;
+}
+.stats-device-details summary span{
+  float:right;
+  min-width:24px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--green) 10%,transparent);
+  text-align:center;
+}
+.stats-device-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+  padding:0 8px 8px;
+}
+.stats-device-card{
+  min-width:0;
+  padding:7px;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.stats-device-card-head{
+  display:grid;
+  gap:3px;
+  font-size:.68rem;
+}
+.stats-device-card-head strong{color:var(--green)}
+.stats-device-card-head span{color:var(--text);font-weight:850}
+.stats-device-card-meta{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:.61rem;
+  line-height:1.25;
+}
 .stats-privacy-note{
+  padding:0 8px 8px;
+  color:var(--muted);
+  font-size:.61rem;
+  line-height:1.3;
+}
+.stats-generated{
   margin-top:8px;
   color:var(--muted);
-  font-size:.65rem;
-  line-height:1.35;
+  font-size:.62rem;
+  text-align:right;
+}
+@media(max-width:340px){
+  .stats-compact-grid,.stats-device-list{grid-template-columns:1fr}
 }

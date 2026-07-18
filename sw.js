@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v56-anonymous-device-activity";
+const CACHE_NAME = "europris-app-v57-gps-compact-stats";
 
 const STATIC_FILES = [
   "./",

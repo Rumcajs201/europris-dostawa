@@ -751,7 +751,7 @@
   </style>
   <link rel="stylesheet" href="all-drivers.css?v=51.0">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=56.0">
+  <link rel="stylesheet" href="stats.css?v=57.0">
 </head>
 
 <body>
@@ -1064,8 +1064,9 @@
       locationUse: "Wybierz ten sklep",
       locationAuto: (number, name, distance) => `Automatycznie wybrano: ${number} — ${name} (${distance}).`,
       locationSuggestion: (number, name, distance) => `Najbliżej jest: ${number} — ${name} (${distance}). Potwierdź wybór.`,
-      locationDenied: "Brak dostępu do lokalizacji. Możesz wyszukać sklep ręcznie albo spróbować ponownie.",
-      locationUnavailable: "Nie udało się ustalić lokalizacji. Spróbuj ponownie.",
+      locationDenied: "Dostęp do lokalizacji jest zablokowany. W ustawieniach przeglądarki lub aplikacji włącz lokalizację dla tej strony, a potem kliknij „Sprawdź ponownie”.",
+      locationUnavailable: "Nie udało się ustalić lokalizacji. Sprawdź, czy GPS jest włączony, i spróbuj ponownie.",
+      locationPermissionPrompt: "Przeglądarka poprosi o zgodę na lokalizację. Wybierz „Zezwól”.",
       locationNoCoordinates: "W bazie nie znaleziono sklepów ze współrzędnymi.",
       adminTitle:"Panel administratora — plan transportów",adminDriverPlanTitle:name=>`Plan dostawy ${name}`,adminPinTitle:"Dostęp administratora",adminPinDescription:"Wpisz czterocyfrowy PIN.",adminPinCancel:"Anuluj",adminPinConfirm:"Otwórz",adminPinError:"Nieprawidłowy PIN.",
       adminDriverNameLabel:"Kierowca",adminDriverPhoneLabel:"Numer telefonu kierowcy",adminDriverAliasesLabel:"Inne zapisy imienia lub nazwiska (po przecinku)",adminImportLabel:"Wczytaj plan Excel",adminDeletePlan:"Usuń wczytany plan",adminDeliveryDateLabel:"Dzień dostawy",adminSyncButton:"Pobierz plan",adminSyncLoading:"Pobieranie planów…",adminSyncOk:(date,time)=>`Plan ${date} pobrany. Aktualizacja: ${time}`,adminSyncNoPlan:date=>`Brak planu na dzień ${date}.`,adminSyncError:"Nie udało się połączyć z automatyzacją Google.",adminSyncNoDates:"Brak dostępnych planów.",adminPlanAvailable:"Plan dostępny",adminPlanMissing:"Brak planu",
@@ -1998,7 +1999,41 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     useNearest.hidden = false;
   }
 
-  function requestNearestStore() {
+  async function locationPermissionState() {
+    if (!navigator.permissions?.query) return "unknown";
+
+    try {
+      const permission = await navigator.permissions.query({ name: "geolocation" });
+      return permission.state || "unknown";
+    } catch {
+      // Safari i część przeglądarek nie obsługuje tego zapytania.
+      return "unknown";
+    }
+  }
+
+  function resolveNearestPosition(position) {
+    const text = translations[language];
+    const best = findNearestStore(
+      position.coords.latitude,
+      position.coords.longitude
+    );
+
+    if (!best) {
+      locationMessage.textContent = text.locationNoCoordinates;
+      return;
+    }
+
+    showNearestResult(best);
+    window.EuroprisAnalytics?.track?.("gps_ok", "nearest_store");
+  }
+
+  function requestPosition(options) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+  }
+
+  async function requestNearestStore() {
     const text = translations[language];
 
     useNearest.hidden = true;
@@ -2006,39 +2041,60 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     nearestDistanceMeters = null;
     nearestWasAutoSelected = false;
     locationResult.textContent = "";
-    locationMessage.textContent = text.locationChecking;
 
-    if (!navigator.geolocation) {
+    if (!window.isSecureContext || !navigator.geolocation) {
       locationMessage.textContent = text.locationUnavailable;
+      window.EuroprisAnalytics?.track?.("gps_error", "unsupported");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const best = findNearestStore(
-          position.coords.latitude,
-          position.coords.longitude
-        );
+    const permissionState = await locationPermissionState();
 
-        if (!best) {
-          locationMessage.textContent = text.locationNoCoordinates;
-          return;
-        }
+    if (permissionState === "denied") {
+      locationMessage.textContent = text.locationDenied;
+      window.EuroprisAnalytics?.track?.("gps_denied", "permission_denied");
+      return;
+    }
 
-        showNearestResult(best);
-      },
-      geolocationError => {
-        locationMessage.textContent =
-          geolocationError.code === geolocationError.PERMISSION_DENIED
-            ? text.locationDenied
-            : text.locationUnavailable;
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000
+    locationMessage.textContent =
+      permissionState === "prompt"
+        ? (text.locationPermissionPrompt || text.locationChecking)
+        : text.locationChecking;
+
+    try {
+      // Pierwsza próba: szybka i oszczędna. Zwykle wystarcza do wyboru sklepu.
+      const position = await requestPosition({
+        enableHighAccuracy: false,
+        timeout: 12000,
+        maximumAge: 120000
+      });
+      resolveNearestPosition(position);
+    } catch (firstError) {
+      if (firstError?.code === 1) {
+        locationMessage.textContent = text.locationDenied;
+        window.EuroprisAnalytics?.track?.("gps_denied", "permission_denied");
+        return;
       }
-    );
+
+      try {
+        // Druga próba z dokładnym GPS, gdy szybka lokalizacja zawiedzie.
+        locationMessage.textContent = text.locationChecking;
+        const position = await requestPosition({
+          enableHighAccuracy: true,
+          timeout: 25000,
+          maximumAge: 0
+        });
+        resolveNearestPosition(position);
+      } catch (secondError) {
+        locationMessage.textContent =
+          secondError?.code === 1 ? text.locationDenied : text.locationUnavailable;
+
+        window.EuroprisAnalytics?.track?.(
+          secondError?.code === 1 ? "gps_denied" : "gps_error",
+          `code_${secondError?.code || "unknown"}`
+        );
+      }
+    }
   }
 
 
@@ -3167,7 +3223,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 </script>
   <script src="all-drivers.js?v=51.0"></script>
   <script src="weather-humor.js?v=53.0"></script>
-  <script src="analytics.js?v=56.0"></script>
-  <script src="stats-panel.js?v=56.0"></script>
+  <script src="analytics.js?v=57.0"></script>
+  <script src="stats-panel.js?v=57.0"></script>
 </body>
 </html>
