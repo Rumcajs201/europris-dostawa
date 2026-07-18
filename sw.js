@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v57-5-force-location-button";
+const CACHE_NAME = "europris-app-v57-6-gps-diagnostics";
 
 const STATIC_FILES = [
   "./",
