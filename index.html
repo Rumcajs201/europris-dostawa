@@ -748,24 +748,10 @@
 .admin-return-load{padding:8px 0;border-top:1px solid var(--border)}
 .admin-return-load:first-of-type{border-top:0}
 .admin-return-load-meta{margin-top:4px;color:var(--muted);font-size:.82rem;line-height:1.4}
-  
-    .location-actions-split {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .location-actions-split .location-button {
-      width: 100%;
-      min-width: 0;
-    }
-
-    .location-use-nearest {
-      width: 100%;
-      margin-top: 8px;
-    }
 </style>
   <link rel="stylesheet" href="all-drivers.css?v=51.0">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.3">
+  <link rel="stylesheet" href="stats.css?v=57.4">
 </head>
 
 <body>
@@ -807,11 +793,10 @@
       <div id="locationHeading" class="location-heading"></div>
       <div id="locationMessage" class="location-message"></div>
       <div id="locationResult" class="location-result"></div>
-      <div class="location-actions location-actions-split">
+      <div class="location-actions">
+        <button id="useNearest" class="location-button" hidden></button>
         <button id="retryLocation" class="location-button secondary"></button>
-        <button id="forceLocation" class="location-button"></button>
       </div>
-      <button id="useNearest" class="location-button location-use-nearest" hidden></button>
     </div>
 
     <input
@@ -1076,8 +1061,6 @@
       locationHeading: "Najbliższy sklep",
       locationChecking: "Sprawdzam Twoją lokalizację…",
       locationRetry: "Sprawdź ponownie",
-      locationForce: "Włącz lokalizację",
-      locationForceHelp: "Jeżeli pojawi się pytanie systemowe, wybierz „Zezwól podczas używania”.",
       locationUse: "Wybierz ten sklep",
       locationAuto: (number, name, distance) => `Automatycznie wybrano: ${number} — ${name} (${distance}).`,
       locationSuggestion: (number, name, distance) => `Najbliżej jest: ${number} — ${name} (${distance}). Potwierdź wybór.`,
@@ -1152,8 +1135,6 @@
       locationHeading: "Nærmeste butikk",
       locationChecking: "Finner posisjonen din…",
       locationRetry: "Prøv igjen",
-      locationForce: "Slå på posisjon",
-      locationForceHelp: "Hvis systemet spør, velg «Tillat mens appen brukes».",
       locationUse: "Velg denne butikken",
       locationAuto: (number, name, distance) => `Automatisk valgt: ${number} — ${name} (${distance}).`,
       locationSuggestion: (number, name, distance) => `Nærmeste butikk er: ${number} — ${name} (${distance}). Bekreft valget.`,
@@ -1227,8 +1208,6 @@
       locationHeading: "Nearest store",
       locationChecking: "Checking your location…",
       locationRetry: "Check again",
-      locationForce: "Enable location",
-      locationForceHelp: "If the system asks, choose “Allow while using”.",
       locationUse: "Select this store",
       locationAuto: (number, name, distance) => `Automatically selected: ${number} — ${name} (${distance}).`,
       locationSuggestion: (number, name, distance) => `Nearest store: ${number} — ${name} (${distance}). Confirm the selection.`,
@@ -1305,7 +1284,6 @@
   const locationResult = document.getElementById("locationResult");
   const useNearest = document.getElementById("useNearest");
   const retryLocation = document.getElementById("retryLocation");
-  const forceLocation = document.getElementById("forceLocation");
   const footer = document.getElementById("footer");
   const brandMark=document.querySelector(".brand-mark"),adminPinOverlay=document.getElementById("adminPinOverlay"),adminPinTitle=document.getElementById("adminPinTitle"),adminPinDescription=document.getElementById("adminPinDescription"),adminPinInput=document.getElementById("adminPinInput"),adminPinCancel=document.getElementById("adminPinCancel"),adminPinConfirm=document.getElementById("adminPinConfirm"),adminPinError=document.getElementById("adminPinError"),adminPanel=document.getElementById("adminPanel"),adminTitle=document.getElementById("adminTitle"),adminClose=document.getElementById("adminClose"),adminDriverNameLabel=document.getElementById("adminDriverNameLabel"),adminDriverPhoneLabel=document.getElementById("adminDriverPhoneLabel"),adminDriverAliasesLabel=document.getElementById("adminDriverAliasesLabel"),adminDriverName=document.getElementById("adminDriverName"),adminDriverPhone=document.getElementById("adminDriverPhone"),adminDriverAliases=document.getElementById("adminDriverAliases"),adminImportLabel=document.getElementById("adminImportLabel"),adminImportFile=document.getElementById("adminImportFile"),adminDeletePlan=document.getElementById("adminDeletePlan"),adminSummary=document.getElementById("adminSummary"),adminPlanList=document.getElementById("adminPlanList"),adminProfileSection=document.getElementById("adminProfileSection"),adminToolbar=document.getElementById("adminToolbar"),adminDeliveryDateLabel=document.getElementById("adminDeliveryDateLabel"),adminDeliveryDate=document.getElementById("adminDeliveryDate"),adminSyncStatus=document.getElementById("adminSyncStatus");
 
@@ -1808,7 +1786,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     search.placeholder = text.placeholder;
     locationHeading.textContent = text.locationHeading;
     retryLocation.textContent = text.locationRetry;
-    forceLocation.textContent = text.locationForce;
     useNearest.textContent = text.locationUse;
     footer.textContent = text.footer;
     applyAdminLanguage();
@@ -2020,53 +1997,6 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     locationMessage.textContent = "";
     locationResult.textContent = text.locationSuggestion(best.store.number, name, distance);
     useNearest.hidden = false;
-  }
-
-  function requestLocationFromUserGesture() {
-    const text = translations[language];
-
-    useNearest.hidden = true;
-    nearestStore = null;
-    nearestDistanceMeters = null;
-    nearestWasAutoSelected = false;
-    locationResult.textContent = "";
-    locationMessage.textContent = text.locationForceHelp || text.locationChecking;
-
-    if (!navigator.geolocation) {
-      locationMessage.textContent = text.locationUnavailable;
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const best = findNearestStore(
-          position.coords.latitude,
-          position.coords.longitude
-        );
-
-        if (!best) {
-          locationMessage.textContent = text.locationNoCoordinates;
-          return;
-        }
-
-        showNearestResult(best);
-        window.EuroprisAnalytics?.track?.("gps_ok", "force_button");
-      },
-      error => {
-        if (error.code === error.PERMISSION_DENIED) {
-          locationMessage.textContent = text.locationDenied;
-          window.EuroprisAnalytics?.track?.("gps_denied", "force_button");
-        } else {
-          locationMessage.textContent = text.locationUnavailable;
-          window.EuroprisAnalytics?.track?.("gps_error", `force_${error.code || "unknown"}`);
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0
-      }
-    );
   }
 
   function requestNearestStore() {
@@ -3153,7 +3083,6 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   });
 
   retryLocation.addEventListener("click", requestNearestStore);
-  forceLocation.addEventListener("click", requestLocationFromUserGesture);
   search.addEventListener("input", () => { void handleSearchInput(); });
 
   document.querySelectorAll("[data-lang]").forEach(button => {
@@ -3205,6 +3134,31 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 
 
 
+  function loadEuroprisOptionalModules() {
+    if (window.__europrisOptionalModulesLoaded) return;
+    window.__europrisOptionalModulesLoaded = true;
+
+    const modules = [
+      "all-drivers.js?v=57.4",
+      "weather-humor.js?v=57.4",
+      "analytics.js?v=57.4",
+      "stats-panel.js?v=57.4"
+    ];
+
+    for (const source of modules) {
+      const script = document.createElement("script");
+      script.src = source;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }
+
+  /*
+    Najpierw uruchamia się baza sklepów i żądanie GPS jak w v50.4.
+    Dodatkowe moduły są ładowane chwilę później, aby nie konkurowały
+    z pytaniem iOS o lokalizację podczas startu PWA.
+  */
+  window.setTimeout(loadEuroprisOptionalModules, 2500);
 
 
   window.addEventListener("pageshow", restoreDailyAssignment);
@@ -3215,31 +3169,15 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   });
 
   if ("serviceWorker" in navigator) {
-    let refreshing = false;
-
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    });
-
-    window.addEventListener("load", async () => {
-      try {
-        const registration = await navigator.serviceWorker.register("sw.js", {
-          updateViaCache: "none"
-        });
-
-        await registration.update();
-      } catch {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js", {
+        updateViaCache: "none"
+      }).catch(() => {
         // Aplikacja działa dalej online nawet bez Service Workera.
-      }
+      });
     });
   }
 })();
 </script>
-  <script src="all-drivers.js?v=51.0"></script>
-  <script src="weather-humor.js?v=53.0"></script>
-  <script src="analytics.js?v=57.3"></script>
-  <script src="stats-panel.js?v=57.3"></script>
-</body>
+  <script src="weather-humor.js?v=53.0"></script></body>
 </html>
