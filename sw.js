@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v57-gps-compact-stats";
+const CACHE_NAME = "europris-app-v57-1-direct-geolocation-prompt";
 
 const STATIC_FILES = [
   "./",
