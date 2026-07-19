@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const EUROPRIS_ANALYTICS_VERSION = "v56";
+  const EUROPRIS_ANALYTICS_VERSION = "v57.9";
   const EUROPRIS_ANALYTICS_ENDPOINT =
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const EUROPRIS_ANALYTICS_TOKEN =
@@ -146,31 +146,40 @@
   }
 
   function send(eventName, extra = {}) {
-    if (!ALLOWED_EVENTS.has(eventName)) return;
+    if (!ALLOWED_EVENTS.has(eventName)) return Promise.resolve(false);
 
     const body = JSON.stringify(payload(eventName, extra));
-    try {
-      if (navigator.sendBeacon) {
-        const blob = new Blob([body], { type: "text/plain;charset=UTF-8" });
-        if (navigator.sendBeacon(EUROPRIS_ANALYTICS_ENDPOINT, blob)) return;
-      }
-    } catch {}
 
-    fetch(EUROPRIS_ANALYTICS_ENDPOINT, {
+    /*
+      Apps Script wykonuje przekierowanie HTTP. Safari/PWA potrafi przyjąć
+      sendBeacon do kolejki, ale nie dostarczyć danych po przekierowaniu.
+      Dlatego podstawowym transportem jest fetch(no-cors), który poprawnie
+      przechodzi przez przekierowanie wdrożenia Apps Script.
+    */
+    return fetch(EUROPRIS_ANALYTICS_ENDPOINT, {
       method: "POST",
       mode: "no-cors",
       cache: "no-store",
       keepalive: true,
+      redirect: "follow",
       headers: { "Content-Type": "text/plain;charset=UTF-8" },
       body
-    }).catch(() => {});
+    })
+      .then(() => true)
+      .catch(() => false);
   }
 
-  let appOpenSent = false;
-  function sendOpenOnce() {
-    if (appOpenSent) return;
-    appOpenSent = true;
-    send("app_open");
+  let lastOpenSentAt = 0;
+  let hiddenAt = 0;
+
+  function sendAppOpen(reason) {
+    const now = Date.now();
+
+    // Chroni przed podwójnym naliczeniem load/pageshow w ciągu 10 sekund.
+    if (now - lastOpenSentAt < 10000) return;
+
+    lastOpenSentAt = now;
+    void send("app_open", { result: reason });
   }
 
   window.EuroprisStats = Object.freeze({
@@ -178,8 +187,38 @@
     version: EUROPRIS_ANALYTICS_VERSION
   });
 
-  window.addEventListener("load", sendOpenOnce, { once: true });
-  window.addEventListener("online", () => send("online"));
-  window.addEventListener("offline", () => send("offline"));
-  window.addEventListener("appinstalled", () => send("pwa_installed"));
+  /*
+    Pierwsze uruchomienie strony.
+    Skrypt może zostać załadowany przed albo po zdarzeniu load.
+  */
+  if (document.readyState === "complete") {
+    sendAppOpen("ready");
+  } else {
+    window.addEventListener("load", () => sendAppOpen("load"), { once: true });
+  }
+
+  /*
+    iOS często nie przeładowuje PWA po ponownym kliknięciu ikony, tylko
+    wznawia ją z pamięci. Wtedy load nie występuje, dlatego liczymy powrót
+    aplikacji na pierwszy plan po co najmniej 15 sekundach w tle.
+  */
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      hiddenAt = Date.now();
+      return;
+    }
+
+    if (hiddenAt && Date.now() - hiddenAt >= 15000) {
+      sendAppOpen("foreground");
+    }
+    hiddenAt = 0;
+  });
+
+  window.addEventListener("pageshow", event => {
+    if (event.persisted) sendAppOpen("pageshow");
+  });
+
+  window.addEventListener("online", () => void send("online"));
+  window.addEventListener("offline", () => void send("offline"));
+  window.addEventListener("appinstalled", () => void send("pwa_installed"));
 })();
