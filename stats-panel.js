@@ -4,6 +4,15 @@
   const API = "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const TOKEN = "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
 
+  function localDayKey() {
+    const date = new Date();
+    return [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, "0"),
+      String(date.getDate()).padStart(2, "0")
+    ].join("-");
+  }
+
   function language() {
     const value = document.documentElement.lang || "pl";
     if (value.startsWith("no") || value.startsWith("nb")) return "no";
@@ -153,7 +162,7 @@
 
     try {
       const response = await fetch(
-        `${API}?action=stats_summary&token=${encodeURIComponent(TOKEN)}`,
+        `${API}?action=stats_summary&token=${encodeURIComponent(TOKEN)}&day=${encodeURIComponent(localDayKey())}`,
         { cache: "no-store" }
       );
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
