@@ -63,7 +63,16 @@
 .selected-driver-sequence.tour-color-1{background:#08783e}
 .selected-driver-sequence.tour-color-2{background:#2563eb}
 
-.drivers-dropdown-return{padding:7px 9px;border-radius:8px;background:color-mix(in srgb,#2563eb 9%,transparent);color:#2563eb;font-size:.78rem;font-weight:850;line-height:1.35}
+.drivers-dropdown-return{
+  position:relative;margin-top:7px;padding:9px 54px 9px 10px;
+  border:1px solid #d71920;border-left:5px solid #d71920;border-radius:9px;
+  background:#fff2f2;color:#b31319;font-size:.78rem;font-weight:900;line-height:1.4
+}
+.drivers-dropdown-return::before{content:"↩";margin-right:5px;color:#d71920;font-weight:950}
+.drivers-dropdown-return-badge{
+  position:absolute;top:7px;right:7px;padding:3px 7px;border-radius:999px;
+  background:#d71920;color:#fff;font-size:.65rem;font-weight:950;white-space:nowrap
+}
 .selected-driver-returns{border-top:2px solid #2563eb}
 .selected-driver-returns-header{padding:9px 12px;background:color-mix(in srgb,#2563eb 11%,transparent);color:#2563eb;font-weight:950}
 .selected-driver-return-item{padding:10px 12px;border-top:1px solid var(--border)}

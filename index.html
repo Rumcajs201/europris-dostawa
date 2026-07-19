@@ -755,11 +755,12 @@
       text-align: center;
       line-height: 1.35;
     }
-.admin-return-loads{margin-top:12px;padding:11px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,#2563eb 6%,transparent)}
-.admin-return-loads-title{margin-bottom:8px;color:#2563eb;font-weight:950}
-.admin-return-load{padding:8px 0;border-top:1px solid var(--border)}
+.admin-return-loads{margin-top:12px;padding:11px;border:1px solid #d71920;border-left:5px solid #d71920;border-radius:12px;background:#fff2f2}
+.admin-return-loads-title{margin-bottom:8px;color:#b31319;font-weight:950;text-transform:uppercase;letter-spacing:.02em}
+.admin-return-load{position:relative;padding:9px 58px 9px 0;border-top:1px solid rgba(215,25,32,.2);color:#8f1116}
 .admin-return-load:first-of-type{border-top:0}
-.admin-return-load-meta{margin-top:4px;color:var(--muted);font-size:.82rem;line-height:1.4}
+.admin-return-load-meta{margin-top:4px;color:#9d3135;font-size:.82rem;line-height:1.4}
+.admin-return-load-badge{position:absolute;top:8px;right:0;padding:3px 7px;border-radius:999px;background:#d71920;color:#fff;font-size:.67rem;font-weight:950;white-space:nowrap}
 
     .location-actions-split {
       grid-template-columns: 1fr 1fr;
@@ -776,9 +777,9 @@
     }
 .history-cloud-status{min-height:18px;margin:7px 0;color:var(--muted);font-size:.72rem;font-weight:750;line-height:1.3;}
 </style>
-  <link rel="stylesheet" href="all-drivers.css?v=51.0">
+  <link rel="stylesheet" href="all-drivers.css?v=57.12">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.11">
+  <link rel="stylesheet" href="stats.css?v=57.12">
 </head>
 
 <body>
@@ -1084,7 +1085,8 @@
       historyCloudBackup: "Zapisz kopię w chmurze",
       historyCloudRestore: "Przywróć kopię z chmury",
       historyCloudSaving: "Zapisywanie kopii historii…",
-      historyCloudSaved: "Kopia historii została nadpisana na Google Drive.",
+      historyCloudSaved: "Kopia historii została zapisana i potwierdzona na Google Drive.",
+      historyCloudInitializing: "Tworzenie folderu kopii na Google Drive…",
       historyCloudRestoring: "Pobieranie kopii historii…",
       historyCloudRestored: "Historia została przywrócona z kopii.",
       historyCloudNoProfile: "Najpierw zaloguj się do ukrytego panelu swoim PIN-em.",
@@ -1169,7 +1171,8 @@
       historyCloudBackup: "Lagre kopi i skyen",
       historyCloudRestore: "Gjenopprett fra skyen",
       historyCloudSaving: "Lagrer historikkopi…",
-      historyCloudSaved: "Historikkopien ble overskrevet på Google Drive.",
+      historyCloudSaved: "Historikkopien ble lagret og bekreftet på Google Drive.",
+      historyCloudInitializing: "Oppretter sikkerhetskopimappe på Google Drive…",
       historyCloudRestoring: "Henter historikkopi…",
       historyCloudRestored: "Historikken ble gjenopprettet.",
       historyCloudNoProfile: "Logg først inn i det skjulte panelet med PIN-koden din.",
@@ -1253,7 +1256,8 @@
       historyCloudBackup: "Save cloud backup",
       historyCloudRestore: "Restore cloud backup",
       historyCloudSaving: "Saving history backup…",
-      historyCloudSaved: "History backup was overwritten on Google Drive.",
+      historyCloudSaved: "History backup was saved and verified on Google Drive.",
+      historyCloudInitializing: "Creating backup folder on Google Drive…",
       historyCloudRestoring: "Downloading history backup…",
       historyCloudRestored: "History was restored from backup.",
       historyCloudNoProfile: "First sign in to the hidden panel with your PIN.",
@@ -1508,6 +1512,7 @@
     activeAdminProfileId = profile.id;
     localStorage.setItem(HISTORY_BACKUP_PROFILE_KEY, profile.id);
     loadAdminProfile(profile.id);
+    void initializeHistoryCloudBackup(false);
     scheduleHistoryBackup("profile-login");
     return true;
   }
@@ -1716,7 +1721,7 @@
   async function selectStoreFromAdmin(r,course){const s=findStoreByNumber(r.storeNumber);tourNumber.value=String(course);saveDailyAssignment();if(s)await selectStore(s);else{search.value=r.storeNumber;currentNumber=r.storeNumber;currentName=r.storeName;currentStore=null;results.replaceChildren();await updateSelected();}adminPanel.hidden=true;window.scrollTo({top:0,behavior:"smooth"});}
   function adminReturnEmptiesText(value,t){const raw=String(value||"").trim();if(!raw||raw==="0"||raw==="32")return"";return t.adminReturnEmpties(raw);}
 function uniqueReturnLoads(rows){const map=new Map();rows.forEach(row=>(Array.isArray(row.returnLoads)?row.returnLoads:[]).forEach(load=>{const key=String(load.orderNumber||load.terminal||load.supplier||JSON.stringify(load));if(!map.has(key))map.set(key,load);}));return[...map.values()];}
-function appendAdminReturnLoads(container,loads,t){if(!loads.length)return;const box=document.createElement("section");box.className="admin-return-loads";const title=document.createElement("div");title.className="admin-return-loads-title";title.textContent=`↩ ${t.adminReturnLoads}`;box.append(title);loads.forEach(load=>{const card=document.createElement("div");card.className="admin-return-load";const main=document.createElement("strong");main.textContent=load.terminal||load.supplier||t.adminReturnLoads;const meta=document.createElement("div");meta.className="admin-return-load-meta";meta.textContent=[load.orderNumber?t.adminReturnOrder(load.orderNumber):"",load.pallets?t.adminReturnPallets(load.pallets):"",load.terminal?t.adminReturnTerminal(load.terminal):"",load.supplier?t.adminReturnSupplier(load.supplier):""].filter(Boolean).join(" • ");card.append(main,meta);box.append(card);});container.append(box);}
+function appendAdminReturnLoads(container,loads,t){if(!loads.length)return;const box=document.createElement("section");box.className="admin-return-loads";const title=document.createElement("div");title.className="admin-return-loads-title";title.textContent=`↩ ${t.adminReturnLoads}`;box.append(title);loads.forEach(load=>{const card=document.createElement("div");card.className="admin-return-load";const main=document.createElement("strong");main.textContent=`🏭 ${load.supplier||load.terminal||t.adminReturnLoads}`;const meta=document.createElement("div");meta.className="admin-return-load-meta";meta.textContent=[load.orderNumber?`📄 ${t.adminReturnOrder(load.orderNumber)}`:"",load.terminal?`📍 ${t.adminReturnTerminal(load.terminal)}`:"",load.pickupTime?`🕒 ${load.pickupTime}`:""].filter(Boolean).join(" • ");const badge=document.createElement("span");badge.className="admin-return-load-badge";badge.textContent=load.pallets?`${load.pallets} PAL.`:"POWRÓT";card.append(main,meta,badge);box.append(card);});container.append(box);}
 function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p=adminProfile();adminPlanList.replaceChildren();if(!plan?.rows?.length){adminSummary.textContent=t.adminNoPlan;adminPlanList.innerHTML=`<div class="admin-empty">${t.adminNoPlan}</div>`;return;}const own=plan.rows.filter(r=>matchesAdminDriver(r,p)),groups=adminCourseGroups(own),pal=own.reduce((s,r)=>s+(+r.pallets||0),0),date=own[0]?.deliveryDate||plan.rows[0]?.deliveryDate||"—";adminSummary.textContent=own.length?t.adminSummary(own.length,groups.length,pal,date):t.adminNoDriverRows;if(!own.length){adminPlanList.innerHTML=`<div class="admin-empty">${t.adminNoDriverRows}</div>`;return;}groups.forEach((g,ci)=>{const course=document.createElement("section");course.className="admin-course";const head=document.createElement("div");head.className="admin-course-header";const transportNumber=visibleTransportNumber(g.rows[0]?.transportNumber);head.innerHTML=`<div>${t.adminCourse(g.tourNumber)}</div><div>${transportNumber?t.adminTransport(transportNumber):""}</div>`;course.append(head);g.rows.forEach(r=>{const stop=document.createElement("article");stop.className="admin-stop";const title=document.createElement("div");title.className="admin-stop-title";title.textContent=`${r.deliverySequence||"—"}. ${r.storeNumber} — ${r.storeName}`;const meta=document.createElement("div");meta.className="admin-stop-meta";meta.textContent=[r.deadline&&t.adminDeadline(r.deadline),t.adminPallets(r.pallets||0),adminReturnEmptiesText(r.returnEmpties,t),visibleTransportNumber(r.transportNumber)?t.adminTransport(visibleTransportNumber(r.transportNumber)):"",r.info?t.adminInfo(r.info):""].filter(Boolean).join(" • ");const acts=document.createElement("div");acts.className="admin-card-actions";const sel=document.createElement("button");sel.className="primary";sel.textContent=t.adminSelectStore;sel.onclick=()=>void selectStoreFromAdmin(r,g.tourNumber);const map=document.createElement("button");map.textContent=t.adminMap;const store=findStoreByNumber(r.storeNumber);map.disabled=!hasValidCoordinates(store);map.onclick=()=>{if(store&&hasValidCoordinates(store)){saveDailyAssignment();window.location.assign(mapsUrl(store));}};acts.append(sel,map);stop.append(title,meta,acts);const peers=plan.rows.filter(q=>q.id!==r.id&&q.storeNumber===r.storeNumber&&q.deliveryDate===r.deliveryDate&&!matchesAdminDriver(q,p));if(peers.length||normalized(r.split).includes("split")){const box=document.createElement("div");box.className="admin-split";box.innerHTML=`<div class="admin-split-title">${t.adminSplitTitle}</div>`;peers.forEach(q=>{const inf=conflictInfo(r.deadline,q.deadline),peer=document.createElement("div");peer.className="admin-peer";const badge=inf.minutes==null?t.adminConflictMedium:`${t.adminTimeDifference(inf.minutes)} — ${inf.level==="high"?t.adminConflictHigh:inf.level==="medium"?t.adminConflictMedium:t.adminConflictLow}`;const peerMain=document.createElement("div");peerMain.textContent=t.adminPeer(q.driver||"—",q.deadline||"—",q.pallets||0);peer.append(peerMain);const peerTransport=visibleTransportNumber(q.transportNumber);if(peerTransport){const transportLine=document.createElement("div");transportLine.textContent=t.adminTransport(peerTransport);peer.append(transportLine);}if(q.phone){const phoneLink=document.createElement("a");phoneLink.className="admin-phone-link";phoneLink.href=`tel:+47${adminDigits(q.phone)}`;phoneLink.textContent=`☎ ${q.phone}`;peer.append(phoneLink);}const badgeElement=document.createElement("span");badgeElement.className=`admin-conflict ${inf.level}`;badgeElement.textContent=badge;peer.append(badgeElement);box.append(peer);});if(!peers.length){const e=document.createElement("div");e.className="admin-peer";e.textContent="Split";box.append(e);}stop.append(box);}course.append(stop);});adminPlanList.append(course);});appendAdminReturnLoads(adminPlanList,uniqueReturnLoads(own),t);}
   function applyAdminLanguage(){
     const t = translations[language];
@@ -2937,34 +2942,63 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
       method: "POST",
       mode: "no-cors",
       cache: "no-store",
+      keepalive: true,
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload)
     });
   }
 
-  async function saveHistoryCloudBackup(showMessage=false) {
-    const text = translations[language];
-    const profile = historyBackupProfileId();
-    if (!profile) {
-      if (showMessage) historyCloudStatus.textContent = text.historyCloudNoProfile;
-      return false;
-    }
-    if (showMessage) historyCloudStatus.textContent = text.historyCloudSaving;
-    try {
-      const data = await buildHistoryBackupPayload();
-      await historyBackupPost({
-        action: "history_backup_save",
-        token: ADMIN_API_TOKEN,
-        profile,
-        backupKey: HISTORY_BACKUP_KEYS[profile],
-        data
+  function historyBackupRequest(action, profile, backupKey) {
+    return new Promise((resolve, reject) => {
+      const callback = `__europrisBackup_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement("script");
+      const timeout = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 30000);
+      function cleanup(){clearTimeout(timeout);delete window[callback];script.remove();}
+      window[callback] = result => { cleanup(); resolve(result); };
+      script.onerror = () => { cleanup(); reject(new Error("network")); };
+      const query = new URLSearchParams({
+        action, token: ADMIN_API_TOKEN, profile, backupKey, callback, _: String(Date.now())
       });
-      localStorage.setItem(HISTORY_BACKUP_LAST_DAY_KEY, historyBackupDayKey());
-      if (showMessage) historyCloudStatus.textContent = text.historyCloudSaved;
+      script.src = `${HISTORY_BACKUP_API_URL}?${query.toString()}`;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function initializeHistoryCloudBackup(showMessage=false) {
+    const text=translations[language],profile=historyBackupProfileId();
+    if(!profile)return false;
+    if(showMessage)historyCloudStatus.textContent=text.historyCloudInitializing;
+    const result=await historyBackupRequest("history_backup_init",profile,HISTORY_BACKUP_KEYS[profile]);
+    return Boolean(result?.ok);
+  }
+
+  async function verifyHistoryCloudBackup(profile,generatedAt) {
+    for(let attempt=0;attempt<6;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,900));
+      const result=await historyBackupRequest("history_backup_status",profile,HISTORY_BACKUP_KEYS[profile]);
+      if(result?.ok&&result.generatedAt===generatedAt)return true;
+    }
+    return false;
+  }
+
+  async function saveHistoryCloudBackup(showMessage=false) {
+    const text=translations[language],profile=historyBackupProfileId();
+    if(!profile){if(showMessage)historyCloudStatus.textContent=text.historyCloudNoProfile;return false;}
+    try{
+      if(!await initializeHistoryCloudBackup(showMessage))throw new Error("init_failed");
+      if(showMessage)historyCloudStatus.textContent=text.historyCloudSaving;
+      const data=await buildHistoryBackupPayload();
+      await historyBackupPost({
+        action:"history_backup_save",token:ADMIN_API_TOKEN,profile,
+        backupKey:HISTORY_BACKUP_KEYS[profile],data
+      });
+      if(!await verifyHistoryCloudBackup(profile,data.generatedAt))throw new Error("not_verified");
+      localStorage.setItem(HISTORY_BACKUP_LAST_DAY_KEY,historyBackupDayKey());
+      if(showMessage)historyCloudStatus.textContent=text.historyCloudSaved;
       return true;
-    } catch (error) {
-      console.error("History backup save:", error);
-      if (showMessage) historyCloudStatus.textContent = text.historyCloudError;
+    }catch(error){
+      console.error("History backup save:",error);
+      if(showMessage)historyCloudStatus.textContent=text.historyCloudError;
       return false;
     }
   }
@@ -3404,9 +3438,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>  <script src="all-drivers.js?v=57.11"></script>
-  <script src="weather-humor.js?v=57.11"></script>
-  <script src="analytics.js?v=57.11"></script>
-  <script src="stats-panel.js?v=57.11"></script>
+</script>  <script src="all-drivers.js?v=57.12"></script>
+  <script src="weather-humor.js?v=57.12"></script>
+  <script src="analytics.js?v=57.12"></script>
+  <script src="stats-panel.js?v=57.12"></script>
 </body>
 </html>

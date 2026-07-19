@@ -191,7 +191,9 @@
           ${compactChart(text.events, data.events, text.noData)}
         </div>
 
-        <div class="stats-generated">${escapeHtml(text.updated)}: ${escapeHtml(data.generatedAt || "—")}</div>
+        <div class="stats-generated">${escapeHtml(text.updated)}: ${escapeHtml(data.generatedAt || "—")}
+          ${data.dailyDebug ? `<br>Dzień telefonu: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Ostatni dzień w danych: ${escapeHtml(data.dailyDebug.lastStoredDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0}` : ""}
+        </div>
       `;
       container.dataset.loaded = "1";
     } catch (error) {

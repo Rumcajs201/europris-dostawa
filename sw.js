@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v57-11-manual-excel-return-loads";
+const CACHE_NAME = "europris-app-v57-12-stable";
 
 const STATIC_FILES = [
   "./",
