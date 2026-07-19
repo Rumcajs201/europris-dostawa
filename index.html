@@ -762,10 +762,43 @@
       width: 100%;
       margin-top: 8px;
     }
+
+    .gps-diagnostics {
+      margin-top: 14px;
+      padding: 12px;
+      border: 2px solid var(--green);
+      border-radius: 12px;
+    }
+    .gps-diagnostics[hidden] { display: none !important; }
+    .gps-diagnostics h3 { margin: 0; color: var(--green); font-size: 1rem; }
+    .gps-diagnostics p { margin: 5px 0 10px; color: var(--muted); font-size: .72rem; }
+    .gps-diagnostics button {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 900;
+    }
+    .gps-diagnostics-content { margin-top: 9px; font-size: .68rem; }
+    .gps-diagnostic-table { display: grid; gap: 5px; }
+    .gps-diagnostic-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 7px;
+      padding: 7px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .gps-diagnostic-row span { color: var(--muted); font-weight: 800; }
+    .gps-diagnostic-row strong { overflow-wrap: anywhere; }
+
+    .history-cloud-status{min-height:18px;margin:7px 0;color:var(--muted);font-size:.72rem;font-weight:750;line-height:1.3;}
 </style>
   <link rel="stylesheet" href="all-drivers.css?v=51.0">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.7">
+  <link rel="stylesheet" href="stats.css?v=57.8">
 </head>
 
 <body>
@@ -921,9 +954,12 @@
         <button id="historyCsv" type="button"></button>
         <button id="historyJson" type="button"></button>
         <button id="historyImport" type="button"></button>
+        <button id="historyCloudBackup" type="button"></button>
+        <button id="historyCloudRestore" type="button"></button>
         <button id="historyClear" type="button"></button>
         <input id="historyImportFile" type="file" accept="application/json,.json" hidden>
       </div>
+      <div id="historyCloudStatus" class="history-cloud-status"></div>
 
       <div id="historySummary" class="history-summary"></div>
       <div id="historyList" class="history-list"></div>
@@ -948,6 +984,15 @@
       </div>
       <div id="adminSummary" class="admin-summary"></div>
       <div id="adminPlanList" class="admin-plan-list"></div>
+      <section id="adminGpsDiagnostics" class="gps-diagnostics" hidden>
+        <h3>Diagnostyka GPS Safari/iPhone</h3>
+        <p>Pokazuje dokładny kod i komunikat błędu zwracany przez przeglądarkę.</p>
+        <button id="adminGpsDiagnosticsRun" type="button">Uruchom test GPS</button>
+        <div id="adminGpsDiagnosticsContent" class="gps-diagnostics-content">
+          Test nie został jeszcze uruchomiony.
+        </div>
+      </section>
+
       <section id="adminStatsPanel" class="stats-panel" hidden>
         <div class="stats-panel-header">
           <div>
@@ -1015,6 +1060,15 @@
   const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const ADMIN_API_TOKEN = "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
   const ADMIN_LAST_DATE_KEY = "europris_admin_last_delivery_date_v1";
+  const HISTORY_BACKUP_PROFILE_KEY = "europris_history_backup_profile_v1";
+  const HISTORY_BACKUP_LAST_DAY_KEY = "europris_history_backup_last_day_v1";
+  const HISTORY_BACKUP_API_URL = ADMIN_API_URL;
+  const HISTORY_BACKUP_KEYS = Object.freeze({
+    andrzej: "ddf7bf4ca99a38869f1eb5d8e45be46f",
+    kamil: "e5da7193b7c21bfda17db78b29c38971",
+    lukasz: "8bbf70654bf0524509d1ed85e4533aba"
+  });
+  let historyBackupTimer = 0;
   let adminApiDates = [];
 
   const translations = {
@@ -1056,6 +1110,16 @@
       historyCsv: "Eksport do Excel (.xlsx)",
       historyJson: "Kopia JSON",
       historyImport: "Importuj kopię",
+      historyCloudBackup: "Zapisz kopię w chmurze",
+      historyCloudRestore: "Przywróć kopię z chmury",
+      historyCloudSaving: "Zapisywanie kopii historii…",
+      historyCloudSaved: "Kopia historii została nadpisana na Google Drive.",
+      historyCloudRestoring: "Pobieranie kopii historii…",
+      historyCloudRestored: "Historia została przywrócona z kopii.",
+      historyCloudNoProfile: "Najpierw zaloguj się do ukrytego panelu swoim PIN-em.",
+      historyCloudNoBackup: "Nie znaleziono kopii dla tego profilu.",
+      historyCloudError: "Nie udało się wykonać operacji kopii.",
+      historyCloudConfirm: "Przywrócić ostatnią kopię i uzupełnić lokalną historię?",
       historyClear: "Wyczyść wybrany miesiąc",
       historyEmpty: "Brak zapisanych dostaw w wybranym miesiącu.",
       historySummary: count => `Liczba dostaw: ${count}`,
@@ -1131,6 +1195,16 @@
       historyCsv: "Eksporter til Excel (.xlsx)",
       historyJson: "JSON-sikkerhetskopi",
       historyImport: "Importer sikkerhetskopi",
+      historyCloudBackup: "Lagre kopi i skyen",
+      historyCloudRestore: "Gjenopprett fra skyen",
+      historyCloudSaving: "Lagrer historikkopi…",
+      historyCloudSaved: "Historikkopien ble overskrevet på Google Drive.",
+      historyCloudRestoring: "Henter historikkopi…",
+      historyCloudRestored: "Historikken ble gjenopprettet.",
+      historyCloudNoProfile: "Logg først inn i det skjulte panelet med PIN-koden din.",
+      historyCloudNoBackup: "Ingen kopi ble funnet for denne profilen.",
+      historyCloudError: "Kopieringen mislyktes.",
+      historyCloudConfirm: "Gjenopprette siste kopi og fylle ut lokal historikk?",
       historyClear: "Tøm valgt måned",
       historyEmpty: "Ingen lagrede leveringer i valgt måned.",
       historySummary: count => `Antall leveringer: ${count}`,
@@ -1205,6 +1279,16 @@
       historyCsv: "Export to Excel (.xlsx)",
       historyJson: "JSON backup",
       historyImport: "Import backup",
+      historyCloudBackup: "Save cloud backup",
+      historyCloudRestore: "Restore cloud backup",
+      historyCloudSaving: "Saving history backup…",
+      historyCloudSaved: "History backup was overwritten on Google Drive.",
+      historyCloudRestoring: "Downloading history backup…",
+      historyCloudRestored: "History was restored from backup.",
+      historyCloudNoProfile: "First sign in to the hidden panel with your PIN.",
+      historyCloudNoBackup: "No backup was found for this profile.",
+      historyCloudError: "Backup operation failed.",
+      historyCloudConfirm: "Restore the latest backup and merge it into local history?",
       historyClear: "Clear selected month",
       historyEmpty: "No saved deliveries in the selected month.",
       historySummary: count => `Deliveries: ${count}`,
@@ -1288,6 +1372,9 @@
   const historyCsv = document.getElementById("historyCsv");
   const historyJson = document.getElementById("historyJson");
   const historyImport = document.getElementById("historyImport");
+  const historyCloudBackup = document.getElementById("historyCloudBackup");
+  const historyCloudRestore = document.getElementById("historyCloudRestore");
+  const historyCloudStatus = document.getElementById("historyCloudStatus");
   const historyImportFile = document.getElementById("historyImportFile");
   const historyClear = document.getElementById("historyClear");
   const adminStatsPanel = document.getElementById("adminStatsPanel");
@@ -1295,6 +1382,9 @@
   const adminStatsDescription = document.getElementById("adminStatsDescription");
   const adminStatsRefresh = document.getElementById("adminStatsRefresh");
   const adminStatsContent = document.getElementById("adminStatsContent");
+  const adminGpsDiagnostics = document.getElementById("adminGpsDiagnostics");
+  const adminGpsDiagnosticsRun = document.getElementById("adminGpsDiagnosticsRun");
+  const adminGpsDiagnosticsContent = document.getElementById("adminGpsDiagnosticsContent");
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const locationHeading = document.getElementById("locationHeading");
@@ -1448,7 +1538,9 @@
     if (!profile) return false;
 
     activeAdminProfileId = profile.id;
+    localStorage.setItem(HISTORY_BACKUP_PROFILE_KEY, profile.id);
     loadAdminProfile(profile.id);
+    scheduleHistoryBackup("profile-login");
     return true;
   }
 
@@ -1673,6 +1765,8 @@ function renderAdminPlan(){const t=translations[language],plan=loadAdminPlan(),p
     adminToolbar.style.display = adminMode ? "" : "none";
     adminStatsPanel.hidden = !adminMode;
     adminStatsPanel.style.display = adminMode ? "" : "none";
+    adminGpsDiagnostics.hidden = !adminMode;
+    adminGpsDiagnostics.style.display = adminMode ? "" : "none";
     if (adminMode && window.EuroprisStatsPanel) {
       window.EuroprisStatsPanel.load(adminStatsContent);
     }
@@ -1801,6 +1895,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     historyCsv.textContent = text.historyCsv;
     historyJson.textContent = text.historyJson;
     historyImport.textContent = text.historyImport;
+    historyCloudBackup.textContent = text.historyCloudBackup;
+    historyCloudRestore.textContent = text.historyCloudRestore;
     historyClear.textContent = text.historyClear;
     search.placeholder = text.placeholder;
     locationHeading.textContent = text.locationHeading;
@@ -1857,6 +1953,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     localStorage.removeItem(ADMIN_PLAN_KEY);
     renderAdminPlan();
   };
+
+  adminGpsDiagnosticsRun.addEventListener("click", runAdminGpsDiagnostics);
 
   adminStatsRefresh.addEventListener("click", () => {
     if (isActiveAdmin() && window.EuroprisStatsPanel) {
@@ -2017,6 +2115,89 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     locationMessage.textContent = "";
     locationResult.textContent = text.locationSuggestion(best.store.number, name, distance);
     useNearest.hidden = false;
+  }
+
+  function gpsDiagnosticMode() {
+    if (navigator.standalone === true) return "iOS PWA";
+    if (window.matchMedia?.("(display-mode: standalone)")?.matches) return "PWA";
+    return "Przeglądarka";
+  }
+
+  function gpsErrorName(code) {
+    if (code === 1) return "PERMISSION_DENIED";
+    if (code === 2) return "POSITION_UNAVAILABLE";
+    if (code === 3) return "TIMEOUT";
+    return "UNKNOWN";
+  }
+
+  async function gpsPermissionState() {
+    if (!navigator.permissions?.query) return "Permissions API niedostępne";
+    try {
+      const result = await navigator.permissions.query({ name: "geolocation" });
+      return result.state || "unknown";
+    } catch (error) {
+      return "błąd: " + (error?.name || "unknown");
+    }
+  }
+
+  function gpsDiagnosticTable(rows) {
+    return `<div class="gps-diagnostic-table">${
+      rows.map(([label, value]) => `
+        <div class="gps-diagnostic-row">
+          <span>${String(label)}</span>
+          <strong>${String(value ?? "—")}</strong>
+        </div>`).join("")
+    }</div>`;
+  }
+
+  async function runAdminGpsDiagnostics() {
+    adminGpsDiagnosticsContent.textContent = "Trwa test GPS…";
+
+    const baseRows = [
+      ["Tryb uruchomienia", gpsDiagnosticMode()],
+      ["Secure Context", String(window.isSecureContext)],
+      ["navigator.geolocation", navigator.geolocation ? "OK" : "BRAK"],
+      ["Stan uprawnienia", await gpsPermissionState()],
+      ["navigator.standalone", String(navigator.standalone === true)],
+      ["Online", String(navigator.onLine)],
+      ["Platforma", navigator.platform || "—"],
+      ["User-Agent", navigator.userAgent || "—"]
+    ];
+
+    if (!navigator.geolocation) {
+      adminGpsDiagnosticsContent.innerHTML = gpsDiagnosticTable([
+        ...baseRows,
+        ["Wynik", "BŁĄD"],
+        ["Komunikat", "navigator.geolocation jest niedostępne"]
+      ]);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        adminGpsDiagnosticsContent.innerHTML = gpsDiagnosticTable([
+          ...baseRows,
+          ["Wynik", "SUKCES"],
+          ["Dokładność", Math.round(position.coords.accuracy) + " m"],
+          ["Szerokość", position.coords.latitude.toFixed(6)],
+          ["Długość", position.coords.longitude.toFixed(6)]
+        ]);
+      },
+      error => {
+        adminGpsDiagnosticsContent.innerHTML = gpsDiagnosticTable([
+          ...baseRows,
+          ["Wynik", "BŁĄD"],
+          ["Kod błędu", error?.code ?? "—"],
+          ["Nazwa błędu", gpsErrorName(error?.code)],
+          ["Komunikat Safari", error?.message || "—"]
+        ]);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 30000,
+        maximumAge: 0
+      }
+    );
   }
 
   function forceNearestStoreLocation() {
@@ -2228,6 +2409,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       tx.onerror = () => reject(tx.error);
     });
     db.close();
+    scheduleHistoryBackup("delivery-save");
   }
 
   async function getAllDeliveries() {
@@ -2251,6 +2433,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       tx.onerror = () => reject(tx.error);
     });
     db.close();
+    scheduleHistoryBackup("delivery-delete");
   }
 
   async function clearMonth(month) {
@@ -2269,6 +2452,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
       tx.onerror = () => reject(tx.error);
     });
     db.close();
+    scheduleHistoryBackup("month-clear");
   }
 
   function formatDateTime(value) {
@@ -2859,6 +3043,135 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     setTimeout(restoreDailyAssignment, 250);
   }
 
+  function historyBackupProfileId() {
+    const value = activeAdminProfileId ||
+      localStorage.getItem(HISTORY_BACKUP_PROFILE_KEY) || "";
+    return Object.prototype.hasOwnProperty.call(HISTORY_BACKUP_KEYS, value) ? value : "";
+  }
+
+  function historyBackupDayKey() {
+    const date = new Date();
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+  }
+
+  async function buildHistoryBackupPayload() {
+    return {
+      version: 8,
+      profile: historyBackupProfileId(),
+      generatedAt: new Date().toISOString(),
+      deliveries: await getAllDeliveries(),
+      privateContacts: await getAllPrivateContacts()
+    };
+  }
+
+  function historyBackupPost(payload) {
+    return fetch(HISTORY_BACKUP_API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      cache: "no-store",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async function saveHistoryCloudBackup(showMessage=false) {
+    const text = translations[language];
+    const profile = historyBackupProfileId();
+    if (!profile) {
+      if (showMessage) historyCloudStatus.textContent = text.historyCloudNoProfile;
+      return false;
+    }
+    if (showMessage) historyCloudStatus.textContent = text.historyCloudSaving;
+    try {
+      const data = await buildHistoryBackupPayload();
+      await historyBackupPost({
+        action: "history_backup_save",
+        token: ADMIN_API_TOKEN,
+        profile,
+        backupKey: HISTORY_BACKUP_KEYS[profile],
+        data
+      });
+      localStorage.setItem(HISTORY_BACKUP_LAST_DAY_KEY, historyBackupDayKey());
+      if (showMessage) historyCloudStatus.textContent = text.historyCloudSaved;
+      return true;
+    } catch (error) {
+      console.error("History backup save:", error);
+      if (showMessage) historyCloudStatus.textContent = text.historyCloudError;
+      return false;
+    }
+  }
+
+  function historyBackupJsonp(profile, backupKey) {
+    return new Promise((resolve,reject) => {
+      const callback=`__europrisHistoryBackup_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script=document.createElement("script");
+      const timeout=setTimeout(()=>{cleanup();reject(new Error("timeout"));},30000);
+      function cleanup(){clearTimeout(timeout);delete window[callback];script.remove();}
+      window[callback]=result=>{cleanup();resolve(result);};
+      script.onerror=()=>{cleanup();reject(new Error("network"));};
+      const query=new URLSearchParams({
+        action:"history_backup_get",token:ADMIN_API_TOKEN,profile,backupKey,callback,_:String(Date.now())
+      });
+      script.src=`${HISTORY_BACKUP_API_URL}?${query.toString()}`;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function restoreHistoryCloudBackup() {
+    const text=translations[language];
+    const profile=historyBackupProfileId();
+    if(!profile){historyCloudStatus.textContent=text.historyCloudNoProfile;return;}
+    if(!confirm(text.historyCloudConfirm))return;
+    historyCloudStatus.textContent=text.historyCloudRestoring;
+    try{
+      const result=await historyBackupJsonp(profile,HISTORY_BACKUP_KEYS[profile]);
+      if(!result?.ok||!result.data){
+        historyCloudStatus.textContent=result?.error==="Not found"?text.historyCloudNoBackup:text.historyCloudError;
+        return;
+      }
+      const deliveries=Array.isArray(result.data.deliveries)?result.data.deliveries:[];
+      const privateContacts=Array.isArray(result.data.privateContacts)?result.data.privateContacts:[];
+      const db=await openDatabase();
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction([DB_STORE,DB_CONTACTS],"readwrite");
+        const deliveryStore=tx.objectStore(DB_STORE);
+        const contactStore=tx.objectStore(DB_CONTACTS);
+        deliveries.forEach(item=>{if(item?.id&&item?.createdAt&&item?.storeNumber)deliveryStore.put(item);});
+        privateContacts.forEach(item=>{if(item?.storeNumber&&item?.phone)contactStore.put(item);});
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error);
+      });
+      db.close();
+      await syncCurrentStore();
+      await renderHistory();
+      historyCloudStatus.textContent=text.historyCloudRestored;
+    }catch(error){
+      console.error("History backup restore:",error);
+      historyCloudStatus.textContent=text.historyCloudError;
+    }
+  }
+
+  function scheduleHistoryBackup(reason="change") {
+    if(!historyBackupProfileId())return;
+    clearTimeout(historyBackupTimer);
+    historyBackupTimer=setTimeout(()=>void saveHistoryCloudBackup(false),reason==="delivery-save"?800:2500);
+  }
+
+  function scheduleDailyHistoryBackup() {
+    clearTimeout(historyBackupTimer);
+    const now=new Date();
+    const target=new Date(now);
+    target.setHours(23,59,0,0);
+    if(target<=now)target.setDate(target.getDate()+1);
+    historyBackupTimer=setTimeout(async()=>{
+      await saveHistoryCloudBackup(false);
+      scheduleDailyHistoryBackup();
+    },Math.min(target-now,2147483647));
+    if(localStorage.getItem(HISTORY_BACKUP_LAST_DAY_KEY)!==historyBackupDayKey()){
+      setTimeout(()=>void saveHistoryCloudBackup(false),5000);
+    }
+  }
+
   async function exportJson() {
     saveDailyAssignment();
     const deliveries = await getAllDeliveries();
@@ -2916,6 +3229,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 
       error.textContent = text.historyImportOk;
       await renderHistory();
+      scheduleHistoryBackup("history-import");
     } catch {
       error.textContent = text.historyImportError;
     }
@@ -2994,6 +3308,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     await syncCurrentStore();
     privatePanel.hidden = true;
     error.textContent = text.privateSaved;
+    scheduleHistoryBackup("contact-save");
   }
 
   async function deleteCurrentPrivateContact() {
@@ -3003,6 +3318,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     await syncCurrentStore();
     privatePanel.hidden = true;
     error.textContent = translations[language].privateDeleted;
+    scheduleHistoryBackup("contact-delete");
   }
 
   function openDelivery() {
@@ -3119,6 +3435,8 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   historyCsv.addEventListener("click", exportExcel);
   historyJson.addEventListener("click", exportJson);
   historyImport.addEventListener("click", () => historyImportFile.click());
+  historyCloudBackup.addEventListener("click", () => void saveHistoryCloudBackup(true));
+  historyCloudRestore.addEventListener("click", () => void restoreHistoryCloudBackup());
 
   historyImportFile.addEventListener("change", async () => {
     const file = historyImportFile.files?.[0];
@@ -3163,6 +3481,7 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   status.textContent = translations[language].loading;
   applyLanguage();
   void updateSelected();
+  scheduleDailyHistoryBackup();
 
   fetch("stores.json?v=36", { cache: "no-store" })
     .then(response => {
@@ -3200,7 +3519,6 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 
 
 
-
   window.addEventListener("pageshow", restoreDailyAssignment);
   window.addEventListener("focus", restoreDailyAssignment);
 
@@ -3218,9 +3536,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>  <script src="all-drivers.js?v=57.7"></script>
-  <script src="weather-humor.js?v=57.7"></script>
-  <script src="analytics.js?v=57.7"></script>
-  <script src="stats-panel.js?v=57.7"></script>
+</script>  <script src="all-drivers.js?v=57.8"></script>
+  <script src="weather-humor.js?v=57.8"></script>
+  <script src="analytics.js?v=57.8"></script>
+  <script src="stats-panel.js?v=57.8"></script>
 </body>
 </html>

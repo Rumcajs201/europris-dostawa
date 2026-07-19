@@ -110,23 +110,4 @@ document.addEventListener("DOMContentLoaded",()=>{createPanel();refresh();
  document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setTimeout(refresh,0)));
 });
 window.EuroprisAllDrivers=Object.freeze({render});
-
-window.EuroprisDriversPanel = Object.freeze({
-  refresh() {
-    try {
-      const panel = createPanel();
-      render(panel);
-    } catch (error) {
-      console.error("Europris driver panel:", error);
-    }
-  }
-});
-
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) window.EuroprisDriversPanel.refresh();
-});
-
-window.addEventListener("storage", event => {
-  if (event.key === PLAN_KEY) window.EuroprisDriversPanel.refresh();
-});
 })();

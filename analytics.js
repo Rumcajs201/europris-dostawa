@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const EUROPRIS_ANALYTICS_VERSION = "v57.7";
+  const EUROPRIS_ANALYTICS_VERSION = "v56";
   const EUROPRIS_ANALYTICS_ENDPOINT =
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const EUROPRIS_ANALYTICS_TOKEN =
@@ -166,18 +166,11 @@
     }).catch(() => {});
   }
 
-  const OPEN_COOLDOWN_MS = 60 * 1000;
-  let lastOpenSentAt = 0;
-
-  function sendAppOpen(reason) {
-    const now = Date.now();
-    if (now - lastOpenSentAt < OPEN_COOLDOWN_MS) return;
-    lastOpenSentAt = now;
-    send("app_open", { result: reason });
-  }
-
-  function registerCurrentSession() {
-    sendAppOpen(document.visibilityState === "visible" ? "initial_visible" : "initial_hidden");
+  let appOpenSent = false;
+  function sendOpenOnce() {
+    if (appOpenSent) return;
+    appOpenSent = true;
+    send("app_open");
   }
 
   window.EuroprisStats = Object.freeze({
@@ -185,20 +178,7 @@
     version: EUROPRIS_ANALYTICS_VERSION
   });
 
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    registerCurrentSession();
-  } else {
-    window.addEventListener("DOMContentLoaded", registerCurrentSession, { once: true });
-  }
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") sendAppOpen("foreground");
-  });
-
-  window.addEventListener("pageshow", event => {
-    if (event.persisted) sendAppOpen("pageshow_cache");
-  });
-
+  window.addEventListener("load", sendOpenOnce, { once: true });
   window.addEventListener("online", () => send("online"));
   window.addEventListener("offline", () => send("offline"));
   window.addEventListener("appinstalled", () => send("pwa_installed"));
