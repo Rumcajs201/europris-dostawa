@@ -73,7 +73,41 @@
   position:absolute;top:7px;right:7px;padding:3px 7px;border-radius:999px;
   background:#d71920;color:#fff;font-size:.65rem;font-weight:950;white-space:nowrap
 }
-.selected-driver-returns{border-top:2px solid #2563eb}
-.selected-driver-returns-header{padding:9px 12px;background:color-mix(in srgb,#2563eb 11%,transparent);color:#2563eb;font-weight:950}
-.selected-driver-return-item{padding:10px 12px;border-top:1px solid var(--border)}
-.selected-driver-return-meta{margin-top:4px;color:var(--muted);font-size:.82rem;line-height:1.4}
+.selected-driver-returns{
+  border-top:2px solid #d71920;
+  border-left:5px solid #d71920;
+  background:#fff2f2
+}
+.selected-driver-returns-header{
+  padding:10px 12px;
+  background:rgba(215,25,32,.10);
+  color:#b31319;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.02em
+}
+.selected-driver-return-item{
+  position:relative;
+  padding:11px 68px 11px 12px;
+  border-top:1px solid rgba(215,25,32,.20);
+  color:#8f1116
+}
+.selected-driver-return-item strong{color:#8f1116}
+.selected-driver-return-meta{
+  margin-top:4px;
+  color:#9d3135;
+  font-size:.82rem;
+  line-height:1.4
+}
+.selected-driver-return-badge{
+  position:absolute;
+  top:10px;
+  right:10px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#d71920;
+  color:#fff;
+  font-size:.67rem;
+  font-weight:950;
+  white-space:nowrap
+}

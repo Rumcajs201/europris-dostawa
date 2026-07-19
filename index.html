@@ -777,9 +777,9 @@
     }
 .history-cloud-status{min-height:18px;margin:7px 0;color:var(--muted);font-size:.72rem;font-weight:750;line-height:1.3;}
 </style>
-  <link rel="stylesheet" href="all-drivers.css?v=57.12">
+  <link rel="stylesheet" href="all-drivers.css?v=57.13">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.12">
+  <link rel="stylesheet" href="stats.css?v=57.13">
 </head>
 
 <body>
@@ -2691,10 +2691,36 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     saveDailyAssignment();
 
     const labels = monthlySummaryLabels();
+
+    // Safari/iOS zezwala na nowe okno tylko bezpośrednio podczas kliknięcia.
+    // Otwieramy je przed pierwszym await, a treść uzupełniamy później.
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      error.textContent = language === "no"
+        ? "Nettleseren blokkerte utskriftsvinduet."
+        : language === "en"
+          ? "The browser blocked the print window."
+          : "Przeglądarka zablokowała okno wydruku.";
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${labels.title}</title></head><body style="font-family:Arial,sans-serif;padding:24px">Przygotowywanie podsumowania…</body></html>`);
+    printWindow.document.close();
+
     const month = historyMonth.value;
-    const rows = await buildMonthlySummaryRows(month);
+    let rows;
+
+    try {
+      rows = await buildMonthlySummaryRows(month);
+    } catch (printError) {
+      printWindow.close();
+      error.textContent = translations[language].historyImportError;
+      return;
+    }
 
     if (!rows.length) {
+      printWindow.close();
       error.textContent = labels.noData;
       return;
     }
@@ -2798,23 +2824,30 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
 </body>
 </html>`;
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      error.textContent = language === "no"
-        ? "Nettleseren blokkerte utskriftsvinduet."
-        : language === "en"
-          ? "The browser blocked the print window."
-          : "Przeglądarka zablokowała okno wydruku.";
-      return;
-    }
-
     printWindow.document.open();
     printWindow.document.write(reportHtml);
     printWindow.document.close();
-    window.setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-    }, 350);
+
+    const startPrint = () => {
+      window.setTimeout(() => {
+        try {
+          printWindow.focus();
+          printWindow.print();
+        } catch (printError) {
+          error.textContent = language === "no"
+            ? "Utskriften kunne ikke startes."
+            : language === "en"
+              ? "Printing could not be started."
+              : "Nie udało się uruchomić drukowania.";
+        }
+      }, 250);
+    };
+
+    if (printWindow.document.readyState === "complete") {
+      startPrint();
+    } else {
+      printWindow.addEventListener("load", startPrint, { once: true });
+    }
   }
 
   async function exportExcel() {
@@ -3438,9 +3471,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>  <script src="all-drivers.js?v=57.12"></script>
-  <script src="weather-humor.js?v=57.12"></script>
-  <script src="analytics.js?v=57.12"></script>
-  <script src="stats-panel.js?v=57.12"></script>
+</script>  <script src="all-drivers.js?v=57.13"></script>
+  <script src="weather-humor.js?v=57.13"></script>
+  <script src="analytics.js?v=57.13"></script>
+  <script src="stats-panel.js?v=57.13"></script>
 </body>
 </html>

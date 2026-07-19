@@ -192,7 +192,7 @@
         </div>
 
         <div class="stats-generated">${escapeHtml(text.updated)}: ${escapeHtml(data.generatedAt || "—")}
-          ${data.dailyDebug ? `<br>Dzień telefonu: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Ostatni dzień w danych: ${escapeHtml(data.dailyDebug.lastStoredDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0}` : ""}
+          ${data.dailyDebug ? `<br>Dzień telefonu: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Dzień zapisany: ${escapeHtml(data.dailyDebug.lastStoredDay || "—")} • Dzień z czasu: ${escapeHtml(data.dailyDebug.lastTimestampDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0}` : ""}
         </div>
       `;
       container.dataset.loaded = "1";
