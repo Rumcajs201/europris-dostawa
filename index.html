@@ -776,10 +776,106 @@
       margin-top: 8px;
     }
 .history-cloud-status{min-height:18px;margin:7px 0;color:var(--muted);font-size:.72rem;font-weight:750;line-height:1.3;}
+
+    .store-drivers-panel {
+      margin: 10px 0 12px;
+      padding: 11px;
+      border: 1px solid #08783e;
+      border-left: 5px solid #08783e;
+      border-radius: 12px;
+      background: color-mix(in srgb, #08783e 7%, var(--surface));
+    }
+
+    .store-drivers-panel[hidden] {
+      display: none !important;
+    }
+
+    .store-drivers-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .store-drivers-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .store-drivers-title {
+      color: #08783e;
+      font-size: .92rem;
+      font-weight: 950;
+    }
+
+    .store-drivers-subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 750;
+    }
+
+    .store-drivers-content {
+      display: grid;
+      gap: 7px;
+    }
+
+    .store-driver-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 9px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--surface);
+    }
+
+    .store-driver-name {
+      color: var(--text);
+      font-weight: 950;
+      overflow-wrap: anywhere;
+    }
+
+    .store-driver-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .73rem;
+      line-height: 1.35;
+    }
+
+    .store-driver-tour {
+      min-width: 54px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #08783e;
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 950;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .store-driver-tour.tour-2 {
+      background: #2563eb;
+    }
+
+    .store-drivers-empty,
+    .store-drivers-loading,
+    .store-drivers-error {
+      padding: 8px 4px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.35;
+    }
+
+    .store-drivers-error {
+      color: #b31319;
+    }
 </style>
-  <link rel="stylesheet" href="all-drivers.css?v=57.13">
+  <link rel="stylesheet" href="all-drivers.css?v=57.15">
   <link rel="stylesheet" href="weather-humor.css?v=53.0">
-  <link rel="stylesheet" href="stats.css?v=57.13">
+  <link rel="stylesheet" href="stats.css?v=57.15">
 </head>
 
 <body>
@@ -844,6 +940,17 @@
         <div id="selectedName" class="selected-name"></div>
       </div>
     </div>
+
+    <section id="storeDriversPanel" class="store-drivers-panel" hidden>
+      <div class="store-drivers-header">
+        <span class="store-drivers-icon">🚚</span>
+        <div>
+          <div id="storeDriversTitle" class="store-drivers-title"></div>
+          <div id="storeDriversSubtitle" class="store-drivers-subtitle"></div>
+        </div>
+      </div>
+      <div id="storeDriversContent" class="store-drivers-content"></div>
+    </section>
 
     <div class="keypad">
       <button class="key" data-digit="1">1</button>
@@ -1042,6 +1149,10 @@
   });
   let historyBackupTimer = 0;
   let adminApiDates = [];
+  let publicTodayPlan = null;
+  let publicTodayPlanDate = "";
+  let publicTodayPlanPromise = null;
+  let publicStoreDriversRequestId = 0;
 
   const translations = {
     pl: {
@@ -1127,7 +1238,7 @@
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} kursów, ${rows} sklepów, ${pallets} palet.`,adminCourse:number=>`Kurs ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Trasa: ${value}`,
       adminDeadline:value=>`Dostawa do: ${value}`,adminPallets:value=>`Palety: ${value}`,adminTrailers:value=>`Trallery: ${value}`,adminSequence:value=>`Kolejność: ${value}`,adminInfo:value=>`Uwagi: ${value}`,adminStatsTitle:"Statystyki aplikacji",adminStatsDescription:"Anonimowe dane techniczne i użycie aplikacji.",adminStatsRefresh:"Odśwież",adminReturnEmpties:value=>`Powrót pustych palet: ${value} sztaple`,adminReturnLoads:"Ładunek powrotny",adminReturnOrder:value=>`Zlecenie: ${value}`,adminReturnPallets:value=>`Palety: ${value}`,adminReturnTerminal:value=>`Odbiór: ${value}`,adminReturnSupplier:value=>`Ładunek: ${value}`,
       adminSelectStore:"Wybierz sklep",adminMap:"Google Maps",adminSplitTitle:"Split / inni kierowcy do tego sklepu",adminPeer:(driver,time,pallets)=>`${driver} — do ${time}, ${pallets} palet`,
-      adminTimeDifference:minutes=>`Różnica planowanych godzin: ${minutes} min`,adminConflictHigh:"Duże ryzyko kolizji",adminConflictMedium:"Możliwa kolizja",adminConflictLow:"Duży odstęp czasu",adminPlanDeleted:"Plan został usunięty.",
+      adminTimeDifference:minutes=>`Różnica planowanych godzin: ${minutes} min`,adminConflictHigh:"Duże ryzyko kolizji",adminConflictMedium:"Możliwa kolizja",adminConflictLow:"Duży odstęp czasu",adminPlanDeleted:"Plan został usunięty.",storeDriversTitle:"Dzisiejsze dostawy do tego sklepu",storeDriversSubtitle:date=>`Plan na ${date}`,storeDriversLoading:"Sprawdzanie dzisiejszego planu…",storeDriversNone:"W dzisiejszym planie nie ma dostawy do tego sklepu.",storeDriversNoPlan:"Brak dostępnego planu na dzisiaj.",storeDriversError:"Nie udało się pobrać dzisiejszego planu.",storeDriversTour:value=>`Tur ${value}`,storeDriversDeadline:value=>`do ${value}`,storeDriversPallets:value=>`${value} palet`,
       footer: "Zbudowane przez Rumcajsa przy pomocy sztucznej inteligencji."
     },
     no: {
@@ -1212,7 +1323,7 @@
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} turer, ${rows} butikker, ${pallets} paller.`,adminCourse:number=>`Tur ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Rute: ${value}`,
       adminDeadline:value=>`Leveres innen: ${value}`,adminPallets:value=>`Paller: ${value}`,adminTrailers:value=>`Traller: ${value}`,adminSequence:value=>`Rekkefølge: ${value}`,adminInfo:value=>`Merknad: ${value}`,adminStatsTitle:"Appstatistikk",adminStatsDescription:"Anonyme tekniske data og bruk av appen.",adminStatsRefresh:"Oppdater",adminReturnEmpties:value=>`Retur tompaller: ${value} stabler`,adminReturnLoads:"Returlast",adminReturnOrder:value=>`Ordre: ${value}`,adminReturnPallets:value=>`Paller: ${value}`,adminReturnTerminal:value=>`Henting: ${value}`,adminReturnSupplier:value=>`Last: ${value}`,
       adminSelectStore:"Velg butikk",adminMap:"Google Maps",adminSplitTitle:"Split / andre sjåfører til samme butikk",adminPeer:(driver,time,pallets)=>`${driver} — innen ${time}, ${pallets} paller`,
-      adminTimeDifference:minutes=>`Forskjell mellom planlagte tider: ${minutes} min`,adminConflictHigh:"Stor kollisjonsfare",adminConflictMedium:"Mulig kollisjon",adminConflictLow:"God tidsavstand",adminPlanDeleted:"Planen er slettet.",
+      adminTimeDifference:minutes=>`Forskjell mellom planlagte tider: ${minutes} min`,adminConflictHigh:"Stor kollisjonsfare",adminConflictMedium:"Mulig kollisjon",adminConflictLow:"God tidsavstand",adminPlanDeleted:"Planen er slettet.",storeDriversTitle:"Dagens leveringer til denne butikken",storeDriversSubtitle:date=>`Plan for ${date}`,storeDriversLoading:"Sjekker dagens plan…",storeDriversNone:"Det er ingen levering til denne butikken i dagens plan.",storeDriversNoPlan:"Ingen plan er tilgjengelig for i dag.",storeDriversError:"Kunne ikke hente dagens plan.",storeDriversTour:value=>`Tur ${value}`,storeDriversDeadline:value=>`innen ${value}`,storeDriversPallets:value=>`${value} paller`,
       footer: "Bygget av Rumcajs med hjelp av kunstig intelligens."
     },
     en: {
@@ -1297,7 +1408,7 @@
       adminSummary:(rows,courses,pallets,date)=>`Plan ${date}: ${courses} trips, ${rows} stores, ${pallets} pallets.`,adminCourse:number=>`Trip ${number}`,adminTransport:value=>`Transport: ${value}`,adminRoute:value=>`Route: ${value}`,
       adminDeadline:value=>`Deliver by: ${value}`,adminPallets:value=>`Pallets: ${value}`,adminTrailers:value=>`Trailers: ${value}`,adminSequence:value=>`Sequence: ${value}`,adminInfo:value=>`Notes: ${value}`,adminStatsTitle:"Application statistics",adminStatsDescription:"Anonymous technical data and application usage.",adminStatsRefresh:"Refresh",adminReturnEmpties:value=>`Empty pallet return: ${value} stacks`,adminReturnLoads:"Return load",adminReturnOrder:value=>`Order: ${value}`,adminReturnPallets:value=>`Pallets: ${value}`,adminReturnTerminal:value=>`Pickup: ${value}`,adminReturnSupplier:value=>`Load: ${value}`,
       adminSelectStore:"Select store",adminMap:"Google Maps",adminSplitTitle:"Split / other drivers for this store",adminPeer:(driver,time,pallets)=>`${driver} — by ${time}, ${pallets} pallets`,
-      adminTimeDifference:minutes=>`Planned-time difference: ${minutes} min`,adminConflictHigh:"High collision risk",adminConflictMedium:"Possible collision",adminConflictLow:"Good time separation",adminPlanDeleted:"The plan has been deleted.",
+      adminTimeDifference:minutes=>`Planned-time difference: ${minutes} min`,adminConflictHigh:"High collision risk",adminConflictMedium:"Possible collision",adminConflictLow:"Good time separation",adminPlanDeleted:"The plan has been deleted.",storeDriversTitle:"Today’s deliveries to this store",storeDriversSubtitle:date=>`Plan for ${date}`,storeDriversLoading:"Checking today’s plan…",storeDriversNone:"There is no delivery to this store in today’s plan.",storeDriversNoPlan:"No plan is available for today.",storeDriversError:"Could not load today’s plan.",storeDriversTour:value=>`Trip ${value}`,storeDriversDeadline:value=>`by ${value}`,storeDriversPallets:value=>`${value} pallets`,
       footer: "Built by Rumcajs with the help of artificial intelligence."
     }
   };
@@ -1324,6 +1435,10 @@
   const results = document.getElementById("results");
   const selectedNumber = document.getElementById("selectedNumber");
   const selectedName = document.getElementById("selectedName");
+  const storeDriversPanel = document.getElementById("storeDriversPanel");
+  const storeDriversTitle = document.getElementById("storeDriversTitle");
+  const storeDriversSubtitle = document.getElementById("storeDriversSubtitle");
+  const storeDriversContent = document.getElementById("storeDriversContent");
   const openButton = document.getElementById("open");
   const openSaveButton = document.getElementById("openSave");
   const navigateButton = document.getElementById("navigate");
@@ -1527,7 +1642,15 @@
     return activeAdminDefinition().role === "admin";
   }
 
-  function saveAdminPlan(p){localStorage.setItem(ADMIN_PLAN_KEY,JSON.stringify(p));}
+  function saveAdminPlan(p){
+    localStorage.setItem(ADMIN_PLAN_KEY,JSON.stringify(p));
+    const date=String(p?.date||p?.rows?.[0]?.deliveryDate||"");
+    if(date&&date===publicPlanDateKey()){
+      publicTodayPlan=p;
+      publicTodayPlanDate=date;
+      if(currentNumber)void updatePublicStoreDrivers();
+    }
+  }
   function loadAdminPlan(){try{return JSON.parse(localStorage.getItem(ADMIN_PLAN_KEY)||"null");}catch{return null;}}
   function normalizeHeader(v){
     return normalized(v)
@@ -1940,6 +2063,160 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     }
 
     if (!historyPanel.hidden) renderHistory();
+    if (currentNumber) void updatePublicStoreDrivers();
+  }
+
+  function publicPlanDateKey() {
+    return currentLocalDateKey();
+  }
+
+  function publicStoreNumber(value) {
+    return String(value || "").replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+  }
+
+  function publicDriversForStore(rows, storeNumber) {
+    const wanted = publicStoreNumber(storeNumber);
+    const grouped = new Map();
+
+    (Array.isArray(rows) ? rows : []).forEach(row => {
+      if (publicStoreNumber(row.storeNumber) !== wanted) return;
+
+      const driver = String(row.driver || row.carrier || "").trim();
+      if (!driver) return;
+
+      const tour = String(row.tour12 || "1").trim() || "1";
+      const key = `${normalized(driver)}|${tour}`;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          driver,
+          tour,
+          pallets: 0,
+          deadlines: new Set()
+        });
+      }
+
+      const item = grouped.get(key);
+      item.pallets += Number(row.pallets) || 0;
+      if (row.deadline) item.deadlines.add(String(row.deadline));
+    });
+
+    return [...grouped.values()]
+      .map(item => ({
+        ...item,
+        deadlines: [...item.deadlines].sort()
+      }))
+      .sort((a, b) =>
+        Number(a.tour) - Number(b.tour) ||
+        normalized(a.driver).localeCompare(normalized(b.driver), "nb")
+      );
+  }
+
+  async function loadPublicTodayPlan() {
+    const date = publicPlanDateKey();
+
+    if (publicTodayPlanDate === date && publicTodayPlan) {
+      return publicTodayPlan;
+    }
+
+    if (publicTodayPlanPromise && publicTodayPlanDate === date) {
+      return publicTodayPlanPromise;
+    }
+
+    publicTodayPlanDate = date;
+    publicTodayPlanPromise = adminJsonp("plan", { date })
+      .then(plan => {
+        publicTodayPlan = plan?.ok && Array.isArray(plan.rows) ? plan : null;
+        return publicTodayPlan;
+      })
+      .catch(() => {
+        publicTodayPlan = null;
+        return null;
+      })
+      .finally(() => {
+        publicTodayPlanPromise = null;
+      });
+
+    return publicTodayPlanPromise;
+  }
+
+  function renderPublicStoreDriversRows(drivers, text) {
+    storeDriversContent.replaceChildren();
+
+    drivers.forEach(driver => {
+      const row = document.createElement("div");
+      row.className = "store-driver-row";
+
+      const info = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "store-driver-name";
+      name.textContent = driver.driver;
+
+      const meta = document.createElement("div");
+      meta.className = "store-driver-meta";
+      meta.textContent = [
+        driver.deadlines.length
+          ? text.storeDriversDeadline(driver.deadlines.join(" / "))
+          : "",
+        text.storeDriversPallets(driver.pallets)
+      ].filter(Boolean).join(" • ");
+
+      const tour = document.createElement("span");
+      tour.className = `store-driver-tour${String(driver.tour) === "2" ? " tour-2" : ""}`;
+      tour.textContent = text.storeDriversTour(driver.tour);
+
+      info.append(name, meta);
+      row.append(info, tour);
+      storeDriversContent.append(row);
+    });
+  }
+
+  async function updatePublicStoreDrivers() {
+    const requestId = ++publicStoreDriversRequestId;
+    const text = translations[language];
+    const storeNumber = currentNumber;
+
+    if (!storeNumber) {
+      storeDriversPanel.hidden = true;
+      storeDriversContent.replaceChildren();
+      return;
+    }
+
+    const date = publicPlanDateKey();
+    storeDriversPanel.hidden = false;
+    storeDriversTitle.textContent = text.storeDriversTitle;
+    storeDriversSubtitle.textContent = text.storeDriversSubtitle(
+      new Intl.DateTimeFormat(
+        language === "no" ? "nb-NO" : language === "en" ? "en-GB" : "pl-PL"
+      ).format(new Date(`${date}T12:00:00`))
+    );
+    storeDriversContent.innerHTML =
+      `<div class="store-drivers-loading">${text.storeDriversLoading}</div>`;
+
+    try {
+      const plan = await loadPublicTodayPlan();
+      if (requestId !== publicStoreDriversRequestId) return;
+
+      if (!plan?.rows?.length) {
+        storeDriversContent.innerHTML =
+          `<div class="store-drivers-empty">${text.storeDriversNoPlan}</div>`;
+        return;
+      }
+
+      const drivers = publicDriversForStore(plan.rows, storeNumber);
+
+      if (!drivers.length) {
+        storeDriversContent.innerHTML =
+          `<div class="store-drivers-empty">${text.storeDriversNone}</div>`;
+        return;
+      }
+
+      renderPublicStoreDriversRows(drivers, text);
+    } catch (planError) {
+      if (requestId !== publicStoreDriversRequestId) return;
+      storeDriversContent.innerHTML =
+        `<div class="store-drivers-error">${text.storeDriversError}</div>`;
+    }
   }
 
   async function updateSelected() {
@@ -1947,6 +2224,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
     selectedName.textContent = currentName || "";
     error.textContent = "";
     await syncCurrentStore();
+    await updatePublicStoreDrivers();
   }
 
   async function selectStore(store) {
@@ -3471,9 +3749,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>  <script src="all-drivers.js?v=57.13"></script>
-  <script src="weather-humor.js?v=57.13"></script>
-  <script src="analytics.js?v=57.13"></script>
-  <script src="stats-panel.js?v=57.13"></script>
+</script>  <script src="all-drivers.js?v=57.15"></script>
+  <script src="weather-humor.js?v=57.15"></script>
+  <script src="analytics.js?v=57.15"></script>
+  <script src="stats-panel.js?v=57.15"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v57-13-final-fixes";
+const CACHE_NAME = "europris-app-v57-15-store-drivers";
 
 const STATIC_FILES = [
   "./",
