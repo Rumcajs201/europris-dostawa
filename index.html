@@ -873,9 +873,9 @@
       color: #b31319;
     }
 </style>
-  <link rel="stylesheet" href="all-drivers.css?v=57.17">
-  <link rel="stylesheet" href="weather-humor.css?v=57.17">
-  <link rel="stylesheet" href="stats.css?v=57.17">
+  <link rel="stylesheet" href="all-drivers.css?v=57.21">
+  <link rel="stylesheet" href="weather-humor.css?v=57.21">
+  <link rel="stylesheet" href="stats.css?v=57.21">
 </head>
 
 <body>
@@ -3248,15 +3248,21 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     };
   }
 
-  function historyBackupPost(payload) {
-    return fetch(HISTORY_BACKUP_API_URL, {
+  async function historyBackupPost(payload) {
+    const body = JSON.stringify(payload);
+
+    // Nie używamy keepalive. Przeglądarki ograniczają łączny rozmiar
+    // żądań keepalive do około 64 KB, a pełna historia może być większa.
+    const response = await fetch(HISTORY_BACKUP_API_URL, {
       method: "POST",
       mode: "no-cors",
       cache: "no-store",
-      keepalive: true,
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
+      redirect: "follow",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      body
     });
+
+    return response;
   }
 
   function historyBackupRequest(action, profile, backupKey) {
@@ -3284,9 +3290,13 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
   }
 
   async function verifyHistoryCloudBackup(profile,generatedAt) {
-    for(let attempt=0;attempt<6;attempt++){
-      await new Promise(resolve=>setTimeout(resolve,900));
-      const result=await historyBackupRequest("history_backup_status",profile,HISTORY_BACKUP_KEYS[profile]);
+    for(let attempt=0;attempt<10;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,1200));
+      const result=await historyBackupRequest(
+        "history_backup_status",
+        profile,
+        HISTORY_BACKUP_KEYS[profile]
+      );
       if(result?.ok&&result.generatedAt===generatedAt)return true;
     }
     return false;
@@ -3749,9 +3759,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>  <script src="all-drivers.js?v=57.17"></script>
-  <script src="weather-humor.js?v=57.17"></script>
-  <script src="analytics.js?v=57.17"></script>
-  <script src="stats-panel.js?v=57.17"></script>
+</script>  <script src="all-drivers.js?v=57.21"></script>
+  <script src="weather-humor.js?v=57.21"></script>
+  <script src="analytics.js?v=57.21"></script>
+  <script src="stats-panel.js?v=57.21"></script>
 </body>
 </html>

@@ -167,7 +167,7 @@
           { cache: "no-store" }
         ),
         fetch(
-          `${API}?action=stats_daily_v2&token=${encodeURIComponent(TOKEN)}&_=${Date.now()}`,
+          `${API}?action=stats_daily_v3&token=${encodeURIComponent(TOKEN)}&day=${encodeURIComponent(localDayKey())}&_=${Date.now()}`,
           { cache: "no-store" }
         )
       ]);
@@ -213,7 +213,7 @@
         </div>
 
         <div class="stats-generated">${escapeHtml(text.updated)}: ${escapeHtml(data.generatedAt || "—")}
-          ${dailyData ? `<br>Licznik dzienny V2: ${escapeHtml(dailyData.apiVersion || "—")} • Dzisiaj: ${escapeHtml(dailyData.today || "—")} • Ostatni zapis: ${escapeHtml(dailyData.lastTimestampDay || "—")} • Rekordy dzisiaj: ${Number(dailyData.rowsToday) || 0}` : (data.dailyDebug ? `<br>Dzień telefonu: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Dzień zapisany: ${escapeHtml(data.dailyDebug.lastStoredDay || "—")} • Dzień z czasu: ${escapeHtml(data.dailyDebug.lastTimestampDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0}` : "")}
+          ${dailyData ? `<br>Licznik dzienny V3: ${escapeHtml(dailyData.apiVersion || "—")} • Dzisiaj: ${escapeHtml(dailyData.today || "—")} • Ostatni zapis: ${escapeHtml(dailyData.lastTimestampDay || "—")} • Rekordy dzisiaj: ${Number(dailyData.rowsToday) || 0}` : (data.dailyDebug ? `<br>Dzień telefonu: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Dzień zapisany: ${escapeHtml(data.dailyDebug.lastStoredDay || "—")} • Dzień z czasu: ${escapeHtml(data.dailyDebug.lastTimestampDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0}` : "")}
         </div>
       `;
       container.dataset.loaded = "1";
