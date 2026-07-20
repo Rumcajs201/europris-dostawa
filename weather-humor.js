@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORE_URL = "stores.json?v=53";
+  const STORE_URL = "stores.json?v=57.16";
   const WEATHER_CACHE_MS = 15 * 60 * 1000;
   const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
 
@@ -306,41 +306,39 @@
   function renderWeather(store, data) {
     const card = document.getElementById("storeWeatherCard");
     if (!card) return;
+
+    const text = ui[lang()];
     const language = lang();
-    const text = ui[language];
-    const current = data.current;
-    const alert = alertInfo(data, language);
+    const current = data?.current;
+
+    if (!current) {
+      renderWeatherMessage(text.unavailable);
+      return;
+    }
 
     card.hidden = false;
     card.innerHTML = `
-      <div class="store-weather-head">
-        <div>
-          <div class="store-weather-title">${text.weatherTitle(store.name || store.number)}</div>
-          <div class="store-weather-condition">${weatherIcon(current.weather_code)} ${weatherDescription(current.weather_code, language)}</div>
-        </div>
-        <button type="button" class="store-weather-refresh">${text.refresh}</button>
-      </div>
-      <div class="store-weather-current">
-        <strong>${Math.round(Number(current.temperature_2m))}°C</strong>
-        <span>${text.feels}: ${Math.round(Number(current.apparent_temperature))}°C</span>
-        <span>${text.wind}: ${Math.round(Number(current.wind_speed_10m))} m/s</span>
-        <span>${text.gusts}: ${Math.round(Number(current.wind_gusts_10m))} m/s</span>
-      </div>
-      <div class="store-weather-alert ${alert.level}">${alert.level === "warning" ? "⚠️" : "✓"} ${alert.text}</div>
-      <div class="store-weather-subtitle">${text.nextHours}</div>
-      <div class="store-weather-hours">
-        ${hourlyItems(data).map(item => `
-          <div class="store-weather-hour">
-            <strong>${item.time}</strong>
-            <span>${weatherIcon(item.code)} ${item.temp}°C</span>
-            <small>💧 ${item.precip}% • 💨 ${Math.round(item.gust)} m/s</small>
+      <div class="store-weather-compact">
+        <div class="store-weather-compact-main">
+          <span class="store-weather-compact-icon">${weatherIcon(current.weather_code)}</span>
+          <div class="store-weather-compact-copy">
+            <div class="store-weather-title">${text.weatherTitle(cleanStoreName(store.name))}</div>
+            <div class="store-weather-condition">${weatherDescription(current.weather_code, language)}</div>
           </div>
-        `).join("")}
+        </div>
+
+        <div class="store-weather-compact-values">
+          <strong>${Math.round(Number(current.temperature_2m))}°C</strong>
+          <span>${text.feels}: ${Math.round(Number(current.apparent_temperature))}°C</span>
+          <span>💨 ${Math.round(Number(current.wind_speed_10m))} m/s</span>
+        </div>
+
+        <button type="button" class="store-weather-refresh" aria-label="${text.refresh}" title="${text.refresh}">↻</button>
       </div>
-      <div class="store-weather-note">${text.practical}</div>
     `;
 
-    card.querySelector(".store-weather-refresh")?.addEventListener("click", () => loadWeather(store, true));
+    card.querySelector(".store-weather-refresh")
+      ?.addEventListener("click", () => loadWeather(store, true));
   }
 
   function renderWeatherMessage(message) {
@@ -439,13 +437,16 @@
       topbar.insertAdjacentElement("afterend", humorCard);
     }
 
+    const storeDriversPanel = document.getElementById("storeDriversPanel");
     const selected = document.getElementById("selected");
-    if (selected && !document.getElementById("storeWeatherCard")) {
+    const weatherAnchor = storeDriversPanel || selected;
+
+    if (weatherAnchor && !document.getElementById("storeWeatherCard")) {
       const weatherCard = document.createElement("section");
       weatherCard.id = "storeWeatherCard";
       weatherCard.className = "store-weather-card";
       weatherCard.hidden = true;
-      selected.insertAdjacentElement("afterend", weatherCard);
+      weatherAnchor.insertAdjacentElement("afterend", weatherCard);
     }
   }
 
