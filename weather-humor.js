@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORE_URL = "stores.json?v=57.16";
+  const STORE_URL = "stores.json?v=57.17";
   const WEATHER_CACHE_MS = 15 * 60 * 1000;
   const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
 
@@ -231,6 +231,12 @@
     return stores.find(store => String(store.number) === String(number)) || null;
   }
 
+  function cleanWeatherStoreName(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   function validStore(store) {
     return store && Number.isFinite(Number(store.latitude)) && Number.isFinite(Number(store.longitude));
   }
@@ -322,7 +328,7 @@
         <div class="store-weather-compact-main">
           <span class="store-weather-compact-icon">${weatherIcon(current.weather_code)}</span>
           <div class="store-weather-compact-copy">
-            <div class="store-weather-title">${text.weatherTitle(cleanStoreName(store.name))}</div>
+            <div class="store-weather-title">${text.weatherTitle(cleanWeatherStoreName(store.name))}</div>
             <div class="store-weather-condition">${weatherDescription(current.weather_code, language)}</div>
           </div>
         </div>
