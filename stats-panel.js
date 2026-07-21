@@ -161,37 +161,17 @@
     container.innerHTML = `<div class="stats-loading">${escapeHtml(text.loading)}</div>`;
 
     try {
-      const [summaryResponse, dailyResponse] = await Promise.all([
-        fetch(
-          `${API}?action=stats_summary&token=${encodeURIComponent(TOKEN)}&day=${encodeURIComponent(localDayKey())}&_=${Date.now()}`,
-          { cache: "no-store" }
-        ),
-        fetch(
-          `${API}?action=stats_daily_v3&token=${encodeURIComponent(TOKEN)}&day=${encodeURIComponent(localDayKey())}&_=${Date.now()}`,
-          { cache: "no-store" }
-        )
-      ]);
+      const summaryResponse = await fetch(
+        `${API}?action=stats_summary&token=${encodeURIComponent(TOKEN)}&day=${encodeURIComponent(localDayKey())}&_=${Date.now()}`,
+        { cache: "no-store" }
+      );
 
       if (!summaryResponse.ok) throw new Error(`HTTP ${summaryResponse.status}`);
 
       const data = await summaryResponse.json();
       if (!data?.ok) throw new Error(data?.error || "API");
 
-      let dailyData = null;
-      try {
-        if (dailyResponse.ok) {
-          const candidate = await dailyResponse.json();
-          if (candidate?.ok) dailyData = candidate;
-        }
-      } catch (dailyError) {
-        console.warn("Europris daily stats V2:", dailyError);
-      }
-
-      const summary = {
-        ...(data.summary || {}),
-        devicesToday: dailyData?.devicesToday ?? data.summary?.devicesToday ?? 0,
-        opensToday: dailyData?.opensToday ?? data.summary?.opensToday ?? 0
-      };
+      const summary = data.summary || {};
       container.innerHTML = `
         <div class="stats-metrics">
           ${metric(text.todayDevices, summary.devicesToday)}
@@ -213,7 +193,7 @@
         </div>
 
         <div class="stats-generated">${escapeHtml(text.updated)}: ${escapeHtml(data.generatedAt || "—")}
-          ${dailyData ? `<br>Licznik dzienny V3: ${escapeHtml(dailyData.apiVersion || "—")} • Dzisiaj: ${escapeHtml(dailyData.today || "—")} • Ostatni zapis: ${escapeHtml(dailyData.lastTimestampDay || "—")} • Rekordy dzisiaj: ${Number(dailyData.rowsToday) || 0}` : (data.dailyDebug ? `<br>Dzień telefonu: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Dzień zapisany: ${escapeHtml(data.dailyDebug.lastStoredDay || "—")} • Dzień z czasu: ${escapeHtml(data.dailyDebug.lastTimestampDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0}` : "")}
+          ${data.dailyDebug ? `<br>Licznik dzienny: ${escapeHtml(data.dailyDebug.effectiveMode || "calendar")} • Dzień: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0} • Rekordy 24 h: ${Number(data.dailyDebug.rowsLast24h) || 0}` : ""}
         </div>
       `;
       container.dataset.loaded = "1";

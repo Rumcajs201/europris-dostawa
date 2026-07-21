@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORE_URL = "stores.json?v=57.17";
+  const STORE_URL = "stores.json?v=57.22";
   const WEATHER_CACHE_MS = 15 * 60 * 1000;
   const WEATHER_API = "https://api.open-meteo.com/v1/forecast";
 
@@ -80,7 +80,7 @@
   const ui = {
     pl: {
       humorTitle: "Humor dnia",
-      weatherTitle: name => `Pogoda — ${name}`,
+      weatherTitle: name => `${name}`,
       loading: "Pobieranie pogody…",
       unavailable: "Nie udało się pobrać pogody.",
       choose: "Wybierz sklep, aby zobaczyć pogodę.",
@@ -102,7 +102,7 @@
     },
     no: {
       humorTitle: "Dagens humor",
-      weatherTitle: name => `Vær — ${name}`,
+      weatherTitle: name => `${name}`,
       loading: "Henter vær…",
       unavailable: "Kunne ikke hente været.",
       choose: "Velg en butikk for å se været.",
@@ -124,7 +124,7 @@
     },
     en: {
       humorTitle: "Daily humor",
-      weatherTitle: name => `Weather — ${name}`,
+      weatherTitle: name => `${name}`,
       loading: "Loading weather…",
       unavailable: "Unable to load weather.",
       choose: "Select a store to see the weather.",
