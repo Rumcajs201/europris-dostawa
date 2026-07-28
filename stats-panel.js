@@ -199,10 +199,26 @@
     container.innerHTML = `<div class="stats-loading">${escapeHtml(text.loading)}</div>`;
 
     try {
-      const data = await statsJsonp({
-        action: "stats_summary_v2",
-        token: TOKEN
-      });
+      let data;
+
+      try {
+        data = await statsJsonp({
+          action: "stats_summary_v2",
+          token: TOKEN
+        });
+      } catch (jsonpError) {
+        // Awaryjny odczyt JSON, gdy przeglądarka zablokuje dynamiczny skrypt.
+        const response = await fetch(
+          `${API}?action=stats_summary_v2&token=${encodeURIComponent(TOKEN)}&_=${Date.now()}`,
+          { cache: "no-store", redirect: "follow" }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        data = await response.json();
+      }
 
       if (!data?.ok) throw new Error(data?.error || "API");
 
@@ -234,7 +250,14 @@
       container.dataset.loaded = "1";
     } catch (error) {
       console.error("Europris stats:", error);
-      container.innerHTML = `<div class="stats-error">${escapeHtml(text.error)}</div>`;
+      container.innerHTML = `
+        <div class="stats-error">
+          ${escapeHtml(text.error)}
+          <small style="display:block;margin-top:6px;overflow-wrap:anywhere">
+            ${escapeHtml(error?.message || "unknown")}
+          </small>
+        </div>
+      `;
     }
   }
 
