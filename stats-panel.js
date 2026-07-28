@@ -167,8 +167,8 @@
       };
 
       const timeout = window.setTimeout(
-        () => finish(new Error("timeout")),
-        20000
+        () => finish(new Error("JSONP timeout")),
+        30000
       );
 
       window[callback] = data => finish(null, data);
@@ -199,28 +199,14 @@
     container.innerHTML = `<div class="stats-loading">${escapeHtml(text.loading)}</div>`;
 
     try {
-      let data;
+      const data = await statsJsonp({
+        action: "stats_summary_v2",
+        token: TOKEN
+      });
 
-      try {
-        data = await statsJsonp({
-          action: "stats_summary_v2",
-          token: TOKEN
-        });
-      } catch (jsonpError) {
-        // Awaryjny odczyt JSON, gdy przeglądarka zablokuje dynamiczny skrypt.
-        const response = await fetch(
-          `${API}?action=stats_summary_v2&token=${encodeURIComponent(TOKEN)}&_=${Date.now()}`,
-          { cache: "no-store", redirect: "follow" }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        data = await response.json();
+      if (!data?.ok) {
+        throw new Error(data?.error || "JSONP API error");
       }
-
-      if (!data?.ok) throw new Error(data?.error || "API");
 
       const summary = data.summary || {};
       container.innerHTML = `
@@ -254,7 +240,7 @@
         <div class="stats-error">
           ${escapeHtml(text.error)}
           <small style="display:block;margin-top:6px;overflow-wrap:anywhere">
-            ${escapeHtml(error?.message || "unknown")}
+            ${escapeHtml(error?.message || "JSONP failed")}
           </small>
         </div>
       `;

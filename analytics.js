@@ -5,7 +5,7 @@
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const TOKEN =
     "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
-  const VERSION = "v58.04";
+  const VERSION = "v58.05";
 
   const ALLOWED_EVENTS = new Set([
     "app_open",
@@ -197,21 +197,7 @@
       result: String(extra.result || "").slice(0, 40)
     };
 
-    return jsonp(parameters).then(result => {
-      if (result?.ok) return true;
-
-      /*
-        Awaryjny pixel GET. Nawet jeśli odpowiedź JSONP zostanie zablokowana,
-        przeglądarka nadal wywoła doGet i serwer zapisze zdarzenie.
-      */
-      const image = new Image();
-      image.src = `${ENDPOINT}?${new URLSearchParams({
-        ...parameters,
-        _: String(Date.now())
-      })}`;
-
-      return false;
-    });
+    return jsonp(parameters).then(result => Boolean(result?.ok));
   }
 
   function sendAppOpen(reason) {
