@@ -148,6 +148,44 @@
     return button;
   }
 
+  function statsJsonp(parameters) {
+    return new Promise((resolve, reject) => {
+      const callback =
+        `__europrisStatsPanel_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement("script");
+      let completed = false;
+
+      const finish = (error, data) => {
+        if (completed) return;
+        completed = true;
+        window.clearTimeout(timeout);
+        delete window[callback];
+        script.remove();
+
+        if (error) reject(error);
+        else resolve(data);
+      };
+
+      const timeout = window.setTimeout(
+        () => finish(new Error("timeout")),
+        20000
+      );
+
+      window[callback] = data => finish(null, data);
+
+      const query = new URLSearchParams({
+        ...parameters,
+        callback,
+        _: String(Date.now())
+      });
+
+      script.async = true;
+      script.src = `${API}?${query}`;
+      script.onerror = () => finish(new Error("network"));
+      document.head.appendChild(script);
+    });
+  }
+
   async function load(container, force = false) {
     if (!container) return;
 
@@ -161,14 +199,11 @@
     container.innerHTML = `<div class="stats-loading">${escapeHtml(text.loading)}</div>`;
 
     try {
-      const summaryResponse = await fetch(
-        `${API}?action=stats_summary&token=${encodeURIComponent(TOKEN)}&day=${encodeURIComponent(localDayKey())}&_=${Date.now()}`,
-        { cache: "no-store" }
-      );
+      const data = await statsJsonp({
+        action: "stats_summary_v2",
+        token: TOKEN
+      });
 
-      if (!summaryResponse.ok) throw new Error(`HTTP ${summaryResponse.status}`);
-
-      const data = await summaryResponse.json();
       if (!data?.ok) throw new Error(data?.error || "API");
 
       const summary = data.summary || {};
@@ -193,7 +228,7 @@
         </div>
 
         <div class="stats-generated">${escapeHtml(text.updated)}: ${escapeHtml(data.generatedAt || "—")}
-          ${data.dailyDebug ? `<br>Licznik dzienny: ${escapeHtml(data.dailyDebug.effectiveMode || "calendar")} • Dzień: ${escapeHtml(data.dailyDebug.requestedDay || "—")} • Rekordy dnia: ${Number(data.dailyDebug.rowsForRequestedDay) || 0} • Rekordy 24 h: ${Number(data.dailyDebug.rowsLast24h) || 0}` : ""}
+          ${data.diagnostics ? `<br>Statystyki V2: ${escapeHtml(data.apiVersion || "—")} • Dzień serwera: ${escapeHtml(data.serverDay || "—")} • Rekordy dzisiaj: ${Number(data.diagnostics.rowsToday) || 0} • Wszystkie rekordy: ${Number(data.diagnostics.totalRows) || 0}` : ""}
         </div>
       `;
       container.dataset.loaded = "1";

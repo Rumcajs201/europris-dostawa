@@ -1,11 +1,11 @@
 (() => {
   "use strict";
 
-  const EUROPRIS_ANALYTICS_VERSION = "v57.9";
-  const EUROPRIS_ANALYTICS_ENDPOINT =
+  const ENDPOINT =
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
-  const EUROPRIS_ANALYTICS_TOKEN =
+  const TOKEN =
     "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
+  const VERSION = "v58.0";
 
   const ALLOWED_EVENTS = new Set([
     "app_open",
@@ -21,56 +21,65 @@
     "pwa_installed"
   ]);
 
-  function simpleHash(text) {
-    let h1 = 0x811c9dc5;
-    for (let i = 0; i < text.length; i++) {
-      h1 ^= text.charCodeAt(i);
-      h1 = Math.imul(h1, 0x01000193);
-    }
-    return (h1 >>> 0).toString(36);
-  }
+  const pendingScripts = new Set();
+  let lastOpenSentAt = 0;
+  let hiddenAt = 0;
 
-  function dayKey() {
-    const d = new Date();
-    return [
-      d.getFullYear(),
-      String(d.getMonth() + 1).padStart(2, "0"),
-      String(d.getDate()).padStart(2, "0")
-    ].join("-");
+  function randomHex(bytesLength) {
+    const bytes = new Uint8Array(bytesLength);
+    crypto.getRandomValues(bytes);
+    return Array.from(
+      bytes,
+      value => value.toString(16).padStart(2, "0")
+    ).join("");
   }
 
   function installationId() {
-    // Losowy identyfikator instalacji. Nie korzysta z numeru telefonu,
-    // konta, GPS, IP, IMEI ani innych identyfikatorów sprzętowych.
-    const key = "europris_stats_installation_id_v1";
+    const key = "europris_stats_installation_id_v2";
+
     try {
       let id = localStorage.getItem(key);
-      if (id && /^[a-f0-9]{24}$/.test(id)) return id;
 
-      const bytes = new Uint8Array(12);
-      crypto.getRandomValues(bytes);
-      id = Array.from(bytes, value => value.toString(16).padStart(2, "0")).join("");
+      if (/^[a-f0-9]{24}$/.test(String(id || ""))) {
+        return id;
+      }
+
+      id = randomHex(12);
       localStorage.setItem(key, id);
       return id;
     } catch {
-      // Tryb awaryjny dla przeglądarek blokujących localStorage.
-      const bytes = new Uint32Array(3);
-      crypto.getRandomValues(bytes);
-      return Array.from(bytes, value => value.toString(16).padStart(8, "0")).join("");
+      /*
+        Pamięciowy fallback działa w bieżącej sesji.
+        Nie używamy IP, GPS, telefonu, konta ani danych sprzętowych.
+      */
+      if (!window.__EUROPRIS_STATS_SESSION_ID__) {
+        window.__EUROPRIS_STATS_SESSION_ID__ = randomHex(12);
+      }
+
+      return window.__EUROPRIS_STATS_SESSION_ID__;
     }
   }
 
-  function dailyAnonymousId() {
-    // Osobny identyfikator do liczenia unikalnych urządzeń w konkretnym dniu.
-    return simpleHash(`${dayKey()}|${installationId()}`);
+  function eventId() {
+    return randomHex(16);
   }
 
   function detectOS() {
     const ua = navigator.userAgent || "";
-    const platform = navigator.userAgentData?.platform || navigator.platform || "";
+    const platform =
+      navigator.userAgentData?.platform ||
+      navigator.platform ||
+      "";
 
     if (/android/i.test(ua)) return "Android";
-    if (/iPad|iPhone|iPod/.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1)) return "iOS";
+
+    if (
+      /iPad|iPhone|iPod/.test(ua) ||
+      (platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    ) {
+      return "iOS";
+    }
+
     if (/windows/i.test(platform) || /windows/i.test(ua)) return "Windows";
     if (/mac/i.test(platform)) return "macOS";
     if (/linux/i.test(platform)) return "Linux";
@@ -79,129 +88,147 @@
 
   function detectBrowser() {
     const ua = navigator.userAgent || "";
+
     if (/Edg\//.test(ua)) return "Edge";
     if (/OPR\//.test(ua)) return "Opera";
     if (/CriOS\//.test(ua)) return "Chrome iOS";
     if (/FxiOS\//.test(ua)) return "Firefox iOS";
     if (/Chrome\//.test(ua)) return "Chrome";
     if (/Firefox\//.test(ua)) return "Firefox";
-    if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) return "Safari";
+    if (/Safari\//.test(ua)) return "Safari";
     return "Other";
   }
 
-  function detectDeviceType() {
-    const shortest = Math.min(screen.width, screen.height);
-    const touch = navigator.maxTouchPoints > 0;
-    if (touch && shortest < 600) return "Phone";
-    if (touch && shortest < 1000) return "Tablet";
+  function detectDevice() {
+    const ua = navigator.userAgent || "";
+
+    if (/iPad|Tablet/i.test(ua)) return "Tablet";
+    if (/Android/i.test(ua) && !/Mobile/i.test(ua)) return "Tablet";
+    if (/Mobile|iPhone|iPod|Android/i.test(ua)) return "Phone";
     return "Desktop";
   }
 
   function detectDisplayMode() {
-    if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true) {
-      return "PWA";
-    }
-    return "Browser";
+    return window.matchMedia("(display-mode: standalone)").matches ||
+      navigator.standalone === true
+      ? "PWA"
+      : "Browser";
   }
 
   function screenClass() {
-    const width = Math.min(screen.width, screen.height);
-    if (width < 360) return "<360";
-    if (width < 430) return "360-429";
+    const width = Math.max(
+      window.screen?.width || 0,
+      window.innerWidth || 0
+    );
+
+    if (width < 430) return "<430";
     if (width < 600) return "430-599";
     if (width < 900) return "600-899";
     return "900+";
   }
 
-  function currentLanguage() {
-    const htmlLang = document.documentElement.lang;
-    if (["pl", "no", "en"].includes(htmlLang)) return htmlLang;
-    try {
-      const stored = localStorage.getItem("europris_language_v6");
-      return ["pl", "no", "en"].includes(stored) ? stored : "other";
-    } catch {
-      return "other";
-    }
+  function language() {
+    const htmlLanguage = String(document.documentElement.lang || "").toLowerCase();
+
+    if (htmlLanguage.startsWith("no") || htmlLanguage.startsWith("nb")) return "no";
+    if (htmlLanguage.startsWith("en")) return "en";
+    if (htmlLanguage.startsWith("pl")) return "pl";
+    return "other";
   }
 
-  function payload(eventName, extra = {}) {
-    return {
-      action: "stats_event",
-      token: EUROPRIS_ANALYTICS_TOKEN,
-      version: EUROPRIS_ANALYTICS_VERSION,
-      event: eventName,
-      day: dayKey(),
-      anonymousDayId: dailyAnonymousId(),
+  function jsonp(parameters) {
+    return new Promise(resolve => {
+      const callback =
+        `__europrisStats_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement("script");
+      let completed = false;
+
+      const finish = result => {
+        if (completed) return;
+        completed = true;
+        window.clearTimeout(timeout);
+        delete window[callback];
+        pendingScripts.delete(script);
+        script.remove();
+        resolve(result);
+      };
+
+      const timeout = window.setTimeout(
+        () => finish({ ok: false, error: "timeout" }),
+        15000
+      );
+
+      window[callback] = data => finish(data || { ok: false });
+
+      const query = new URLSearchParams({
+        ...parameters,
+        callback,
+        _: String(Date.now())
+      });
+
+      script.async = true;
+      script.src = `${ENDPOINT}?${query}`;
+      script.onerror = () => finish({ ok: false, error: "network" });
+
+      pendingScripts.add(script);
+      document.head.appendChild(script);
+    });
+  }
+
+  function track(eventName, extra = {}) {
+    if (!ALLOWED_EVENTS.has(eventName)) {
+      return Promise.resolve(false);
+    }
+
+    return jsonp({
+      action: "stats_event_v2",
+      token: TOKEN,
+      eventId: eventId(),
       installationId: installationId(),
+      event: eventName,
       os: detectOS(),
       browser: detectBrowser(),
-      device: detectDeviceType(),
+      device: detectDevice(),
       displayMode: detectDisplayMode(),
       screenClass: screenClass(),
-      language: currentLanguage(),
-      online: navigator.onLine,
-      // extra może zawierać wyłącznie zdefiniowane bezpieczne kategorie.
+      language: language(),
+      version: VERSION,
+      online: navigator.onLine ? "true" : "false",
       result: String(extra.result || "").slice(0, 40)
-    };
+    }).then(result => Boolean(result?.ok));
   }
-
-  function send(eventName, extra = {}) {
-    if (!ALLOWED_EVENTS.has(eventName)) return Promise.resolve(false);
-
-    const body = JSON.stringify(payload(eventName, extra));
-
-    /*
-      Apps Script wykonuje przekierowanie HTTP. Safari/PWA potrafi przyjąć
-      sendBeacon do kolejki, ale nie dostarczyć danych po przekierowaniu.
-      Dlatego podstawowym transportem jest fetch(no-cors), który poprawnie
-      przechodzi przez przekierowanie wdrożenia Apps Script.
-    */
-    return fetch(EUROPRIS_ANALYTICS_ENDPOINT, {
-      method: "POST",
-      mode: "no-cors",
-      cache: "no-store",
-      keepalive: true,
-      redirect: "follow",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      body
-    })
-      .then(() => true)
-      .catch(() => false);
-  }
-
-  let lastOpenSentAt = 0;
-  let hiddenAt = 0;
 
   function sendAppOpen(reason) {
     const now = Date.now();
 
-    // Chroni przed podwójnym naliczeniem load/pageshow w ciągu 10 sekund.
     if (now - lastOpenSentAt < 10000) return;
 
     lastOpenSentAt = now;
-    void send("app_open", { result: reason });
+    void track("app_open", { result: reason });
   }
 
   window.EuroprisStats = Object.freeze({
-    track: send,
-    version: EUROPRIS_ANALYTICS_VERSION
+    track,
+    version: VERSION,
+    installationId
   });
 
-  /*
-    Pierwsze uruchomienie strony.
-    Skrypt może zostać załadowany przed albo po zdarzeniu load.
-  */
   if (document.readyState === "complete") {
     sendAppOpen("ready");
   } else {
-    window.addEventListener("load", () => sendAppOpen("load"), { once: true });
+    window.addEventListener(
+      "load",
+      () => sendAppOpen("load"),
+      { once: true }
+    );
   }
 
-  /*
-    iOS często nie przeładowuje PWA po ponownym kliknięciu ikony, tylko
-    wznawia ją z pamięci. Wtedy load nie występuje, dlatego liczymy powrót
-    aplikacji na pierwszy plan po co najmniej 15 sekundach w tle.
-  */
+  window.addEventListener("pageshow", event => {
+    if (event.persisted) {
+      sendAppOpen("pageshow");
+    }
+  });
+
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       hiddenAt = Date.now();
@@ -209,16 +236,21 @@
     }
 
     if (hiddenAt && Date.now() - hiddenAt >= 15000) {
-      sendAppOpen("foreground");
+      sendAppOpen("resume");
     }
+
     hiddenAt = 0;
   });
 
-  window.addEventListener("pageshow", event => {
-    if (event.persisted) sendAppOpen("pageshow");
+  window.addEventListener("online", () => {
+    void track("online", { result: "online" });
   });
 
-  window.addEventListener("online", () => void send("online"));
-  window.addEventListener("offline", () => void send("offline"));
-  window.addEventListener("appinstalled", () => void send("pwa_installed"));
+  window.addEventListener("offline", () => {
+    void track("offline", { result: "offline" });
+  });
+
+  window.addEventListener("appinstalled", () => {
+    void track("pwa_installed", { result: "installed" });
+  });
 })();
