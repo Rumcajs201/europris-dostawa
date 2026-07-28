@@ -5,7 +5,7 @@
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const TOKEN =
     "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
-  const VERSION = "v58.05";
+  const VERSION = "v58.06";
 
   const ALLOWED_EVENTS = new Set([
     "app_open",
@@ -136,43 +136,25 @@
     return "other";
   }
 
-  function jsonp(parameters) {
-    return new Promise(resolve => {
-      const callback =
-        `__europrisStats_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      const script = document.createElement("script");
-      let completed = false;
+  async function sendThroughSharedApi(action, params = {}) {
+    const startedAt = Date.now();
 
-      const finish = result => {
-        if (completed) return;
-        completed = true;
-        window.clearTimeout(timeout);
-        delete window[callback];
-        pendingScripts.delete(script);
-        script.remove();
-        resolve(result);
+    while (!window.EuroprisAdminApi?.request) {
+      if (Date.now() - startedAt > 15000) {
+        return { ok: false, error: "shared API unavailable" };
+      }
+
+      await new Promise(resolve => window.setTimeout(resolve, 100));
+    }
+
+    try {
+      return await window.EuroprisAdminApi.request(action, params);
+    } catch (error) {
+      return {
+        ok: false,
+        error: String(error?.message || error || "network")
       };
-
-      const timeout = window.setTimeout(
-        () => finish({ ok: false, error: "timeout" }),
-        15000
-      );
-
-      window[callback] = data => finish(data || { ok: false });
-
-      const query = new URLSearchParams({
-        ...parameters,
-        callback,
-        _: String(Date.now())
-      });
-
-      script.async = true;
-      script.src = `${ENDPOINT}?${query}`;
-      script.onerror = () => finish({ ok: false, error: "network" });
-
-      pendingScripts.add(script);
-      document.head.appendChild(script);
-    });
+    }
   }
 
   function track(eventName, extra = {}) {
@@ -181,8 +163,6 @@
     }
 
     const parameters = {
-      action: "stats_event_v2",
-      token: TOKEN,
       eventId: eventId(),
       installationId: installationId(),
       event: eventName,
@@ -197,7 +177,8 @@
       result: String(extra.result || "").slice(0, 40)
     };
 
-    return jsonp(parameters).then(result => Boolean(result?.ok));
+    return sendThroughSharedApi("stats_event_v2", parameters)
+      .then(result => Boolean(result?.ok));
   }
 
   function sendAppOpen(reason) {

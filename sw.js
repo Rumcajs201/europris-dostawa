@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-05-jsonp-only";
+const CACHE_NAME = "europris-app-v58-06-shared-api";
 
 const STATIC_FILES = [
   "./",
