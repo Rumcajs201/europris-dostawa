@@ -5,7 +5,7 @@
     "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
   const TOKEN =
     "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
-  const VERSION = "v58.01";
+  const VERSION = "v58.02";
 
   const ALLOWED_EVENTS = new Set([
     "app_open",

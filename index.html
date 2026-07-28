@@ -146,6 +146,19 @@
       border-color: var(--green);
     }
 
+    .app-version {
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: .58rem;
+      font-weight: 850;
+      letter-spacing: .04em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
     h1 {
       margin: 0 0 7px;
       font-size: 1.4rem;
@@ -873,9 +886,9 @@
       color: #b31319;
     }
 </style>
-  <link rel="stylesheet" href="all-drivers.css?v=58.01">
-  <link rel="stylesheet" href="weather-humor.css?v=58.01">
-  <link rel="stylesheet" href="stats.css?v=58.01">
+  <link rel="stylesheet" href="all-drivers.css?v=58.02">
+  <link rel="stylesheet" href="weather-humor.css?v=58.02">
+  <link rel="stylesheet" href="stats.css?v=58.02">
 </head>
 
 <body>
@@ -907,6 +920,7 @@
           <button class="language" data-lang="no">NO</button>
           <button class="language" data-lang="en">EN</button>
         </div>
+        <div id="appVersionLabel" class="app-version">Wersja 58.02</div>
       </div>
     </div>
 
@@ -1134,6 +1148,7 @@
     }
   };
   let activeAdminProfileId = "";
+  const EUROPRIS_APP_VERSION = "58.02";
   const ADMIN_PROFILE_KEY_PREFIX = "europris_admin_profile_v2_";
   const ADMIN_PLAN_KEY = "europris_admin_plan_v1";
   const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
@@ -3811,9 +3826,9 @@ footer{margin-top:2mm;color:#666;font-size:6.5pt;text-align:right}
     });
   }
 })();
-</script>  <script src="all-drivers.js?v=58.01"></script>
-  <script src="weather-humor.js?v=58.01"></script>
-  <script src="analytics.js?v=58.01"></script>
-  <script src="stats-panel.js?v=58.01"></script>
+</script>  <script src="all-drivers.js?v=58.02"></script>
+  <script src="weather-humor.js?v=58.02"></script>
+  <script src="analytics.js?v=58.02"></script>
+  <script src="stats-panel.js?v=58.02"></script>
 </body>
 </html>
