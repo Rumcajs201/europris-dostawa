@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-03-daily-stats-fix";
+const CACHE_NAME = "europris-app-v58-04-service-worker-fix";
 
 const STATIC_FILES = [
   "./",
@@ -28,22 +28,39 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
+    Promise.all([
+      caches.keys().then(keys =>
+        Promise.all(
+          keys
+            .filter(key => key !== CACHE_NAME)
+            .map(key => caches.delete(key))
+        )
+      ),
+      self.clients.claim()
+    ])
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
+  const request = event.request;
 
-  const requestUrl = new URL(event.request.url);
-  const isNavigation = event.request.mode === "navigate";
+  if (request.method !== "GET") return;
+
+  const requestUrl = new URL(request.url);
+
+  /*
+    Najważniejsza poprawka v58.04:
+    Service Worker obsługuje wyłącznie pliki z tej samej domeny GitHub Pages.
+
+    Żądania do Google Apps Script i googleusercontent.com nie są przechwytywane.
+    Przeglądarka wykonuje je bezpośrednio, więc respondWith() nigdy nie dostaje
+    wartości null.
+  */
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  const isNavigation = request.mode === "navigate";
   const isCoreFile =
     requestUrl.pathname.endsWith("/index.html") ||
     requestUrl.pathname.endsWith("/manifest.webmanifest") ||
@@ -51,28 +68,48 @@ self.addEventListener("fetch", event => {
 
   if (isNavigation || isCoreFile) {
     event.respondWith(
-      fetch(event.request, { cache: "no-store" })
+      fetch(request, { cache: "no-store" })
         .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          }
           return response;
         })
-        .catch(() =>
-          caches.match(event.request).then(cached =>
-            cached || caches.match("./index.html")
-          )
-        )
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+
+          const fallback = await caches.match("./index.html");
+          if (fallback) return fallback;
+
+          return new Response("Offline", {
+            status: 503,
+            statusText: "Service Unavailable",
+            headers: { "Content-Type": "text/plain; charset=UTF-8" }
+          });
+        })
     );
     return;
   }
 
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        if (response && response.ok && response.type === "basic") {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+
+        return new Response("", {
+          status: 504,
+          statusText: "Gateway Timeout"
+        });
+      })
   );
 });
