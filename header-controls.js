@@ -2,37 +2,13 @@
   "use strict";
 
   const SUPPORTED = ["pl", "no", "en", "de"];
-  const FALLBACK_KEY = "europris-language";
+  const LANGUAGE_KEY = "europris_language_v6";
 
   const labels = {
-    pl: {
-      language: "Język",
-      information: "Informacje",
-      title: "Informacje",
-      text: "Ta sekcja jest przygotowana. Jej zawartość ustalimy w następnym kroku.",
-      close: "Zamknij"
-    },
-    no: {
-      language: "Språk",
-      information: "Informasjon",
-      title: "Informasjon",
-      text: "Denne delen er klargjort. Innholdet bestemmer vi i neste trinn.",
-      close: "Lukk"
-    },
-    en: {
-      language: "Language",
-      information: "Information",
-      title: "Information",
-      text: "This section is ready. We will decide its content in the next step.",
-      close: "Close"
-    },
-    de: {
-      language: "Sprache",
-      information: "Informationen",
-      title: "Informationen",
-      text: "Dieser Bereich ist vorbereitet. Den Inhalt legen wir im nächsten Schritt fest.",
-      close: "Schließen"
-    }
+    pl: { language:"Język", information:"Informacje", title:"Informacje", text:"Ta sekcja jest przygotowana. Jej zawartość ustalimy w następnym kroku.", close:"Zamknij" },
+    no: { language:"Språk", information:"Informasjon", title:"Informasjon", text:"Denne delen er klargjort. Innholdet bestemmer vi i neste trinn.", close:"Lukk" },
+    en: { language:"Language", information:"Information", title:"Information", text:"This section is ready. We will decide its content in the next step.", close:"Close" },
+    de: { language:"Sprache", information:"Informationen", title:"Informationen", text:"Dieser Bereich ist vorbereitet. Den Inhalt legen wir im nächsten Schritt fest.", close:"Schließen" }
   };
 
   const languageOptions = [
@@ -42,9 +18,45 @@
     ["de", "🇩🇪 DE"]
   ];
 
-  function languageStorageKey() {
-    return typeof LANGUAGE_KEY !== "undefined" ? LANGUAGE_KEY : FALLBACK_KEY;
-  }
+  const germanText = {
+    title: "Europris-Lieferbestätigung",
+    description: "Geben Sie die Filialnummer ein oder beginnen Sie mit der Eingabe des Filialnamens.",
+    locationHeading: "Standort",
+    retryLocation: "Erneut versuchen",
+    forceLocation: "Standort verwenden",
+    useNearest: "Nächste Filiale wählen",
+    trailerLabel: "Aktuelle Tour und Auflieger",
+    trailerHint: "Interne Nummern eingeben",
+    tourFieldLabel: "Tour",
+    trailerFieldLabel: "Auflieger",
+    open: "Lieferseite öffnen",
+    openSave: "Öffnen und Lieferung speichern",
+    navigate: "In Google Maps navigieren",
+    call: "Anrufen",
+    callPrivate: "Privat anrufen",
+    editPrivate: "Private Nummer hinzufügen / bearbeiten",
+    historyToggle: "Lieferverlauf",
+    historyTitle: "Lieferverlauf",
+    historyPrint: "Detaillierten Bericht drucken",
+    historyPrintSummary: "Monatsübersicht A4 drucken",
+    historyCsv: "Nach Excel exportieren (.xlsx)",
+    historyJson: "JSON-Sicherung",
+    historyImport: "Sicherung importieren",
+    historyCloudBackup: "Cloud-Sicherung",
+    historyCloudRestore: "Cloud-Sicherung wiederherstellen",
+    historyClear: "Ausgewählten Monat löschen",
+    footer: "Erstellt von Rumcajs mit Hilfe künstlicher Intelligenz.",
+    adminTitle: "Lieferpläne",
+    adminDriverNameLabel: "Fahrer",
+    adminDriverPhoneLabel: "Telefon",
+    adminDriverAliasesLabel: "Zusätzliche Namen",
+    adminDeliveryDateLabel: "Lieferdatum",
+    adminImportLabel: "Excel-Datei importieren",
+    adminDeletePlan: "Plan löschen",
+    adminStatsTitle: "App-Statistiken",
+    adminStatsDescription: "Anonyme technische Daten und App-Nutzung.",
+    adminStatsRefresh: "Aktualisieren"
+  };
 
   function normalizeLanguage(value) {
     const code = String(value || "").toLowerCase();
@@ -55,100 +67,84 @@
     return "";
   }
 
-  function addGermanTranslations() {
-    if (typeof translations === "undefined" || !translations.en || translations.de) return;
-
-    translations.de = {
-      ...translations.en,
-      title: "Europris-Lieferbestätigung",
-      description: "Geben Sie die Filialnummer ein oder beginnen Sie mit der Eingabe des Filialnamens.",
-      placeholder: "Filialnummer oder Filialname",
-      trailerLabel: "Aktuelle Tour und Auflieger",
-      trailerHint: "Interne Nummern eingeben",
-      tourFieldLabel: "Tour",
-      trailerFieldLabel: "Auflieger",
-      trailerRequired: "Geben Sie vor dem Speichern die Aufliegernummer ein.",
-      tourRequired: "Geben Sie vor dem Speichern die Tournummer ein.",
-      tourTrailerRequired: "Ergänzen Sie Tour- und Aufliegernummer.",
-      open: "Lieferseite öffnen",
-      openSave: "Öffnen und Lieferung speichern",
-      navigate: "In Google Maps navigieren",
-      call: "Anrufen",
-      callPrivate: "Privat anrufen",
-      editPrivate: "Private Nummer hinzufügen / bearbeiten",
-      history: "Lieferverlauf",
-      historyTitle: "Lieferverlauf",
-      historyPrint: "Detaillierten Bericht drucken",
-      historyPrintSummary: "Monatsübersicht A4 drucken",
-      historyCsv: "Nach Excel exportieren (.xlsx)",
-      historyJson: "JSON-Sicherung",
-      historyImport: "Sicherung importieren",
-      historyClear: "Ausgewählten Monat löschen",
-      historyEmpty: "Keine gespeicherten Lieferungen im ausgewählten Monat.",
-      historyDelete: "Löschen",
-      historyOpen: "Seite",
-      historyMap: "Karte",
-      historyCall: "Anrufen",
-      locationHeading: "Standort",
-      locationRetry: "Erneut versuchen",
-      locationForce: "Standort verwenden",
-      locationUse: "Nächste Filiale wählen",
-      loading: "Filialdaten werden geladen…",
-      footer: "Erstellt von Rumcajs mit Hilfe künstlicher Intelligenz."
-    };
+  function savedLanguage() {
+    try {
+      const saved = normalizeLanguage(localStorage.getItem(LANGUAGE_KEY));
+      return SUPPORTED.includes(saved) ? saved : "";
+    } catch (_) {
+      return "";
+    }
   }
 
   function activeLanguage() {
-    // Źródłem prawdy jest faktycznie aktywny język aplikacji,
-    // a nie potencjalnie stara wartość zapisana w localStorage.
-    if (typeof language !== "undefined") {
-      const active = normalizeLanguage(language);
-      if (SUPPORTED.includes(active)) return active;
-    }
-
-    const htmlLanguage = normalizeLanguage(document.documentElement.lang);
-    if (SUPPORTED.includes(htmlLanguage)) return htmlLanguage;
-
-    try {
-      const saved = normalizeLanguage(localStorage.getItem(languageStorageKey()));
-      if (SUPPORTED.includes(saved)) return saved;
-    } catch (_) {}
-
-    return "pl";
+    const html = normalizeLanguage(document.documentElement.lang);
+    if (SUPPORTED.includes(html)) return html;
+    return savedLanguage() || "pl";
   }
 
-  function persistLanguage(nextLanguage) {
-    try {
-      localStorage.setItem(languageStorageKey(), nextLanguage);
-    } catch (_) {}
+  function persistLanguage(value) {
+    try { localStorage.setItem(LANGUAGE_KEY, value); } catch (_) {}
   }
 
-  function setLanguage(nextLanguage) {
-    if (!SUPPORTED.includes(nextLanguage)) return;
+  function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element && element.textContent !== value) element.textContent = value;
+  }
 
-    addGermanTranslations();
+  function applyGermanInterface() {
+    if (activeLanguage() !== "de") return;
 
-    if (nextLanguage !== "de") {
-      const originalButton = document.querySelector(`.languages [data-lang="${nextLanguage}"]`);
-      if (originalButton) {
-        originalButton.click();
-        persistLanguage(nextLanguage);
-        return;
-      }
+    document.documentElement.lang = "de";
+    document.title = "Europris-Lieferbestätigung";
+
+    Object.entries(germanText).forEach(([id, value]) => setText(id, value));
+
+    const search = document.getElementById("search");
+    if (search) {
+      search.placeholder = "Filialnummer oder Filialname";
+      search.setAttribute("aria-label", "Filialnummer oder Filialname");
     }
 
-    if (typeof language !== "undefined") language = nextLanguage;
-    document.documentElement.lang = nextLanguage === "no" ? "nb" : nextLanguage;
-    persistLanguage(nextLanguage);
+    const tour = document.getElementById("tourNumber");
+    if (tour) tour.setAttribute("aria-label", "Tournummer");
 
-    if (typeof applyLanguage === "function") applyLanguage();
+    const trailer = document.getElementById("trailerNumber");
+    if (trailer) trailer.setAttribute("aria-label", "Aufliegernummer");
+
+    const emptyHistory = document.querySelector(".history-empty");
+    if (emptyHistory && /no|brak|ingen|empty/i.test(emptyHistory.textContent || "")) {
+      emptyHistory.textContent = "Keine gespeicherten Lieferungen im ausgewählten Monat.";
+    }
+  }
+
+  function selectOriginalLanguage(value) {
+    const button = document.querySelector(`.languages [data-lang="${value}"]`);
+    if (button) button.click();
+  }
+
+  function setLanguage(value) {
+    if (!SUPPORTED.includes(value)) return;
+
+    if (value === "de") {
+      // Główna aplikacja zna PL/NO/EN. Angielski uruchamia kompletne odświeżenie,
+      // po czym bezpiecznie nakładamy pełny niemiecki interfejs.
+      selectOriginalLanguage("en");
+      document.documentElement.lang = "de";
+      persistLanguage("de");
+      applyGermanInterface();
+      window.setTimeout(applyGermanInterface, 0);
+      window.setTimeout(applyGermanInterface, 150);
+      return;
+    }
+
+    document.documentElement.lang = value === "no" ? "nb" : value;
+    persistLanguage(value);
+    selectOriginalLanguage(value);
   }
 
   function start() {
     const controls = document.querySelector(".topbar-controls");
     if (!controls || controls.querySelector(".europris-header-actions")) return;
-
-    addGermanTranslations();
 
     const wrapper = document.createElement("div");
     wrapper.className = "europris-header-actions";
@@ -169,13 +165,7 @@
 
     const dialog = document.createElement("dialog");
     dialog.className = "europris-info-dialog";
-    dialog.innerHTML = `
-      <div class="europris-info-content">
-        <h2 class="europris-info-title"></h2>
-        <p class="europris-info-text"></p>
-        <button type="button" class="europris-info-close"></button>
-      </div>
-    `;
+    dialog.innerHTML = `<div class="europris-info-content"><h2 class="europris-info-title"></h2><p class="europris-info-text"></p><button type="button" class="europris-info-close"></button></div>`;
     document.body.appendChild(dialog);
 
     const dialogTitle = dialog.querySelector(".europris-info-title");
@@ -194,9 +184,11 @@
     }
 
     select.addEventListener("change", () => {
-      const selected = select.value;
-      setLanguage(selected);
-      window.setTimeout(updateLabels, 0);
+      setLanguage(select.value);
+      window.setTimeout(() => {
+        updateLabels();
+        applyGermanInterface();
+      }, 0);
     });
 
     document.querySelectorAll(".languages [data-lang]").forEach(button => {
@@ -214,17 +206,25 @@
       if (event.target === dialog) dialog.close();
     });
 
-    // Informacje po lewej, język po prawej.
     wrapper.append(infoButton, select);
     controls.insertBefore(wrapper, controls.firstChild);
 
-    if (activeLanguage() === "de") setLanguage("de");
+    const initial = savedLanguage() || activeLanguage();
+    if (initial === "de") {
+      document.documentElement.lang = "de";
+      persistLanguage("de");
+      applyGermanInterface();
+      window.setTimeout(applyGermanInterface, 100);
+    }
+
     updateLabels();
+
+    const observer = new MutationObserver(() => {
+      if (activeLanguage() === "de") window.setTimeout(applyGermanInterface, 0);
+    });
+    observer.observe(document.body, { childList:true, subtree:true });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, { once: true });
-  } else {
-    start();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once:true });
+  else start();
 })();
