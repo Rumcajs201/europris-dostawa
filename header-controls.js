@@ -1,6 +1,9 @@
 (() => {
   "use strict";
 
+  const SUPPORTED = ["pl", "no", "en", "de"];
+  const FALLBACK_KEY = "europris-language";
+
   const labels = {
     pl: {
       language: "Język",
@@ -31,6 +34,26 @@
       close: "Schließen"
     }
   };
+
+  const languageOptions = [
+    ["pl", "🇵🇱 PL"],
+    ["no", "🇳🇴 NO"],
+    ["en", "🇬🇧 EN"],
+    ["de", "🇩🇪 DE"]
+  ];
+
+  function languageStorageKey() {
+    return typeof LANGUAGE_KEY !== "undefined" ? LANGUAGE_KEY : FALLBACK_KEY;
+  }
+
+  function normalizeLanguage(value) {
+    const code = String(value || "").toLowerCase();
+    if (code.startsWith("nb") || code.startsWith("nn") || code.startsWith("no")) return "no";
+    if (code.startsWith("en")) return "en";
+    if (code.startsWith("de")) return "de";
+    if (code.startsWith("pl")) return "pl";
+    return "";
+  }
 
   function addGermanTranslations() {
     if (typeof translations === "undefined" || !translations.en || translations.de) return;
@@ -75,46 +98,50 @@
     };
   }
 
-  function currentLanguage() {
-    try {
-      const saved = localStorage.getItem(typeof LANGUAGE_KEY !== "undefined" ? LANGUAGE_KEY : "europris-language");
-      if (["pl", "no", "en", "de"].includes(saved)) return saved;
-    } catch (_) {}
-
-    if (typeof language !== "undefined" && ["pl", "no", "en", "de"].includes(language)) {
-      return language;
+  function activeLanguage() {
+    // Źródłem prawdy jest faktycznie aktywny język aplikacji,
+    // a nie potencjalnie stara wartość zapisana w localStorage.
+    if (typeof language !== "undefined") {
+      const active = normalizeLanguage(language);
+      if (SUPPORTED.includes(active)) return active;
     }
+
+    const htmlLanguage = normalizeLanguage(document.documentElement.lang);
+    if (SUPPORTED.includes(htmlLanguage)) return htmlLanguage;
+
+    try {
+      const saved = normalizeLanguage(localStorage.getItem(languageStorageKey()));
+      if (SUPPORTED.includes(saved)) return saved;
+    } catch (_) {}
 
     return "pl";
   }
 
+  function persistLanguage(nextLanguage) {
+    try {
+      localStorage.setItem(languageStorageKey(), nextLanguage);
+    } catch (_) {}
+  }
+
   function setLanguage(nextLanguage) {
-    if (!["pl", "no", "en", "de"].includes(nextLanguage)) return;
+    if (!SUPPORTED.includes(nextLanguage)) return;
+
+    addGermanTranslations();
 
     if (nextLanguage !== "de") {
       const originalButton = document.querySelector(`.languages [data-lang="${nextLanguage}"]`);
       if (originalButton) {
         originalButton.click();
+        persistLanguage(nextLanguage);
         return;
       }
     }
 
-    addGermanTranslations();
+    if (typeof language !== "undefined") language = nextLanguage;
+    document.documentElement.lang = nextLanguage === "no" ? "nb" : nextLanguage;
+    persistLanguage(nextLanguage);
 
-    if (typeof language !== "undefined") {
-      language = nextLanguage;
-    }
-
-    try {
-      localStorage.setItem(
-        typeof LANGUAGE_KEY !== "undefined" ? LANGUAGE_KEY : "europris-language",
-        nextLanguage
-      );
-    } catch (_) {}
-
-    if (typeof applyLanguage === "function") {
-      applyLanguage();
-    }
+    if (typeof applyLanguage === "function") applyLanguage();
   }
 
   function start() {
@@ -126,25 +153,19 @@
     const wrapper = document.createElement("div");
     wrapper.className = "europris-header-actions";
 
+    const infoButton = document.createElement("button");
+    infoButton.type = "button";
+    infoButton.className = "europris-info-button";
+
     const select = document.createElement("select");
     select.className = "europris-language-select";
-    select.setAttribute("aria-label", labels.pl.language);
 
-    [
-      ["pl", "PL"],
-      ["no", "NO"],
-      ["en", "EN"],
-      ["de", "DE"]
-    ].forEach(([value, name]) => {
+    languageOptions.forEach(([value, name]) => {
       const option = document.createElement("option");
       option.value = value;
       option.textContent = name;
       select.appendChild(option);
     });
-
-    const infoButton = document.createElement("button");
-    infoButton.type = "button";
-    infoButton.className = "europris-info-button";
 
     const dialog = document.createElement("dialog");
     dialog.className = "europris-info-dialog";
@@ -162,7 +183,7 @@
     const closeButton = dialog.querySelector(".europris-info-close");
 
     function updateLabels() {
-      const selected = currentLanguage();
+      const selected = activeLanguage();
       const text = labels[selected] || labels.pl;
       select.value = selected;
       select.setAttribute("aria-label", text.language);
@@ -173,17 +194,19 @@
     }
 
     select.addEventListener("change", () => {
-      setLanguage(select.value);
-      updateLabels();
+      const selected = select.value;
+      setLanguage(selected);
+      window.setTimeout(updateLabels, 0);
+    });
+
+    document.querySelectorAll(".languages [data-lang]").forEach(button => {
+      button.addEventListener("click", () => window.setTimeout(updateLabels, 0));
     });
 
     infoButton.addEventListener("click", () => {
       updateLabels();
-      if (typeof dialog.showModal === "function") {
-        dialog.showModal();
-      } else {
-        dialog.setAttribute("open", "");
-      }
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
     });
 
     closeButton.addEventListener("click", () => dialog.close());
@@ -191,14 +214,11 @@
       if (event.target === dialog) dialog.close();
     });
 
-    wrapper.append(select, infoButton);
+    // Informacje po lewej, język po prawej.
+    wrapper.append(infoButton, select);
     controls.insertBefore(wrapper, controls.firstChild);
 
-    const savedLanguage = currentLanguage();
-    if (savedLanguage === "de") {
-      setLanguage("de");
-    }
-
+    if (activeLanguage() === "de") setLanguage("de");
     updateLabels();
   }
 
