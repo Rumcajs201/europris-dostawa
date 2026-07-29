@@ -256,3 +256,15 @@
     void track("pwa_installed", { result: "installed" });
   });
 })();
+
+(() => {
+  const style = document.createElement("link");
+  style.rel = "stylesheet";
+  style.href = "header-controls.css?v=1";
+  document.head.appendChild(style);
+
+  const script = document.createElement("script");
+  script.src = "header-controls.js?v=1";
+  script.defer = true;
+  document.head.appendChild(script);
+})();
