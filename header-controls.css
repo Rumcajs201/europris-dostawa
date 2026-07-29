@@ -1,16 +1,19 @@
-/* Wyłącznie górne sterowanie: rozwijany język + Informacje. */
+/* Wyłącznie górne sterowanie: Informacje + rozwijany język. */
 .languages {
   display: none !important;
 }
 
 .topbar-controls {
-  width: 190px;
+  width: 214px;
+  justify-self: end;
+  align-self: start;
 }
 
 .europris-header-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 86px;
   gap: 7px;
+  width: 100%;
 }
 
 .europris-language-select,
@@ -18,7 +21,7 @@
   width: 100%;
   min-width: 0;
   min-height: 42px;
-  padding: 0 9px;
+  padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--card);
@@ -30,6 +33,7 @@
 
 .europris-language-select {
   appearance: auto;
+  text-align-last: center;
 }
 
 .europris-info-button {
@@ -81,5 +85,9 @@
 @media (max-width: 360px) {
   .topbar-controls {
     width: 100%;
+  }
+
+  .europris-header-actions {
+    grid-template-columns: minmax(0, 1fr) 92px;
   }
 }
