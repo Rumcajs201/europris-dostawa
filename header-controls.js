@@ -126,8 +126,6 @@
     if (!SUPPORTED.includes(value)) return;
 
     if (value === "de") {
-      // Główna aplikacja zna PL/NO/EN. Angielski uruchamia kompletne odświeżenie,
-      // po czym bezpiecznie nakładamy pełny niemiecki interfejs.
       selectOriginalLanguage("en");
       document.documentElement.lang = "de";
       persistLanguage("de");
@@ -227,4 +225,13 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once:true });
   else start();
+})();
+
+(() => {
+  if (document.querySelector('script[data-history-edit]')) return;
+  const script = document.createElement("script");
+  script.src = "history-edit.js?v=1";
+  script.defer = true;
+  script.dataset.historyEdit = "1";
+  document.head.appendChild(script);
 })();
