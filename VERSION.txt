@@ -1,3 +1,3 @@
 EUROPRIS DOSTAWA
-Wersja aplikacji: 58.06
-Data pakietu: 2026-07-28
+Wersja aplikacji: 58.07
+Data pakietu: 2026-07-29

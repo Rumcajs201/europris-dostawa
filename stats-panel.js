@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const API = "https://script.google.com/macros/s/AKfycbzalC81iNvpLXuymmbMVI4pYB1FzuTXHgnvG4kegKspl7Mfd5j11BGW9W5Gv9xXsM1lMg/exec";
+  const TOKEN = "hBsuU2uyQQ6WO3MbA30DtVLb2SJhuiblRqH77g1Ns9M";
 
   function localDayKey() {
     const date = new Date();
@@ -146,22 +148,42 @@
     return button;
   }
 
-  async function statsRequest(action, params = {}) {
-    /*
-      Nie tworzymy drugiego mechanizmu JSONP.
-      Czekamy na wspólne API używane przez działający panel planów.
-    */
-    const startedAt = Date.now();
+  function statsJsonp(parameters) {
+    return new Promise((resolve, reject) => {
+      const callback =
+        `__europrisStatsPanel_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const script = document.createElement("script");
+      let completed = false;
 
-    while (!window.EuroprisAdminApi?.request) {
-      if (Date.now() - startedAt > 10000) {
-        throw new Error("shared API unavailable");
-      }
+      const finish = (error, data) => {
+        if (completed) return;
+        completed = true;
+        window.clearTimeout(timeout);
+        delete window[callback];
+        script.remove();
 
-      await new Promise(resolve => window.setTimeout(resolve, 100));
-    }
+        if (error) reject(error);
+        else resolve(data);
+      };
 
-    return window.EuroprisAdminApi.request(action, params);
+      const timeout = window.setTimeout(
+        () => finish(new Error("JSONP timeout")),
+        30000
+      );
+
+      window[callback] = data => finish(null, data);
+
+      const query = new URLSearchParams({
+        ...parameters,
+        callback,
+        _: String(Date.now())
+      });
+
+      script.async = true;
+      script.src = `${API}?${query}`;
+      script.onerror = () => finish(new Error("network"));
+      document.head.appendChild(script);
+    });
   }
 
   async function load(container, force = false) {
@@ -177,7 +199,10 @@
     container.innerHTML = `<div class="stats-loading">${escapeHtml(text.loading)}</div>`;
 
     try {
-      const data = await statsRequest("stats_summary_v2");
+      const data = await statsJsonp({
+        action: "stats_summary_v2",
+        token: TOKEN
+      });
 
       if (!data?.ok) {
         throw new Error(data?.error || "JSONP API error");
