@@ -82,6 +82,15 @@
   font-weight: 850;
 }
 
+.history-item-actions .history-edit-button {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.history-item-actions .delete {
+  margin-left: auto;
+}
+
 @media (max-width: 360px) {
   .topbar-controls {
     width: 100%;
