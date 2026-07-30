@@ -230,7 +230,7 @@
 (() => {
   if (document.querySelector('script[data-history-edit]')) return;
   const script = document.createElement("script");
-  script.src = "history-edit.js?v=1";
+  script.src = "history-edit.js?v=2";
   script.defer = true;
   script.dataset.historyEdit = "1";
   document.head.appendChild(script);
