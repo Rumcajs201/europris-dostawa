@@ -5,11 +5,21 @@
   const DB_VERSION = 2;
   const DB_STORE = "deliveries";
   const labels = {
-    pl: { edit:"Edytuj", tour:"Numer kursu", trailer:"Numer naczepy", pallets:"Liczba palet", invalid:"Wpisz prawidłową liczbę palet." },
-    no: { edit:"Rediger", tour:"Turnummer", trailer:"Tilhengernummer", pallets:"Antall paller", invalid:"Skriv inn et gyldig antall paller." },
-    en: { edit:"Edit", tour:"Trip number", trailer:"Trailer number", pallets:"Number of pallets", invalid:"Enter a valid number of pallets." },
-    de: { edit:"Bearbeiten", tour:"Tournummer", trailer:"Aufliegernummer", pallets:"Anzahl der Paletten", invalid:"Geben Sie eine gültige Palettenzahl ein." }
+    pl: { edit:"Edytuj", tour:"Numer kursu", trailer:"Numer naczepy", pallets:"Liczba palet", palletsDisplay:value=>`📦 Do zabrania: ${value}`, invalid:"Wpisz prawidłową liczbę palet." },
+    no: { edit:"Rediger", tour:"Turnummer", trailer:"Tilhengernummer", pallets:"Antall paller", palletsDisplay:value=>`📦 Hentes: ${value} paller`, invalid:"Skriv inn et gyldig antall paller." },
+    en: { edit:"Edit", tour:"Trip number", trailer:"Trailer number", pallets:"Number of pallets", palletsDisplay:value=>`📦 To collect: ${value} pallets`, invalid:"Enter a valid number of pallets." },
+    de: { edit:"Bearbeiten", tour:"Tournummer", trailer:"Aufliegernummer", pallets:"Anzahl der Paletten", palletsDisplay:value=>`📦 Abzuholen: ${value} Paletten`, invalid:"Geben Sie eine gültige Palettenzahl ein." }
   };
+
+  const germanHumor = [
+    ["Montag. Erst Kaffee, dann der Rest der Welt.","Der Motor läuft. Jetzt ist der Fahrer dran.","Neue Woche, neue Filialen, derselbe Kaffee."],
+    ["Dienstag — dem Wochenende näher als gestern.","Montag ist erledigt. Weiter geht’s.","Der Motor ist warm, die Woche kommt ins Rollen."],
+    ["Mittwoch — die halbe Woche liegt im Rückspiegel.","Der Gipfel ist geschafft. Jetzt geht es bergab Richtung Wochenende.","Das Wochenende ist schon am Horizont."],
+    ["Donnerstag — Freitag blinkt schon mit der Lichthupe.","Bald fährt das Wochenende an die Rampe.","Donnerstag ist fast Freitag, nur mit einer zusätzlichen Tour."],
+    ["Freitag! Noch eine Filiale, dann entlädt sich das Wochenende von selbst.","Es riecht nach Wochenende und frischem Kaffee.","Sogar der Tachograph sieht heute fröhlicher aus."],
+    ["Samstag — heute wird der Fahrer geladen, nicht der Auflieger.","Der Tachograph ruht. Du darfst das auch.","Die einzige Tour heute führt zum Kühlschrank."],
+    ["Sonntag — ruh dich aus, morgen fragt der Motor wieder nach Kaffee.","Heute werden die Batterien geladen. Die Route kann warten.","Der letzte ruhige Parkplatz vor Montag."]
+  ];
 
   function language() {
     const value = String(document.documentElement.lang || "pl").toLowerCase();
@@ -17,6 +27,19 @@
     if (value.startsWith("en")) return "en";
     if (value.startsWith("de")) return "de";
     return "pl";
+  }
+
+  function renderGermanHumor() {
+    if (language() !== "de") return;
+    const card = document.getElementById("dailyHumorCard");
+    if (!card) return;
+    const title = card.querySelector(".daily-humor-title");
+    const text = card.querySelector(".daily-humor-text");
+    const day = (new Date().getDay() + 6) % 7;
+    const pool = germanHumor[day];
+    const index = new Date().getDate() % pool.length;
+    if (title && title.textContent !== "☕ Humor des Tages") title.textContent = "☕ Humor des Tages";
+    if (text && text.textContent !== pool[index]) text.textContent = pool[index];
   }
 
   function cleanTwoDigits(value) {
@@ -126,7 +149,10 @@
     if (!list || !month) return;
 
     const cards = Array.from(list.querySelectorAll(".history-item"));
-    if (!cards.length) return;
+    if (!cards.length) {
+      renderGermanHumor();
+      return;
+    }
 
     enhancing = true;
     try {
@@ -135,8 +161,12 @@
 
       cards.forEach((card, index) => {
         const actions = card.querySelector(".history-item-actions");
+        const main = card.querySelector(".history-item-main");
         const item = items[index];
         if (!actions || !item) return;
+
+        const detail = main?.children?.[2];
+        if (detail) detail.textContent = text.palletsDisplay(Number(item.pallets) || 0);
 
         let button = actions.querySelector(".history-edit-isolated");
         if (!button) {
@@ -152,6 +182,7 @@
         const remove = actions.querySelector(".delete");
         if (remove && remove !== actions.lastElementChild) actions.appendChild(remove);
       });
+      renderGermanHumor();
     } finally {
       enhancing = false;
     }
@@ -164,11 +195,28 @@
     const observer = new MutationObserver(() => window.setTimeout(() => void enhance(), 0));
     observer.observe(list, { childList:true, subtree:true });
 
+    const languageObserver = new MutationObserver(() => {
+      window.setTimeout(() => {
+        renderGermanHumor();
+        void enhance();
+      }, 0);
+    });
+    languageObserver.observe(document.documentElement, { attributes:true, attributeFilter:["lang"] });
+
     document.getElementById("historyToggle")?.addEventListener("click", () => window.setTimeout(() => void enhance(), 50));
     document.getElementById("historyMonth")?.addEventListener("change", () => window.setTimeout(() => void enhance(), 50));
+    document.querySelector(".europris-language-select")?.addEventListener("change", () => window.setTimeout(() => {
+      renderGermanHumor();
+      void enhance();
+    }, 180));
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) window.setTimeout(() => void enhance(), 50);
+      if (!document.hidden) window.setTimeout(() => {
+        renderGermanHumor();
+        void enhance();
+      }, 50);
     });
+
+    window.setTimeout(renderGermanHumor, 200);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once:true });
