@@ -4,14 +4,14 @@
 }
 
 .topbar-controls {
-  width: 196px;
+  width: 188px;
   justify-self: end;
   align-self: start;
 }
 
 .europris-header-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 82px;
+  grid-template-columns: minmax(0, 1fr) 78px;
   gap: 6px;
   width: 100%;
 }
