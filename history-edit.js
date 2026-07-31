@@ -5,10 +5,10 @@
   const DB_VERSION = 2;
   const DB_STORE = "deliveries";
   const labels = {
-    pl: { edit:"Edytuj", tour:"Numer kursu", trailer:"Numer naczepy", pallets:"Liczba palet", emptyPallets:"Puste palety", palletsDisplay:value=>`📦 Dostawa: ${value} palet`, emptyDisplay:value=>`↩ Puste palety: ${value}`, invalid:"Wpisz prawidłową liczbę palet." },
-    no: { edit:"Rediger", tour:"Turnummer", trailer:"Tilhengernummer", pallets:"Antall paller", emptyPallets:"Tomme paller", palletsDisplay:value=>`📦 Levering: ${value} paller`, emptyDisplay:value=>`↩ Tomme paller: ${value}`, invalid:"Skriv inn et gyldig antall paller." },
-    en: { edit:"Edit", tour:"Trip number", trailer:"Trailer number", pallets:"Number of pallets", emptyPallets:"Empty pallets", palletsDisplay:value=>`📦 Delivery: ${value} pallets`, emptyDisplay:value=>`↩ Empty pallets: ${value}`, invalid:"Enter a valid number of pallets." },
-    de: { edit:"Bearbeiten", tour:"Tournummer", trailer:"Aufliegernummer", pallets:"Anzahl der Paletten", emptyPallets:"Leere Paletten", palletsDisplay:value=>`📦 Lieferung: ${value} Paletten`, emptyDisplay:value=>`↩ Leere Paletten: ${value}`, invalid:"Geben Sie eine gültige Palettenzahl ein." }
+    pl: { edit:"Edytuj", tour:"Numer kursu", trailer:"Numer naczepy", pallets:"Dostawa (liczba palet)", emptyPallets:"Puste palety?", palletsDisplay:value=>`📦 Dostawa: ${value} palet`, emptyDisplay:value=>`↩ Puste palety: ${value}`, invalid:"Wpisz prawidłową liczbę palet.", dialogTitle:"Edytuj dostawę", save:"Zapisz", cancel:"Anuluj" },
+    no: { edit:"Rediger", tour:"Turnummer", trailer:"Tilhengernummer", pallets:"Levering (antall paller)", emptyPallets:"Tomme paller?", palletsDisplay:value=>`📦 Levering: ${value} paller`, emptyDisplay:value=>`↩ Tomme paller: ${value}`, invalid:"Skriv inn et gyldig antall paller.", dialogTitle:"Rediger levering", save:"Lagre", cancel:"Avbryt" },
+    en: { edit:"Edit", tour:"Trip number", trailer:"Trailer number", pallets:"Delivery (number of pallets)", emptyPallets:"Empty pallets?", palletsDisplay:value=>`📦 Delivery: ${value} pallets`, emptyDisplay:value=>`↩ Empty pallets: ${value}`, invalid:"Enter a valid number of pallets.", dialogTitle:"Edit delivery", save:"Save", cancel:"Cancel" },
+    de: { edit:"Bearbeiten", tour:"Tournummer", trailer:"Aufliegernummer", pallets:"Lieferung (Anzahl Paletten)", emptyPallets:"Leere Paletten?", palletsDisplay:value=>`📦 Lieferung: ${value} Paletten`, emptyDisplay:value=>`↩ Leere Paletten: ${value}`, invalid:"Geben Sie eine gültige Palettenzahl ein.", dialogTitle:"Lieferung bearbeiten", save:"Speichern", cancel:"Abbrechen" }
   };
 
   const germanHumor = [
@@ -148,25 +148,132 @@
     pendingEmptyPallets = value;
   }
 
-  async function editItem(item) {
+  function ensureEditDialogStyles() {
+    if (document.getElementById("historyEditDialogStyles")) return;
+    const style = document.createElement("style");
+    style.id = "historyEditDialogStyles";
+    style.textContent = `
+      .history-edit-dialog{width:min(calc(100% - 28px),390px);padding:0;border:1px solid var(--border);border-radius:18px;background:var(--card);color:var(--text);box-shadow:0 18px 55px rgba(0,0,0,.32)}
+      .history-edit-dialog::backdrop{background:rgba(0,0,0,.58)}
+      .history-edit-form{display:grid;gap:12px;padding:18px}
+      .history-edit-title{margin:0;color:var(--green);font-size:1.16rem}
+      .history-edit-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .history-edit-field{display:grid;gap:5px;color:var(--muted);font-size:.78rem;font-weight:850}
+      .history-edit-field input{width:100%;min-height:46px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--text);font:inherit;font-size:1rem;font-weight:850;text-align:center}
+      .history-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:2px}
+      .history-edit-actions button{min-height:44px;border:1px solid var(--green);border-radius:11px;background:transparent;color:var(--green);font:inherit;font-weight:850}
+      .history-edit-actions .primary{background:var(--green);color:#fff}
+      .history-edit-error{min-height:18px;color:#d71920;font-size:.82rem;font-weight:800;text-align:center}
+      @media(max-width:360px){.history-edit-fields{grid-template-columns:1fr}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function showEditDialog(item) {
+    ensureEditDialogStyles();
     const text = labels[language()] || labels.pl;
-    const tour = window.prompt(text.tour, cleanTwoDigits(item.tourNumber));
-    if (tour === null) return;
-    const trailer = window.prompt(text.trailer, cleanTwoDigits(item.trailerNumber));
-    if (trailer === null) return;
-    const palletsRaw = window.prompt(text.pallets, String(Number(item.pallets) || 0));
-    if (palletsRaw === null) return;
-    const emptyRaw = window.prompt(text.emptyPallets, String(Number(item.emptyPallets) || 0));
-    if (emptyRaw === null) return;
+    const dialog = document.createElement("dialog");
+    dialog.className = "history-edit-dialog";
 
-    const pallets = cleanCount(palletsRaw);
-    const emptyPallets = cleanCount(emptyRaw);
-    if (pallets === null || emptyPallets === null) {
-      window.alert(text.invalid);
-      return;
-    }
+    const form = document.createElement("form");
+    form.className = "history-edit-form";
+    form.method = "dialog";
 
-    await save({ ...item, tourNumber:cleanTwoDigits(tour), trailerNumber:cleanTwoDigits(trailer), pallets, emptyPallets });
+    const title = document.createElement("h2");
+    title.className = "history-edit-title";
+    title.textContent = text.dialogTitle;
+
+    const fields = document.createElement("div");
+    fields.className = "history-edit-fields";
+
+    const createField = (labelText, value, twoDigits = false) => {
+      const label = document.createElement("label");
+      label.className = "history-edit-field";
+      const caption = document.createElement("span");
+      caption.textContent = labelText.replace(/\?$/, "");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.value = value;
+      if (twoDigits) input.maxLength = 2;
+      input.addEventListener("input", () => {
+        input.value = twoDigits
+          ? cleanTwoDigits(input.value)
+          : String(input.value).replace(/\D/g, "").slice(0, 4);
+      });
+      label.append(caption, input);
+      fields.appendChild(label);
+      return input;
+    };
+
+    const tourInput = createField(text.tour, cleanTwoDigits(item.tourNumber), true);
+    const trailerInput = createField(text.trailer, cleanTwoDigits(item.trailerNumber), true);
+    const palletsInput = createField(text.pallets, String(Number(item.pallets) || 0));
+    const emptyInput = createField(text.emptyPallets, String(Number(item.emptyPallets) || 0));
+
+    const message = document.createElement("div");
+    message.className = "history-edit-error";
+
+    const actions = document.createElement("div");
+    actions.className = "history-edit-actions";
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.className = "primary";
+    saveButton.textContent = text.save;
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.textContent = text.cancel;
+    actions.append(saveButton, cancelButton);
+
+    form.append(title, fields, message, actions);
+    dialog.appendChild(form);
+    document.body.appendChild(dialog);
+
+    return new Promise(resolve => {
+      let finished = false;
+      const finish = value => {
+        if (finished) return;
+        finished = true;
+        if (dialog.open) dialog.close();
+        dialog.remove();
+        resolve(value);
+      };
+
+      cancelButton.addEventListener("click", () => finish(null));
+      dialog.addEventListener("cancel", event => {
+        event.preventDefault();
+        finish(null);
+      });
+      dialog.addEventListener("click", event => {
+        if (event.target === dialog) finish(null);
+      });
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const pallets = cleanCount(palletsInput.value);
+        const emptyPallets = cleanCount(emptyInput.value);
+        if (pallets === null || emptyPallets === null) {
+          message.textContent = text.invalid;
+          return;
+        }
+        finish({
+          tourNumber: cleanTwoDigits(tourInput.value),
+          trailerNumber: cleanTwoDigits(trailerInput.value),
+          pallets,
+          emptyPallets
+        });
+      });
+
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+      window.setTimeout(() => tourInput.focus(), 0);
+    });
+  }
+
+  async function editItem(item) {
+    const values = await showEditDialog(item);
+    if (!values) return;
+
+    await save({ ...item, ...values });
     const month = document.getElementById("historyMonth");
     if (month) month.dispatchEvent(new Event("change", { bubbles:true }));
   }
