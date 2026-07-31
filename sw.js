@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-09-safe-export-feedback";
+const CACHE_NAME = "europris-app-v58-10-excel-column-widths";
 
 const STATIC_FILES = [
   "./",
@@ -15,6 +15,7 @@ const STATIC_FILES = [
   "./all-drivers.js",
   "./all-drivers.css",
   "./export-feedback.js",
+  "./excel-column-widths.js",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
   "./europris-app-icon-512-v28.png"
@@ -49,7 +50,17 @@ async function withExportFeedback(response) {
   if (!type.includes("text/html")) return response;
 
   const html = await response.text();
-  if (html.includes('src="export-feedback.js')) {
+  const scripts = [];
+
+  if (!html.includes('src="export-feedback.js')) {
+    scripts.push('  <script src="export-feedback.js?v=58.10"></script>\n');
+  }
+
+  if (!html.includes('src="excel-column-widths.js')) {
+    scripts.push('  <script src="excel-column-widths.js?v=58.10"></script>\n');
+  }
+
+  if (!scripts.length) {
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
@@ -66,8 +77,7 @@ async function withExportFeedback(response) {
     });
   }
 
-  const script = '  <script src="export-feedback.js?v=58.09"></script>\n';
-  const updated = html.slice(0, closingBodyIndex) + script + html.slice(closingBodyIndex);
+  const updated = html.slice(0, closingBodyIndex) + scripts.join("") + html.slice(closingBodyIndex);
   const headers = new Headers(response.headers);
   headers.set("content-type", "text/html; charset=UTF-8");
   headers.delete("content-length");
