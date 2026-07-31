@@ -254,3 +254,91 @@
   script.dataset.historyEdit = "1";
   document.head.appendChild(script);
 })();
+
+(() => {
+  "use strict";
+
+  const messages = {
+    pl: { title:"Eksport do Excela", preparing:"Przygotowywanie pliku Excel…", detail:"Proszę nie zamykać tego okna. Pobieranie rozpocznie się automatycznie.", ready:"Plik jest gotowy. Rozpoczynanie pobierania…", error:"Nie udało się przygotować pliku Excel." },
+    no: { title:"Eksport til Excel", preparing:"Forbereder Excel-filen…", detail:"Ikke lukk dette vinduet. Nedlastingen starter automatisk.", ready:"Filen er klar. Nedlastingen starter…", error:"Excel-filen kunne ikke klargjøres." },
+    en: { title:"Export to Excel", preparing:"Preparing the Excel file…", detail:"Do not close this window. The download will start automatically.", ready:"The file is ready. Starting download…", error:"The Excel file could not be prepared." },
+    de: { title:"Excel-Export", preparing:"Excel-Datei wird vorbereitet…", detail:"Bitte dieses Fenster nicht schließen. Der Download startet automatisch.", ready:"Die Datei ist fertig. Download wird gestartet…", error:"Die Excel-Datei konnte nicht erstellt werden." }
+  };
+
+  function currentLanguage() {
+    const value = String(document.documentElement.lang || "pl").toLowerCase();
+    if (value.startsWith("no") || value.startsWith("nb") || value.startsWith("nn")) return "no";
+    if (value.startsWith("en")) return "en";
+    if (value.startsWith("de")) return "de";
+    return "pl";
+  }
+
+  function writeStatus(target, heading, detail, done = false) {
+    if (!target || target.closed) return;
+    const mark = done ? "✓" : "⏳";
+    target.document.open();
+    target.document.write(`<!doctype html><html lang="${currentLanguage()}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${heading}</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#fff;color:#17211b;font-family:Arial,Helvetica,sans-serif}.box{width:min(100%,440px);padding:30px 24px;border:1px solid #d8e2dc;border-radius:18px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.08)}.mark{font-size:42px;margin-bottom:14px}h1{margin:0 0 12px;color:#08783e;font-size:22px}p{margin:0;color:#526159;line-height:1.5;font-size:15px}</style></head><body><main class="box"><div class="mark">${mark}</div><h1>${heading}</h1><p>${detail}</p></main></body></html>`);
+    target.document.close();
+  }
+
+  function install() {
+    const button = document.getElementById("historyCsv");
+    if (!button || button.dataset.exportFeedback === "1") return;
+    button.dataset.exportFeedback = "1";
+
+    let busy = false;
+    button.addEventListener("click", event => {
+      if (busy) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      const text = messages[currentLanguage()] || messages.pl;
+      const statusWindow = window.open("", "_blank");
+      if (!statusWindow) return;
+
+      busy = true;
+      button.disabled = true;
+      writeStatus(statusWindow, text.preparing, text.detail, false);
+
+      const originalWriteFile = window.XLSX?.writeFile;
+      let restored = false;
+      const restore = () => {
+        if (restored) return;
+        restored = true;
+        if (window.XLSX && originalWriteFile) window.XLSX.writeFile = originalWriteFile;
+        busy = false;
+        button.disabled = false;
+      };
+
+      if (window.XLSX && typeof originalWriteFile === "function") {
+        window.XLSX.writeFile = function(...args) {
+          try {
+            const result = originalWriteFile.apply(this, args);
+            writeStatus(statusWindow, text.ready, text.detail, true);
+            window.setTimeout(() => {
+              if (!statusWindow.closed) statusWindow.close();
+            }, 1800);
+            return result;
+          } catch (exportError) {
+            writeStatus(statusWindow, text.error, "", false);
+            throw exportError;
+          } finally {
+            restore();
+          }
+        };
+      }
+
+      window.setTimeout(() => {
+        if (!restored) {
+          writeStatus(statusWindow, text.error, "", false);
+          restore();
+        }
+      }, 90000);
+    }, true);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once:true });
+  else install();
+})();
