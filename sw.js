@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-08-export-feedback";
+const CACHE_NAME = "europris-app-v58-09-emergency-restore";
 
 const STATIC_FILES = [
   "./",
@@ -14,7 +14,6 @@ const STATIC_FILES = [
   "./weather-humor.css",
   "./all-drivers.js",
   "./all-drivers.css",
-  "./export-feedback.js",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
   "./europris-app-icon-512-v28.png"
@@ -42,36 +41,6 @@ self.addEventListener("activate", event => {
   );
 });
 
-async function withExportFeedback(response) {
-  if (!response || !response.ok) return response;
-  const type = response.headers.get("content-type") || "";
-  if (!type.includes("text/html")) return response;
-
-  const html = await response.text();
-  if (html.includes("export-feedback.js")) {
-    return new Response(html, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers
-    });
-  }
-
-  const updated = html.replace(
-    /<\/body>/i,
-    '  <script src="export-feedback.js?v=58.08"></script>\n</body>'
-  );
-
-  const headers = new Headers(response.headers);
-  headers.set("content-type", "text/html; charset=UTF-8");
-  headers.delete("content-length");
-
-  return new Response(updated, {
-    status: response.status,
-    statusText: response.statusText,
-    headers
-  });
-}
-
 self.addEventListener("fetch", event => {
   const request = event.request;
 
@@ -92,19 +61,19 @@ self.addEventListener("fetch", event => {
   if (isNavigation || isCoreFile) {
     event.respondWith(
       fetch(request, { cache: "no-store" })
-        .then(async response => {
+        .then(response => {
           if (response && response.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
           }
-          return isNavigation ? withExportFeedback(response) : response;
+          return response;
         })
         .catch(async () => {
           const cached = await caches.match(request);
-          if (cached) return isNavigation ? withExportFeedback(cached) : cached;
+          if (cached) return cached;
 
           const fallback = await caches.match("./index.html");
-          if (fallback) return isNavigation ? withExportFeedback(fallback) : fallback;
+          if (fallback) return fallback;
 
           return new Response("Offline", {
             status: 503,
