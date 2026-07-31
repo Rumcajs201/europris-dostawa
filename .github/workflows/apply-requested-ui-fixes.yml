@@ -1,0 +1,186 @@
+name: Apply requested UI fixes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-requested-ui-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fixes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply requested changes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          css_path = Path('header-controls.css')
+          css = css_path.read_text(encoding='utf-8')
+          css = css.replace('width: 196px;', 'width: 188px;', 1)
+          css = css.replace('grid-template-columns: minmax(0, 1fr) 82px;', 'grid-template-columns: minmax(0, 1fr) 78px;', 1)
+          css_path.write_text(css, encoding='utf-8')
+
+          js_path = Path('history-edit.js')
+          js = js_path.read_text(encoding='utf-8')
+          js = js.replace('emptyPallets:"Puste palety"', 'emptyPallets:"Puste palety?"', 1)
+
+          replacement = r'''  function ensureEditDialogStyles() {
+    if (document.getElementById("historyEditDialogStyles")) return;
+    const style = document.createElement("style");
+    style.id = "historyEditDialogStyles";
+    style.textContent = `
+      .history-edit-dialog{width:min(calc(100% - 28px),390px);padding:0;border:1px solid var(--border);border-radius:18px;background:var(--card);color:var(--text);box-shadow:0 18px 55px rgba(0,0,0,.32)}
+      .history-edit-dialog::backdrop{background:rgba(0,0,0,.58)}
+      .history-edit-form{display:grid;gap:12px;padding:18px}
+      .history-edit-title{margin:0;color:var(--green);font-size:1.16rem}
+      .history-edit-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .history-edit-field{display:grid;gap:5px;color:var(--muted);font-size:.78rem;font-weight:850}
+      .history-edit-field input{width:100%;min-height:46px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--text);font:inherit;font-size:1rem;font-weight:850;text-align:center}
+      .history-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:2px}
+      .history-edit-actions button{min-height:44px;border:1px solid var(--green);border-radius:11px;background:transparent;color:var(--green);font:inherit;font-weight:850}
+      .history-edit-actions .primary{background:var(--green);color:#fff}
+      .history-edit-error{min-height:18px;color:#d71920;font-size:.82rem;font-weight:800;text-align:center}
+      @media(max-width:360px){.history-edit-fields{grid-template-columns:1fr}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function editDialogLabels() {
+    const code = language();
+    if (code === "no") return { title:"Rediger levering", save:"Lagre", cancel:"Avbryt" };
+    if (code === "en") return { title:"Edit delivery", save:"Save", cancel:"Cancel" };
+    if (code === "de") return { title:"Lieferung bearbeiten", save:"Speichern", cancel:"Abbrechen" };
+    return { title:"Edytuj dostawę", save:"Zapisz", cancel:"Anuluj" };
+  }
+
+  function showEditDialog(item) {
+    ensureEditDialogStyles();
+    const text = labels[language()] || labels.pl;
+    const buttons = editDialogLabels();
+    const dialog = document.createElement("dialog");
+    dialog.className = "history-edit-dialog";
+
+    const form = document.createElement("form");
+    form.className = "history-edit-form";
+    form.method = "dialog";
+
+    const title = document.createElement("h2");
+    title.className = "history-edit-title";
+    title.textContent = buttons.title;
+
+    const fields = document.createElement("div");
+    fields.className = "history-edit-fields";
+
+    const createField = (labelText, value, maxLength = "") => {
+      const label = document.createElement("label");
+      label.className = "history-edit-field";
+      const caption = document.createElement("span");
+      caption.textContent = labelText;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.value = value;
+      if (maxLength) input.maxLength = Number(maxLength);
+      input.addEventListener("input", () => {
+        input.value = maxLength
+          ? cleanTwoDigits(input.value)
+          : String(input.value).replace(/\D/g, "").slice(0, 4);
+      });
+      label.append(caption, input);
+      fields.appendChild(label);
+      return input;
+    };
+
+    const tourInput = createField(text.tour, cleanTwoDigits(item.tourNumber), "2");
+    const trailerInput = createField(text.trailer, cleanTwoDigits(item.trailerNumber), "2");
+    const palletsInput = createField(text.pallets, String(Number(item.pallets) || 0));
+    const emptyInput = createField(text.emptyPallets.replace(/\?$/, ""), String(Number(item.emptyPallets) || 0));
+
+    const error = document.createElement("div");
+    error.className = "history-edit-error";
+
+    const actions = document.createElement("div");
+    actions.className = "history-edit-actions";
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.textContent = buttons.cancel;
+    const saveButton = document.createElement("button");
+    saveButton.type = "submit";
+    saveButton.className = "primary";
+    saveButton.textContent = buttons.save;
+    actions.append(saveButton, cancel);
+
+    form.append(title, fields, error, actions);
+    dialog.appendChild(form);
+    document.body.appendChild(dialog);
+
+    return new Promise(resolve => {
+      const close = result => {
+        dialog.close();
+        dialog.remove();
+        resolve(result);
+      };
+
+      cancel.addEventListener("click", () => close(null));
+      dialog.addEventListener("cancel", event => {
+        event.preventDefault();
+        close(null);
+      });
+      dialog.addEventListener("click", event => {
+        if (event.target === dialog) close(null);
+      });
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const pallets = cleanCount(palletsInput.value);
+        const emptyPallets = cleanCount(emptyInput.value);
+        if (pallets === null || emptyPallets === null) {
+          error.textContent = text.invalid;
+          return;
+        }
+        close({
+          tourNumber: cleanTwoDigits(tourInput.value),
+          trailerNumber: cleanTwoDigits(trailerInput.value),
+          pallets,
+          emptyPallets
+        });
+      });
+
+      dialog.showModal();
+      window.setTimeout(() => tourInput.focus(), 0);
+    });
+  }
+
+  async function editItem(item) {
+    const values = await showEditDialog(item);
+    if (!values) return;
+
+    await save({ ...item, ...values });
+    const month = document.getElementById("historyMonth");
+    if (month) month.dispatchEvent(new Event("change", { bubbles:true }));
+  }
+'''
+
+          pattern = re.compile(r'  async function editItem\(item\) \{.*?\n  \}\n\n  let enhancing = false;', re.S)
+          if not pattern.search(js):
+              raise SystemExit('Nie znaleziono funkcji editItem do podmiany')
+          js = pattern.sub(replacement + '\n  let enhancing = false;', js, count=1)
+          js_path.write_text(js, encoding='utf-8')
+          PY
+
+      - name: Remove one-shot workflow and commit
+        run: |
+          rm .github/workflows/apply-requested-ui-fixes.yml
+          git config user.name "Rumcajs AI"
+          git config user.email "actions@users.noreply.github.com"
+          git add header-controls.css history-edit.js .github/workflows/apply-requested-ui-fixes.yml
+          git commit -m "Popraw górny pasek i edycję historii dostaw"
+          git push
