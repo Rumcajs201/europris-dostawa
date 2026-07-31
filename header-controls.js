@@ -11,6 +11,13 @@
     de: { language:"Sprache", information:"Informationen", title:"Informationen", text:"Dieser Bereich ist vorbereitet. Den Inhalt legen wir im nächsten Schritt fest.", close:"Schließen" }
   };
 
+  const historyCopyLabels = {
+    pl: { exportCopy:"Eksport kopii", importCopy:"Import kopii" },
+    no: { exportCopy:"Eksporter kopi", importCopy:"Importer kopi" },
+    en: { exportCopy:"Export copy", importCopy:"Import copy" },
+    de: { exportCopy:"Kopie exportieren", importCopy:"Kopie importieren" }
+  };
+
   const languageOptions = [
     ["pl", "🇵🇱 PL"],
     ["no", "🇳🇴 NO"],
@@ -40,10 +47,8 @@
     historyPrint: "Detaillierten Bericht drucken",
     historyPrintSummary: "Monatsübersicht A4 drucken",
     historyCsv: "Nach Excel exportieren (.xlsx)",
-    historyJson: "JSON-Sicherung",
-    historyImport: "Sicherung importieren",
-    historyCloudBackup: "Cloud-Sicherung",
-    historyCloudRestore: "Cloud-Sicherung wiederherstellen",
+    historyJson: "Kopie exportieren",
+    historyImport: "Kopie importieren",
     historyClear: "Ausgewählten Monat löschen",
     footer: "Erstellt von Rumcajs mit Hilfe künstlicher Intelligenz.",
     adminTitle: "Lieferpläne",
@@ -91,6 +96,16 @@
     if (element && element.textContent !== value) element.textContent = value;
   }
 
+  function updateHistoryCopyControls() {
+    document.getElementById("historyCloudBackup")?.remove();
+    document.getElementById("historyCloudRestore")?.remove();
+    document.getElementById("historyCloudStatus")?.remove();
+
+    const text = historyCopyLabels[activeLanguage()] || historyCopyLabels.pl;
+    setText("historyJson", text.exportCopy);
+    setText("historyImport", text.importCopy);
+  }
+
   function applyGermanInterface() {
     if (activeLanguage() !== "de") return;
 
@@ -98,6 +113,7 @@
     document.title = "Europris-Lieferbestätigung";
 
     Object.entries(germanText).forEach(([id, value]) => setText(id, value));
+    updateHistoryCopyControls();
 
     const search = document.getElementById("search");
     if (search) {
@@ -179,6 +195,7 @@
       dialogTitle.textContent = text.title;
       dialogText.textContent = text.text;
       closeButton.textContent = text.close;
+      updateHistoryCopyControls();
     }
 
     select.addEventListener("change", () => {
@@ -216,8 +233,10 @@
     }
 
     updateLabels();
+    updateHistoryCopyControls();
 
     const observer = new MutationObserver(() => {
+      updateHistoryCopyControls();
       if (activeLanguage() === "de") window.setTimeout(applyGermanInterface, 0);
     });
     observer.observe(document.body, { childList:true, subtree:true });
