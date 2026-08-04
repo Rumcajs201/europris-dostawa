@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "58.15";
+  const APP_VERSION = "58.16";
 
   function updateVersion() {
     const label = document.getElementById("appVersionLabel");
