@@ -1,0 +1,49 @@
+name: Apply info layout fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-info-layout-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply direct stylesheet loading and cache bump
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          link = '  <link rel="stylesheet" href="info-feedback.css?v=58.12">\n'
+          if 'href="info-feedback.css' not in html:
+              html = html.replace('</head>', link + '</head>', 1)
+          else:
+              import re
+              html = re.sub(r'<link rel="stylesheet" href="info-feedback\.css\?v=[^"]+">', '<link rel="stylesheet" href="info-feedback.css?v=58.12">', html, count=1)
+          index.write_text(html, encoding='utf-8')
+
+          sw = Path('sw.js')
+          text = sw.read_text(encoding='utf-8')
+          text = text.replace('europris-app-v58-11-info-feedback', 'europris-app-v58-12-info-layout')
+          text = text.replace('info-feedback.css?v=58.11', 'info-feedback.css?v=58.12')
+          sw.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Remove workflow and commit
+        run: |
+          rm .github/workflows/apply-info-layout-fix.yml
+          git config user.name "Rumcajs AI"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html sw.js .github/workflows/apply-info-layout-fix.yml
+          git commit -m "Popraw układ okna informacji na iPhone"
+          git push
