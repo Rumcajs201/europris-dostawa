@@ -1,7 +1,21 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "58.16";
+  const APP_VERSION = "58.17";
+  const questions = {
+    pl: "Pytania ?",
+    no: "Spørsmål ?",
+    en: "Questions ?",
+    de: "Fragen ?"
+  };
+
+  function currentLanguage() {
+    const value = String(document.documentElement.lang || "pl").toLowerCase();
+    if (value.startsWith("no") || value.startsWith("nb") || value.startsWith("nn")) return "no";
+    if (value.startsWith("en")) return "en";
+    if (value.startsWith("de")) return "de";
+    return "pl";
+  }
 
   function updateVersion() {
     const label = document.getElementById("appVersionLabel");
@@ -9,34 +23,29 @@
     if (label && label.textContent !== value) label.textContent = value;
   }
 
-  function clearFeedbackStoreField() {
-    const dialog = document.querySelector(".europris-info-dialog");
-    if (!dialog) return;
-
-    dialog.querySelectorAll(".europris-feedback-label").forEach(label => {
-      const caption = String(label.querySelector("span")?.textContent || "").toLowerCase();
-      if (
-        caption.includes("numer sklepu") ||
-        caption.includes("butikknummer") ||
-        caption.includes("store number") ||
-        caption.includes("filialnummer")
-      ) {
-        const input = label.querySelector("input");
-        if (input) input.value = "";
-      }
-    });
+  function updateInfoButton() {
+    const button = document.querySelector(".europris-info-button");
+    if (!button) return;
+    const lang = currentLanguage();
+    const main = lang === "no" ? "Informasjon" : lang === "en" ? "Information" : lang === "de" ? "Informationen" : "Informacje";
+    button.innerHTML = `<span class="europris-info-main">${main}</span><span class="europris-info-sub">${questions[lang] || questions.pl}</span>`;
   }
 
   function install() {
     updateVersion();
+    updateInfoButton();
 
     document.addEventListener("click", event => {
-      if (event.target.closest(".europris-info-button") || event.target.closest(".europris-feedback-reset")) {
-        window.setTimeout(clearFeedbackStoreField, 120);
+      if (event.target.closest(".europris-info-button") || event.target.closest(".language")) {
+        window.setTimeout(updateInfoButton, 80);
       }
     }, true);
 
-    window.setTimeout(clearFeedbackStoreField, 250);
+    document.querySelector(".europris-language-select")?.addEventListener("change", () => {
+      window.setTimeout(updateInfoButton, 80);
+    });
+
+    window.setTimeout(updateInfoButton, 200);
   }
 
   if (document.readyState === "loading") {
