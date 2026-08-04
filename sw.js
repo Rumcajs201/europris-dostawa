@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-16-feedback-send";
+const CACHE_NAME = "europris-app-v58-17-feedback-ui";
 
 const STATIC_FILES = [
   "./",
@@ -29,98 +29,62 @@ const STATIC_FILES = [
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_FILES))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_FILES)));
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(
-    Promise.all([
-      caches.keys().then(keys =>
-        Promise.all(
-          keys
-            .filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-        )
-      ),
-      self.clients.claim()
-    ])
-  );
+  event.waitUntil(Promise.all([
+    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))),
+    self.clients.claim()
+  ]));
 });
 
 async function withInjectedEnhancements(response) {
   if (!response || !response.ok) return response;
-
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
 
-  const html = await response.text();
+  let html = await response.text();
+  const version = "58.17";
+
+  html = html
+    .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
+    .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
+    .replace(/header-controls\.js\?v=[^"']+/g, `header-controls.js?v=${version}`)
+    .replace(/info-feedback\.js\?v=[^"']+/g, `info-feedback.js?v=${version}`)
+    .replace(/feedback-send-fix\.js\?v=[^"']+/g, `feedback-send-fix.js?v=${version}`)
+    .replace(/export-feedback\.js\?v=[^"']+/g, `export-feedback.js?v=${version}`)
+    .replace(/excel-column-widths\.js\?v=[^"']+/g, `excel-column-widths.js?v=${version}`)
+    .replace(/app-version-feedback-fix\.js\?v=[^"']+/g, `app-version-feedback-fix.js?v=${version}`);
+
   const headAssets = [];
   const bodyAssets = [];
 
-  if (!html.includes('href="header-controls.css')) {
-    headAssets.push('  <link rel="stylesheet" href="header-controls.css?v=58.16">\n');
-  }
-
-  if (!html.includes('href="info-feedback.css')) {
-    headAssets.push('  <link rel="stylesheet" href="info-feedback.css?v=58.16">\n');
-  }
-
-  if (!html.includes('src="header-controls.js')) {
-    bodyAssets.push('  <script src="header-controls.js?v=58.16"></script>\n');
-  }
-
-  if (!html.includes('src="info-feedback.js')) {
-    bodyAssets.push('  <script src="info-feedback.js?v=58.16"></script>\n');
-  }
-
-  if (!html.includes('src="feedback-send-fix.js')) {
-    bodyAssets.push('  <script src="feedback-send-fix.js?v=58.16"></script>\n');
-  }
-
-  if (!html.includes('src="export-feedback.js')) {
-    bodyAssets.push('  <script src="export-feedback.js?v=58.16"></script>\n');
-  }
-
-  if (!html.includes('src="excel-column-widths.js')) {
-    bodyAssets.push('  <script src="excel-column-widths.js?v=58.16"></script>\n');
-  }
-
-  if (!html.includes('src="app-version-feedback-fix.js')) {
-    bodyAssets.push('  <script src="app-version-feedback-fix.js?v=58.16"></script>\n');
-  }
-
-  let updated = html;
+  if (!html.includes('href="header-controls.css')) headAssets.push(`  <link rel="stylesheet" href="header-controls.css?v=${version}">\n`);
+  if (!html.includes('href="info-feedback.css')) headAssets.push(`  <link rel="stylesheet" href="info-feedback.css?v=${version}">\n`);
+  if (!html.includes('src="header-controls.js')) bodyAssets.push(`  <script src="header-controls.js?v=${version}"></script>\n`);
+  if (!html.includes('src="info-feedback.js')) bodyAssets.push(`  <script src="info-feedback.js?v=${version}"></script>\n`);
+  if (!html.includes('src="feedback-send-fix.js')) bodyAssets.push(`  <script src="feedback-send-fix.js?v=${version}"></script>\n`);
+  if (!html.includes('src="export-feedback.js')) bodyAssets.push(`  <script src="export-feedback.js?v=${version}"></script>\n`);
+  if (!html.includes('src="excel-column-widths.js')) bodyAssets.push(`  <script src="excel-column-widths.js?v=${version}"></script>\n`);
+  if (!html.includes('src="app-version-feedback-fix.js')) bodyAssets.push(`  <script src="app-version-feedback-fix.js?v=${version}"></script>\n`);
 
   if (headAssets.length) {
-    const closingHeadIndex = updated.toLowerCase().lastIndexOf("</head>");
-    if (closingHeadIndex >= 0) {
-      updated = updated.slice(0, closingHeadIndex) + headAssets.join("") + updated.slice(closingHeadIndex);
-    }
+    const closingHeadIndex = html.toLowerCase().lastIndexOf("</head>");
+    if (closingHeadIndex >= 0) html = html.slice(0, closingHeadIndex) + headAssets.join("") + html.slice(closingHeadIndex);
   }
 
   if (bodyAssets.length) {
-    const closingBodyIndex = updated.toLowerCase().lastIndexOf("</body>");
-    if (closingBodyIndex >= 0) {
-      updated = updated.slice(0, closingBodyIndex) + bodyAssets.join("") + updated.slice(closingBodyIndex);
-    }
-  }
-
-  if (updated === html) {
-    return new Response(html, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers
-    });
+    const closingBodyIndex = html.toLowerCase().lastIndexOf("</body>");
+    if (closingBodyIndex >= 0) html = html.slice(0, closingBodyIndex) + bodyAssets.join("") + html.slice(closingBodyIndex);
   }
 
   const headers = new Headers(response.headers);
   headers.set("content-type", "text/html; charset=UTF-8");
   headers.delete("content-length");
 
-  return new Response(updated, {
+  return new Response(html, {
     status: response.status,
     statusText: response.statusText,
     headers
@@ -129,20 +93,13 @@ async function withInjectedEnhancements(response) {
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-
   if (request.method !== "GET") return;
 
   const requestUrl = new URL(request.url);
-
-  if (requestUrl.origin !== self.location.origin) {
-    return;
-  }
+  if (requestUrl.origin !== self.location.origin) return;
 
   const isNavigation = request.mode === "navigate";
-  const isCoreFile =
-    requestUrl.pathname.endsWith("/index.html") ||
-    requestUrl.pathname.endsWith("/manifest.webmanifest") ||
-    requestUrl.pathname.endsWith("/stores.json");
+  const isCoreFile = requestUrl.pathname.endsWith("/index.html") || requestUrl.pathname.endsWith("/manifest.webmanifest") || requestUrl.pathname.endsWith("/stores.json");
 
   if (isNavigation || isCoreFile) {
     event.respondWith(
@@ -183,11 +140,7 @@ self.addEventListener("fetch", event => {
       .catch(async () => {
         const cached = await caches.match(request);
         if (cached) return cached;
-
-        return new Response("", {
-          status: 504,
-          statusText: "Gateway Timeout"
-        });
+        return new Response("", { status: 504, statusText: "Gateway Timeout" });
       })
   );
 });
