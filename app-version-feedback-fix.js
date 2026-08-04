@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "58.14";
+  const APP_VERSION = "58.15";
 
   function updateVersion() {
     const label = document.getElementById("appVersionLabel");
@@ -32,9 +32,11 @@
 
     document.addEventListener("click", event => {
       if (event.target.closest(".europris-info-button") || event.target.closest(".europris-feedback-reset")) {
-        window.setTimeout(clearFeedbackStoreField, 0);
+        window.setTimeout(clearFeedbackStoreField, 120);
       }
     }, true);
+
+    window.setTimeout(clearFeedbackStoreField, 250);
   }
 
   if (document.readyState === "loading") {
