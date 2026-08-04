@@ -1,64 +1,118 @@
-/* Rozszerzona sekcja Informacje + formularz zgłoszeń. */
+/* Informacje + formularz zgłoszeń — układ zoptymalizowany pod iPhone. */
 .europris-info-dialog {
-  width: min(calc(100% - 22px), 430px);
-  max-height: calc(100svh - 28px);
-  overflow: auto;
+  width: min(calc(100% - 24px), 430px);
+  max-height: calc(100svh - 24px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 20px 60px rgba(0,0,0,.34);
+}
+
+.europris-info-dialog::backdrop {
+  background: rgba(0,0,0,.62);
 }
 
 .europris-info-content {
-  padding: 18px;
+  max-height: calc(100svh - 24px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 16px 16px;
+}
+
+.europris-info-title {
+  margin: 0 0 6px;
+  color: var(--green);
+  font-size: 1.28rem;
+  line-height: 1.15;
 }
 
 .europris-info-intro {
   margin: 0 0 14px;
   color: var(--muted);
+  font-size: .9rem;
   line-height: 1.45;
 }
 
 .europris-info-section {
-  margin: 14px 0;
-  padding: 13px;
+  margin: 12px 0;
+  padding: 14px;
   border: 1px solid var(--border);
-  border-radius: 13px;
-  background: color-mix(in srgb, var(--green) 5%, transparent);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--green) 5%, var(--card));
 }
 
 .europris-info-section h3 {
-  margin: 0 0 8px;
+  margin: 0 0 9px;
   color: var(--green);
-  font-size: .98rem;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
 .europris-info-list {
   margin: 0;
-  padding-left: 19px;
+  padding-left: 20px;
   color: var(--muted);
-  font-size: .88rem;
+  font-size: .84rem;
   line-height: 1.48;
+}
+
+.europris-info-list li + li {
+  margin-top: 4px;
 }
 
 .europris-feedback-form {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-top: 12px;
 }
 
 .europris-feedback-label {
-  display: grid;
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) !important;
   gap: 5px;
+  min-width: 0;
   color: var(--muted);
-  font-size: .78rem;
+  font-size: .76rem;
   font-weight: 850;
+  line-height: 1.25;
+}
+
+.europris-feedback-label:first-child,
+.europris-feedback-label:nth-child(4) {
+  grid-column: 1 / -1;
+}
+
+.europris-feedback-label > span {
+  display: block;
+  min-width: 0;
 }
 
 .europris-feedback-form select,
 .europris-feedback-form input,
 .europris-feedback-form textarea {
-  width: 100%;
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  margin: 0 !important;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 11px;
   background: var(--card);
   color: var(--text);
   font: inherit;
+  font-size: .92rem;
+  outline: none;
+  box-shadow: none;
+}
+
+.europris-feedback-form select:focus,
+.europris-feedback-form input:focus,
+.europris-feedback-form textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 18%, transparent);
 }
 
 .europris-feedback-form select,
@@ -68,21 +122,25 @@
 }
 
 .europris-feedback-form textarea {
-  min-height: 112px;
+  min-height: 105px;
   resize: vertical;
-  padding: 10px;
+  padding: 10px 11px;
   line-height: 1.4;
 }
 
 .europris-feedback-actions {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  margin-top: 2px;
 }
 
 .europris-feedback-submit,
 .europris-feedback-reset {
+  width: 100%;
   min-height: 44px;
+  margin: 0;
   border-radius: 11px;
   font: inherit;
   font-weight: 850;
@@ -96,14 +154,15 @@
 
 .europris-feedback-reset {
   border: 1px solid var(--border);
-  background: transparent;
+  background: var(--card);
   color: var(--text);
 }
 
 .europris-feedback-status {
-  min-height: 20px;
+  grid-column: 1 / -1;
+  min-height: 18px;
   color: var(--muted);
-  font-size: .82rem;
+  font-size: .78rem;
   font-weight: 800;
   text-align: center;
   line-height: 1.35;
@@ -113,17 +172,34 @@
 .europris-feedback-status.is-error { color: #d71920; }
 
 .europris-info-meta {
-  margin-top: 12px;
+  margin: 12px 4px 0;
   color: var(--muted);
-  font-size: .72rem;
+  font-size: .7rem;
   line-height: 1.4;
   text-align: center;
 }
 
 .europris-info-close {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  min-height: 48px;
   margin-top: 12px;
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  background: var(--green);
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  box-shadow: 0 -6px 18px color-mix(in srgb, var(--card) 90%, transparent);
 }
 
-@media (max-width: 360px) {
-  .europris-feedback-actions { grid-template-columns: 1fr; }
+@media (max-width: 390px) {
+  .europris-info-content { padding: 15px 13px 13px; }
+  .europris-info-section { padding: 12px; }
+  .europris-feedback-form { grid-template-columns: 1fr; }
+  .europris-feedback-label:first-child,
+  .europris-feedback-label:nth-child(4),
+  .europris-feedback-actions,
+  .europris-feedback-status { grid-column: 1; }
 }
