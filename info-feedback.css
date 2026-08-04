@@ -11,9 +11,7 @@
   box-shadow: 0 20px 60px rgba(0,0,0,.34);
 }
 
-.europris-info-dialog::backdrop {
-  background: rgba(0,0,0,.62);
-}
+.europris-info-dialog::backdrop { background: rgba(0,0,0,.62); }
 
 .europris-info-content {
   max-height: calc(100svh - 24px);
@@ -23,7 +21,7 @@
 }
 
 .europris-info-title {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   color: var(--green);
   font-size: 1.28rem;
   line-height: 1.15;
@@ -34,6 +32,19 @@
   color: var(--muted);
   font-size: .9rem;
   line-height: 1.45;
+}
+
+/* Pierwszy opis jest wizytówką aplikacji i autora. */
+.europris-info-content > .europris-info-intro:first-of-type {
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--green) 55%, var(--border));
+  border-left: 5px solid var(--green);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--green) 9%, var(--card));
+  color: var(--text);
+  font-weight: 760;
+  line-height: 1.5;
+  box-shadow: 0 4px 14px rgba(0,0,0,.06);
 }
 
 .europris-info-section {
@@ -59,9 +70,7 @@
   line-height: 1.48;
 }
 
-.europris-info-list li + li {
-  margin-top: 4px;
-}
+.europris-info-list li + li { margin-top: 4px; }
 
 .europris-feedback-form {
   display: grid;
@@ -82,14 +91,9 @@
 }
 
 .europris-feedback-label:first-child,
-.europris-feedback-label:nth-child(4) {
-  grid-column: 1 / -1;
-}
+.europris-feedback-label:nth-child(4) { grid-column: 1 / -1; }
 
-.europris-feedback-label > span {
-  display: block;
-  min-width: 0;
-}
+.europris-feedback-label > span { display: block; min-width: 0; }
 
 .europris-feedback-form select,
 .europris-feedback-form input,
@@ -116,10 +120,7 @@
 }
 
 .europris-feedback-form select,
-.europris-feedback-form input {
-  min-height: 44px;
-  padding: 0 10px;
-}
+.europris-feedback-form input { min-height: 44px; padding: 0 10px; }
 
 .europris-feedback-form textarea {
   min-height: 105px;
@@ -146,17 +147,8 @@
   font-weight: 850;
 }
 
-.europris-feedback-submit {
-  border: 1px solid var(--green);
-  background: var(--green);
-  color: #fff;
-}
-
-.europris-feedback-reset {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-}
+.europris-feedback-submit { border: 1px solid var(--green); background: var(--green); color: #fff; }
+.europris-feedback-reset { border: 1px solid var(--border); background: var(--card); color: var(--text); }
 
 .europris-feedback-status {
   grid-column: 1 / -1;
