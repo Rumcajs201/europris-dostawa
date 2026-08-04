@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-10-excel-column-widths";
+const CACHE_NAME = "europris-app-v58-11-info-feedback";
 
 const STATIC_FILES = [
   "./",
@@ -16,6 +16,11 @@ const STATIC_FILES = [
   "./all-drivers.css",
   "./export-feedback.js",
   "./excel-column-widths.js",
+  "./header-controls.css",
+  "./header-controls.js",
+  "./history-edit.js",
+  "./info-feedback.css",
+  "./info-feedback.js",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
   "./europris-app-icon-512-v28.png"
@@ -43,24 +48,57 @@ self.addEventListener("activate", event => {
   );
 });
 
-async function withExportFeedback(response) {
+async function withInjectedEnhancements(response) {
   if (!response || !response.ok) return response;
 
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
 
   const html = await response.text();
-  const scripts = [];
+  const headAssets = [];
+  const bodyAssets = [];
+
+  if (!html.includes('href="header-controls.css')) {
+    headAssets.push('  <link rel="stylesheet" href="header-controls.css?v=58.11">\n');
+  }
+
+  if (!html.includes('href="info-feedback.css')) {
+    headAssets.push('  <link rel="stylesheet" href="info-feedback.css?v=58.11">\n');
+  }
+
+  if (!html.includes('src="header-controls.js')) {
+    bodyAssets.push('  <script src="header-controls.js?v=58.11"></script>\n');
+  }
+
+  if (!html.includes('src="info-feedback.js')) {
+    bodyAssets.push('  <script src="info-feedback.js?v=58.11"></script>\n');
+  }
 
   if (!html.includes('src="export-feedback.js')) {
-    scripts.push('  <script src="export-feedback.js?v=58.10"></script>\n');
+    bodyAssets.push('  <script src="export-feedback.js?v=58.11"></script>\n');
   }
 
   if (!html.includes('src="excel-column-widths.js')) {
-    scripts.push('  <script src="excel-column-widths.js?v=58.10"></script>\n');
+    bodyAssets.push('  <script src="excel-column-widths.js?v=58.11"></script>\n');
   }
 
-  if (!scripts.length) {
+  let updated = html;
+
+  if (headAssets.length) {
+    const closingHeadIndex = updated.toLowerCase().lastIndexOf("</head>");
+    if (closingHeadIndex >= 0) {
+      updated = updated.slice(0, closingHeadIndex) + headAssets.join("") + updated.slice(closingHeadIndex);
+    }
+  }
+
+  if (bodyAssets.length) {
+    const closingBodyIndex = updated.toLowerCase().lastIndexOf("</body>");
+    if (closingBodyIndex >= 0) {
+      updated = updated.slice(0, closingBodyIndex) + bodyAssets.join("") + updated.slice(closingBodyIndex);
+    }
+  }
+
+  if (updated === html) {
     return new Response(html, {
       status: response.status,
       statusText: response.statusText,
@@ -68,16 +106,6 @@ async function withExportFeedback(response) {
     });
   }
 
-  const closingBodyIndex = html.toLowerCase().lastIndexOf("</body>");
-  if (closingBodyIndex < 0) {
-    return new Response(html, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers
-    });
-  }
-
-  const updated = html.slice(0, closingBodyIndex) + scripts.join("") + html.slice(closingBodyIndex);
   const headers = new Headers(response.headers);
   headers.set("content-type", "text/html; charset=UTF-8");
   headers.delete("content-length");
@@ -114,14 +142,14 @@ self.addEventListener("fetch", event => {
             const copy = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
           }
-          return isNavigation ? withExportFeedback(response) : response;
+          return isNavigation ? withInjectedEnhancements(response) : response;
         })
         .catch(async () => {
           const cached = await caches.match(request);
-          if (cached) return isNavigation ? withExportFeedback(cached) : cached;
+          if (cached) return isNavigation ? withInjectedEnhancements(cached) : cached;
 
           const fallback = await caches.match("./index.html");
-          if (fallback) return isNavigation ? withExportFeedback(fallback) : fallback;
+          if (fallback) return isNavigation ? withInjectedEnhancements(fallback) : fallback;
 
           return new Response("Offline", {
             status: 503,
