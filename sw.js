@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-15-feedback-store-empty";
+const CACHE_NAME = "europris-app-v58-16-feedback-send";
 
 const STATIC_FILES = [
   "./",
@@ -21,6 +21,7 @@ const STATIC_FILES = [
   "./history-edit.js",
   "./info-feedback.css",
   "./info-feedback.js",
+  "./feedback-send-fix.js",
   "./app-version-feedback-fix.js",
   "./europris-app-icon-180-v28.png",
   "./europris-app-icon-192-v28.png",
@@ -60,31 +61,35 @@ async function withInjectedEnhancements(response) {
   const bodyAssets = [];
 
   if (!html.includes('href="header-controls.css')) {
-    headAssets.push('  <link rel="stylesheet" href="header-controls.css?v=58.15">\n');
+    headAssets.push('  <link rel="stylesheet" href="header-controls.css?v=58.16">\n');
   }
 
   if (!html.includes('href="info-feedback.css')) {
-    headAssets.push('  <link rel="stylesheet" href="info-feedback.css?v=58.15">\n');
+    headAssets.push('  <link rel="stylesheet" href="info-feedback.css?v=58.16">\n');
   }
 
   if (!html.includes('src="header-controls.js')) {
-    bodyAssets.push('  <script src="header-controls.js?v=58.15"></script>\n');
+    bodyAssets.push('  <script src="header-controls.js?v=58.16"></script>\n');
   }
 
   if (!html.includes('src="info-feedback.js')) {
-    bodyAssets.push('  <script src="info-feedback.js?v=58.15"></script>\n');
+    bodyAssets.push('  <script src="info-feedback.js?v=58.16"></script>\n');
+  }
+
+  if (!html.includes('src="feedback-send-fix.js')) {
+    bodyAssets.push('  <script src="feedback-send-fix.js?v=58.16"></script>\n');
   }
 
   if (!html.includes('src="export-feedback.js')) {
-    bodyAssets.push('  <script src="export-feedback.js?v=58.15"></script>\n');
+    bodyAssets.push('  <script src="export-feedback.js?v=58.16"></script>\n');
   }
 
   if (!html.includes('src="excel-column-widths.js')) {
-    bodyAssets.push('  <script src="excel-column-widths.js?v=58.15"></script>\n');
+    bodyAssets.push('  <script src="excel-column-widths.js?v=58.16"></script>\n');
   }
 
   if (!html.includes('src="app-version-feedback-fix.js')) {
-    bodyAssets.push('  <script src="app-version-feedback-fix.js?v=58.15"></script>\n');
+    bodyAssets.push('  <script src="app-version-feedback-fix.js?v=58.16"></script>\n');
   }
 
   let updated = html;
