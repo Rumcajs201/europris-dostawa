@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-11-info-feedback";
+const CACHE_NAME = "europris-app-v58-12-info-layout";
 
 const STATIC_FILES = [
   "./",
@@ -63,7 +63,7 @@ async function withInjectedEnhancements(response) {
   }
 
   if (!html.includes('href="info-feedback.css')) {
-    headAssets.push('  <link rel="stylesheet" href="info-feedback.css?v=58.11">\n');
+    headAssets.push('  <link rel="stylesheet" href="info-feedback.css?v=58.12">\n');
   }
 
   if (!html.includes('src="header-controls.js')) {
