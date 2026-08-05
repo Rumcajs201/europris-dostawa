@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-17-feedback-ui";
+const CACHE_NAME = "europris-app-v58-18-feedback-email-required";
 
 const STATIC_FILES = [
   "./",
@@ -46,7 +46,7 @@ async function withInjectedEnhancements(response) {
   if (!type.includes("text/html")) return response;
 
   let html = await response.text();
-  const version = "58.17";
+  const version = "58.18";
 
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
