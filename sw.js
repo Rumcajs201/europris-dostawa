@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-19-pallet-history-fix";
+const CACHE_NAME = "europris-app-v58-20-startup-info";
 
 const STATIC_FILES = [
   "./",
@@ -22,6 +22,8 @@ const STATIC_FILES = [
   "./history-edit.js",
   "./info-feedback.css",
   "./info-feedback.js",
+  "./startup-info.css",
+  "./startup-info.js",
   "./feedback-send-fix.js",
   "./app-version-feedback-fix.js",
   "./europris-app-icon-180-v28.png",
@@ -47,14 +49,16 @@ async function withInjectedEnhancements(response) {
   if (!type.includes("text/html")) return response;
 
   let html = await response.text();
-  const version = "58.19";
+  const version = "58.20";
 
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
+    .replace(/startup-info\.css\?v=[^"']+/g, `startup-info.css?v=${version}`)
     .replace(/pallet-history-fix\.js\?v=[^"']+/g, `pallet-history-fix.js?v=${version}`)
     .replace(/header-controls\.js\?v=[^"']+/g, `header-controls.js?v=${version}`)
     .replace(/info-feedback\.js\?v=[^"']+/g, `info-feedback.js?v=${version}`)
+    .replace(/startup-info\.js\?v=[^"']+/g, `startup-info.js?v=${version}`)
     .replace(/feedback-send-fix\.js\?v=[^"']+/g, `feedback-send-fix.js?v=${version}`)
     .replace(/export-feedback\.js\?v=[^"']+/g, `export-feedback.js?v=${version}`)
     .replace(/excel-column-widths\.js\?v=[^"']+/g, `excel-column-widths.js?v=${version}`)
@@ -65,9 +69,11 @@ async function withInjectedEnhancements(response) {
 
   if (!html.includes('href="header-controls.css')) headAssets.push(`  <link rel="stylesheet" href="header-controls.css?v=${version}">\n`);
   if (!html.includes('href="info-feedback.css')) headAssets.push(`  <link rel="stylesheet" href="info-feedback.css?v=${version}">\n`);
+  if (!html.includes('href="startup-info.css')) headAssets.push(`  <link rel="stylesheet" href="startup-info.css?v=${version}">\n`);
   if (!html.includes('src="pallet-history-fix.js')) bodyAssets.push(`  <script src="pallet-history-fix.js?v=${version}"></script>\n`);
   if (!html.includes('src="header-controls.js')) bodyAssets.push(`  <script src="header-controls.js?v=${version}"></script>\n`);
   if (!html.includes('src="info-feedback.js')) bodyAssets.push(`  <script src="info-feedback.js?v=${version}"></script>\n`);
+  if (!html.includes('src="startup-info.js')) bodyAssets.push(`  <script src="startup-info.js?v=${version}"></script>\n`);
   if (!html.includes('src="feedback-send-fix.js')) bodyAssets.push(`  <script src="feedback-send-fix.js?v=${version}"></script>\n`);
   if (!html.includes('src="export-feedback.js')) bodyAssets.push(`  <script src="export-feedback.js?v=${version}"></script>\n`);
   if (!html.includes('src="excel-column-widths.js')) bodyAssets.push(`  <script src="excel-column-widths.js?v=${version}"></script>\n`);
