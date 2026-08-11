@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const DISMISS_KEY = "europris_startup_info_feedback_v1_dismissed";
+  const DISMISS_KEY = "europris_startup_info_feedback_v2_dismissed";
 
   const copy = {
     pl: {
