@@ -1,0 +1,86 @@
+name: Dodaj profil Fredrik
+
+on:
+  push:
+    paths:
+      - ".github/workflows/add-fredrik-profile.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  add-fredrik:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Dodaj profil Fredrik 2345
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          old_profile = '''    "5678": {
+      id: "lukasz",
+      role: "driver",
+      name: "Łukasz",
+      phone: "",
+      aliases: ["Bartek"]
+    }
+  };'''
+          new_profile = '''    "5678": {
+      id: "lukasz",
+      role: "driver",
+      name: "Łukasz",
+      phone: "",
+      aliases: ["Bartek"]
+    },
+    "2345": {
+      id: "fredrik",
+      role: "driver",
+      name: "Fredrik",
+      phone: "",
+      aliases: ["Fredrik"]
+    }
+  };'''
+
+          old_backup = '''    kamil: "e5da7193b7c21bfda17db78b29c38971",
+    lukasz: "8bbf70654bf0524509d1ed85e4533aba"
+  });'''
+          new_backup = '''    kamil: "e5da7193b7c21bfda17db78b29c38971",
+    lukasz: "8bbf70654bf0524509d1ed85e4533aba",
+    fredrik: "a7f2c91e54d84b6fa1d3902c7e58b413"
+  });'''
+
+          if '"2345": {' not in s:
+              if old_profile not in s:
+                  raise SystemExit('Nie znaleziono bloku profili')
+              s = s.replace(old_profile, new_profile, 1)
+
+          if 'fredrik: "a7f2c91e54d84b6fa1d3902c7e58b413"' not in s:
+              if old_backup not in s:
+                  raise SystemExit('Nie znaleziono bloku kopii profili')
+              s = s.replace(old_backup, new_backup, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Sprawdź zmianę
+        run: |
+          grep -q '"2345": {' index.html
+          grep -q 'id: "fredrik"' index.html
+          grep -q 'role: "driver"' index.html
+          grep -q 'fredrik: "a7f2c91e54d84b6fa1d3902c7e58b413"' index.html
+
+      - name: Zapisz zmianę i usuń workflow jednorazowy
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          rm -f .github/workflows/add-fredrik-profile.yml
+          git add index.html .github/workflows/add-fredrik-profile.yml
+          git commit -m "Dodaj profil Fredrik z PIN 2345"
+          git push
