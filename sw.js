@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-21-startup-info-v2";
+const CACHE_NAME = "europris-app-v58-22-fredrik-profile";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
@@ -11,12 +11,28 @@ const STATIC_FILES = [
 self.addEventListener("install", event => { event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_FILES))); self.skipWaiting(); });
 self.addEventListener("activate", event => { event.waitUntil(Promise.all([caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))), self.clients.claim()])); });
 
+function injectFredrikProfile(html) {
+  if (!html.includes('"2345": {')) {
+    const oldProfile = `    "5678": {\n      id: "lukasz",\n      role: "driver",\n      name: "Łukasz",\n      phone: "",\n      aliases: ["Bartek"]\n    }\n  };`;
+    const newProfile = `    "5678": {\n      id: "lukasz",\n      role: "driver",\n      name: "Łukasz",\n      phone: "",\n      aliases: ["Bartek"]\n    },\n    "2345": {\n      id: "fredrik",\n      role: "driver",\n      name: "Fredrik",\n      phone: "",\n      aliases: ["Fredrik"]\n    }\n  };`;
+    html = html.replace(oldProfile, newProfile);
+  }
+
+  if (!html.includes('fredrik: "a7f2c91e54d84b6fa1d3902c7e58b413"')) {
+    const oldBackup = `    kamil: "e5da7193b7c21bfda17db78b29c38971",\n    lukasz: "8bbf70654bf0524509d1ed85e4533aba"\n  });`;
+    const newBackup = `    kamil: "e5da7193b7c21bfda17db78b29c38971",\n    lukasz: "8bbf70654bf0524509d1ed85e4533aba",\n    fredrik: "a7f2c91e54d84b6fa1d3902c7e58b413"\n  });`;
+    html = html.replace(oldBackup, newBackup);
+  }
+
+  return html;
+}
+
 async function withInjectedEnhancements(response) {
   if (!response || !response.ok) return response;
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
-  let html = await response.text();
-  const version = "58.21";
+  let html = injectFredrikProfile(await response.text());
+  const version = "58.22";
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
