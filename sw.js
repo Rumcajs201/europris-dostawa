@@ -1,10 +1,11 @@
-const CACHE_NAME = "europris-app-v58-23-otta-636-fix";
+const CACHE_NAME = "europris-app-v58-24-admin-mail";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
   "./stats.css", "./stats-panel.js", "./analytics.js", "./weather-humor.js", "./weather-humor.css", "./all-drivers.js", "./all-drivers.css",
   "./export-feedback.js", "./excel-column-widths.js", "./header-controls.css", "./pallet-history-fix.js", "./header-controls.js", "./history-edit.js",
   "./info-feedback.css", "./info-feedback.js", "./startup-info.css", "./startup-info.js", "./feedback-send-fix.js", "./app-version-feedback-fix.js",
+  "./admin-mail.css", "./admin-mail.js",
   "./europris-app-icon-180-v28.png", "./europris-app-icon-192-v28.png", "./europris-app-icon-512-v28.png"
 ];
 
@@ -32,15 +33,17 @@ async function withInjectedEnhancements(response) {
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
   let html = injectFredrikProfile(await response.text());
-  const version = "58.23";
+  const version = "58.24";
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
     .replace(/startup-info\.css\?v=[^"']+/g, `startup-info.css?v=${version}`)
+    .replace(/admin-mail\.css\?v=[^"']+/g, `admin-mail.css?v=${version}`)
     .replace(/pallet-history-fix\.js\?v=[^"']+/g, `pallet-history-fix.js?v=${version}`)
     .replace(/header-controls\.js\?v=[^"']+/g, `header-controls.js?v=${version}`)
     .replace(/info-feedback\.js\?v=[^"']+/g, `info-feedback.js?v=${version}`)
     .replace(/startup-info\.js\?v=[^"']+/g, `startup-info.js?v=${version}`)
+    .replace(/admin-mail\.js\?v=[^"']+/g, `admin-mail.js?v=${version}`)
     .replace(/feedback-send-fix\.js\?v=[^"']+/g, `feedback-send-fix.js?v=${version}`)
     .replace(/export-feedback\.js\?v=[^"']+/g, `export-feedback.js?v=${version}`)
     .replace(/excel-column-widths\.js\?v=[^"']+/g, `excel-column-widths.js?v=${version}`)
@@ -49,10 +52,12 @@ async function withInjectedEnhancements(response) {
   if (!html.includes('href="header-controls.css')) headAssets.push(`  <link rel="stylesheet" href="header-controls.css?v=${version}">\n`);
   if (!html.includes('href="info-feedback.css')) headAssets.push(`  <link rel="stylesheet" href="info-feedback.css?v=${version}">\n`);
   if (!html.includes('href="startup-info.css')) headAssets.push(`  <link rel="stylesheet" href="startup-info.css?v=${version}">\n`);
+  if (!html.includes('href="admin-mail.css')) headAssets.push(`  <link rel="stylesheet" href="admin-mail.css?v=${version}">\n`);
   if (!html.includes('src="pallet-history-fix.js')) bodyAssets.push(`  <script src="pallet-history-fix.js?v=${version}"></script>\n`);
   if (!html.includes('src="header-controls.js')) bodyAssets.push(`  <script src="header-controls.js?v=${version}"></script>\n`);
   if (!html.includes('src="info-feedback.js')) bodyAssets.push(`  <script src="info-feedback.js?v=${version}"></script>\n`);
   if (!html.includes('src="startup-info.js')) bodyAssets.push(`  <script src="startup-info.js?v=${version}"></script>\n`);
+  if (!html.includes('src="admin-mail.js')) bodyAssets.push(`  <script src="admin-mail.js?v=${version}"></script>\n`);
   if (!html.includes('src="feedback-send-fix.js')) bodyAssets.push(`  <script src="feedback-send-fix.js?v=${version}"></script>\n`);
   if (!html.includes('src="export-feedback.js')) bodyAssets.push(`  <script src="export-feedback.js?v=${version}"></script>\n`);
   if (!html.includes('src="excel-column-widths.js')) bodyAssets.push(`  <script src="excel-column-widths.js?v=${version}"></script>\n`);
