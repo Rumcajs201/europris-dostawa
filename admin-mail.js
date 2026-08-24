@@ -14,10 +14,32 @@
 
   function lang(){const v=String(document.documentElement.lang||"pl").toLowerCase();if(v.startsWith("no")||v.startsWith("nb")||v.startsWith("nn"))return"no";if(v.startsWith("en"))return"en";if(v.startsWith("de"))return"de";return"pl";}
   function t(){return labels[lang()]||labels.pl;}
-  function isAndrzejAdmin(){const panel=document.getElementById("adminPanel"),profile=document.getElementById("adminProfileSection");if(!panel||panel.hidden||!profile)return false;const css=getComputedStyle(profile);return !profile.hidden&&css.display!=="none";}
+
+  function panelOpen(){const panel=document.getElementById("adminPanel");return !!panel && !panel.hidden && getComputedStyle(panel).display!=="none";}
+  function isAndrzejAdmin(){
+    if(!panelOpen()) return false;
+    const profile=document.getElementById("adminProfileSection");
+    if(profile && !profile.hidden && getComputedStyle(profile).display!=="none") return true;
+    const title=String(document.getElementById("adminTitle")?.textContent||"").toLowerCase();
+    return title.includes("andrzej");
+  }
+
   function jsonp(action,params={}){return new Promise((resolve,reject)=>{const cb=`__europrisMail_${Date.now()}_${Math.random().toString(36).slice(2)}`,s=document.createElement("script");let done=false;const cleanup=()=>{if(done)return;done=true;clearTimeout(timer);delete window[cb];s.remove();};const timer=setTimeout(()=>{cleanup();reject(new Error("timeout"));},20000);window[cb]=data=>{cleanup();resolve(data);};const q=new URLSearchParams({action,token:API_TOKEN,callback:cb,_:String(Date.now()),...params});s.src=`${API_URL}?${q}`;s.onerror=()=>{cleanup();reject(new Error("network"));};document.head.appendChild(s);});}
 
-  function ensureUi(){const adminPanel=document.getElementById("adminPanel");if(!adminPanel||document.getElementById("adminMailWrap"))return;const wrap=document.createElement("section");wrap.id="adminMailWrap";wrap.className="admin-mail-wrap";wrap.hidden=true;wrap.innerHTML=`<button id="adminMailTile" class="admin-mail-tile" type="button"><span class="admin-mail-tile-title"></span><span class="admin-mail-tile-sub"></span><span id="adminMailBadge" class="admin-mail-badge zero">0</span></button><section id="adminMailPanel" class="admin-mail-panel" hidden><div class="admin-mail-head"><strong id="adminMailPanelTitle"></strong><button id="adminMailRefresh" class="admin-mail-refresh" type="button"></button></div><div id="adminMailContent"></div></section>`;const stats=document.getElementById("adminStatsPanel");if(stats)adminPanel.insertBefore(wrap,stats);else adminPanel.appendChild(wrap);document.getElementById("adminMailTile").addEventListener("click",()=>{const p=document.getElementById("adminMailPanel");p.hidden=!p.hidden;if(!p.hidden)void loadMail(true);});document.getElementById("adminMailRefresh").addEventListener("click",()=>void loadMail(true));applyText();}
+  function ensureUi(){
+    const adminPanel=document.getElementById("adminPanel");
+    if(!adminPanel||document.getElementById("adminMailWrap"))return;
+    const wrap=document.createElement("section");
+    wrap.id="adminMailWrap";
+    wrap.className="admin-mail-wrap";
+    wrap.hidden=true;
+    wrap.innerHTML=`<button id="adminMailTile" class="admin-mail-tile" type="button"><span class="admin-mail-tile-title"></span><span class="admin-mail-tile-sub"></span><span id="adminMailBadge" class="admin-mail-badge zero">0</span></button><section id="adminMailPanel" class="admin-mail-panel" hidden><div class="admin-mail-head"><strong id="adminMailPanelTitle"></strong><button id="adminMailRefresh" class="admin-mail-refresh" type="button"></button></div><div id="adminMailContent"></div></section>`;
+    const stats=document.getElementById("adminStatsPanel");
+    if(stats) adminPanel.insertBefore(wrap,stats); else adminPanel.appendChild(wrap);
+    document.getElementById("adminMailTile").addEventListener("click",()=>{const p=document.getElementById("adminMailPanel");p.hidden=!p.hidden;if(!p.hidden)void loadMail(true);});
+    document.getElementById("adminMailRefresh").addEventListener("click",()=>void loadMail(true));
+    applyText();
+  }
 
   function applyText(){const x=t(),wrap=document.getElementById("adminMailWrap");if(!wrap)return;wrap.querySelector(".admin-mail-tile-title").textContent=x.title;wrap.querySelector(".admin-mail-tile-sub").textContent=x.sub;document.getElementById("adminMailPanelTitle").textContent=x.panel;document.getElementById("adminMailRefresh").textContent=x.refresh;renderBadge();if(!document.getElementById("adminMailPanel").hidden)renderList();}
   function renderBadge(){const b=document.getElementById("adminMailBadge");if(!b)return;b.textContent=String(state.unread||0);b.classList.toggle("zero",!(state.unread>0));b.title=state.unread>0?`${state.unread} ${t().new}`:"0";}
@@ -28,7 +50,18 @@
 
   function syncVisibility(){ensureUi();const wrap=document.getElementById("adminMailWrap");if(!wrap)return;const allowed=isAndrzejAdmin();wrap.hidden=!allowed;if(!allowed){const p=document.getElementById("adminMailPanel");if(p)p.hidden=true;return;}applyText();if(!state.loaded)void loadMail(false);}
 
-  function start(){ensureUi();syncVisibility();const observer=new MutationObserver(()=>setTimeout(syncVisibility,0));const admin=document.getElementById("adminPanel"),profile=document.getElementById("adminProfileSection");if(admin)observer.observe(admin,{attributes:true,attributeFilter:["hidden","style"]});if(profile)observer.observe(profile,{attributes:true,attributeFilter:["hidden","style"]});document.addEventListener("click",e=>{if(e.target.closest(".language")||e.target.closest("[data-lang]"))setTimeout(applyText,80);},true);setInterval(()=>{if(isAndrzejAdmin())void loadMail(true);},120000);}
+  function start(){
+    ensureUi();
+    syncVisibility();
+    const observer=new MutationObserver(()=>setTimeout(syncVisibility,20));
+    const admin=document.getElementById("adminPanel"),profile=document.getElementById("adminProfileSection"),title=document.getElementById("adminTitle");
+    if(admin)observer.observe(admin,{attributes:true,attributeFilter:["hidden","style"]});
+    if(profile)observer.observe(profile,{attributes:true,attributeFilter:["hidden","style"]});
+    if(title)observer.observe(title,{childList:true,subtree:true,characterData:true});
+    document.addEventListener("click",e=>{if(e.target.closest(".language")||e.target.closest("[data-lang]"))setTimeout(()=>{applyText();syncVisibility();},80);},true);
+    setInterval(syncVisibility,500);
+    setInterval(()=>{if(isAndrzejAdmin())void loadMail(true);},120000);
+  }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
