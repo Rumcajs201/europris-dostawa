@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-22-fredrik-profile";
+const CACHE_NAME = "europris-app-v58-23-otta-636-fix";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
@@ -32,7 +32,7 @@ async function withInjectedEnhancements(response) {
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
   let html = injectFredrikProfile(await response.text());
-  const version = "58.22";
+  const version = "58.23";
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
@@ -63,11 +63,34 @@ async function withInjectedEnhancements(response) {
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
+async function withoutObsoleteOtta(response) {
+  if (!response || !response.ok) return response;
+  try {
+    const data = await response.clone().json();
+    if (!Array.isArray(data)) return response;
+    const cleaned = data.filter(store => !(
+      Number(store?.number) === 210 &&
+      String(store?.name || "").toLowerCase().includes("otta")
+    ));
+    const headers = new Headers(response.headers);
+    headers.set("content-type", "application/json; charset=UTF-8");
+    headers.delete("content-length");
+    return new Response(JSON.stringify(cleaned, null, 2), {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
+  } catch (_) {
+    return response;
+  }
+}
+
 self.addEventListener("fetch", event => {
   const request=event.request; if(request.method!=="GET")return;
   const requestUrl=new URL(request.url); if(requestUrl.origin!==self.location.origin)return;
   const isNavigation=request.mode==="navigate";
-  const isCoreFile=requestUrl.pathname.endsWith("/index.html")||requestUrl.pathname.endsWith("/manifest.webmanifest")||requestUrl.pathname.endsWith("/stores.json");
-  if(isNavigation||isCoreFile){event.respondWith(fetch(request,{cache:"no-store"}).then(async response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}return isNavigation?withInjectedEnhancements(response):response;}).catch(async()=>{const cached=await caches.match(request);if(cached)return isNavigation?withInjectedEnhancements(cached):cached;const fallback=await caches.match("./index.html");if(fallback)return isNavigation?withInjectedEnhancements(fallback):fallback;return new Response("Offline",{status:503,statusText:"Service Unavailable",headers:{"Content-Type":"text/plain; charset=UTF-8"}});}));return;}
+  const isStoresFile=requestUrl.pathname.endsWith("/stores.json");
+  const isCoreFile=requestUrl.pathname.endsWith("/index.html")||requestUrl.pathname.endsWith("/manifest.webmanifest")||isStoresFile;
+  if(isNavigation||isCoreFile){event.respondWith(fetch(request,{cache:"no-store"}).then(async response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}if(isNavigation)return withInjectedEnhancements(response);if(isStoresFile)return withoutObsoleteOtta(response);return response;}).catch(async()=>{const cached=await caches.match(request);if(cached){if(isNavigation)return withInjectedEnhancements(cached);if(isStoresFile)return withoutObsoleteOtta(cached);return cached;}const fallback=await caches.match("./index.html");if(fallback)return isNavigation?withInjectedEnhancements(fallback):fallback;return new Response("Offline",{status:503,statusText:"Service Unavailable",headers:{"Content-Type":"text/plain; charset=UTF-8"}});}));return;}
   event.respondWith(fetch(request).then(response=>{if(response&&response.ok&&response.type==="basic"){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}return response;}).catch(async()=>{const cached=await caches.match(request);if(cached)return cached;return new Response("",{status:504,statusText:"Gateway Timeout"});}));
 });
