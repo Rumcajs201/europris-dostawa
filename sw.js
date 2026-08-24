@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-24-admin-mail";
+const CACHE_NAME = "europris-app-v58-25-admin-mail-fix";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
@@ -33,7 +33,7 @@ async function withInjectedEnhancements(response) {
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
   let html = injectFredrikProfile(await response.text());
-  const version = "58.24";
+  const version = "58.25";
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
