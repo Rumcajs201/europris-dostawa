@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-27-mail-tile-colors";
+const CACHE_NAME = "europris-app-v58-28-mail-tile-style-fix";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
@@ -33,7 +33,7 @@ async function withInjectedEnhancements(response) {
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
   let html = injectFredrikProfile(await response.text());
-  const version = "58.27";
+  const version = "58.28";
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
@@ -73,21 +73,12 @@ async function withoutObsoleteOtta(response) {
   try {
     const data = await response.clone().json();
     if (!Array.isArray(data)) return response;
-    const cleaned = data.filter(store => !(
-      Number(store?.number) === 210 &&
-      String(store?.name || "").toLowerCase().includes("otta")
-    ));
+    const cleaned = data.filter(store => !(Number(store?.number) === 210 && String(store?.name || "").toLowerCase().includes("otta")));
     const headers = new Headers(response.headers);
     headers.set("content-type", "application/json; charset=UTF-8");
     headers.delete("content-length");
-    return new Response(JSON.stringify(cleaned, null, 2), {
-      status: response.status,
-      statusText: response.statusText,
-      headers
-    });
-  } catch (_) {
-    return response;
-  }
+    return new Response(JSON.stringify(cleaned, null, 2), {status: response.status,statusText: response.statusText,headers});
+  } catch (_) { return response; }
 }
 
 self.addEventListener("fetch", event => {
