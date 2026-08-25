@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "58.27";
+  const APP_VERSION = "58.28";
   const questions = {
     pl: "Pytania ?",
     no: "Spørsmål ?",
