@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-28-mail-tile-style-fix";
+const CACHE_NAME = "europris-app-v58-29-remove-andalsnes-355";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
@@ -33,7 +33,7 @@ async function withInjectedEnhancements(response) {
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
   let html = injectFredrikProfile(await response.text());
-  const version = "58.28";
+  const version = "58.29";
   html = html
     .replace(/header-controls\.css\?v=[^"']+/g, `header-controls.css?v=${version}`)
     .replace(/info-feedback\.css\?v=[^"']+/g, `info-feedback.css?v=${version}`)
@@ -68,12 +68,18 @@ async function withInjectedEnhancements(response) {
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
-async function withoutObsoleteOtta(response) {
+async function withoutObsoleteStores(response) {
   if (!response || !response.ok) return response;
   try {
     const data = await response.clone().json();
     if (!Array.isArray(data)) return response;
-    const cleaned = data.filter(store => !(Number(store?.number) === 210 && String(store?.name || "").toLowerCase().includes("otta")));
+    const cleaned = data.filter(store => {
+      const number = Number(store?.number);
+      const name = String(store?.name || "").toLowerCase();
+      const obsoleteOtta = number === 210 && name.includes("otta");
+      const obsoleteAndalsnes = number === 355 && (name.includes("åndalsnes") || name.includes("andalsnes"));
+      return !(obsoleteOtta || obsoleteAndalsnes);
+    });
     const headers = new Headers(response.headers);
     headers.set("content-type", "application/json; charset=UTF-8");
     headers.delete("content-length");
@@ -87,6 +93,6 @@ self.addEventListener("fetch", event => {
   const isNavigation=request.mode==="navigate";
   const isStoresFile=requestUrl.pathname.endsWith("/stores.json");
   const isCoreFile=requestUrl.pathname.endsWith("/index.html")||requestUrl.pathname.endsWith("/manifest.webmanifest")||isStoresFile;
-  if(isNavigation||isCoreFile){event.respondWith(fetch(request,{cache:"no-store"}).then(async response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}if(isNavigation)return withInjectedEnhancements(response);if(isStoresFile)return withoutObsoleteOtta(response);return response;}).catch(async()=>{const cached=await caches.match(request);if(cached){if(isNavigation)return withInjectedEnhancements(cached);if(isStoresFile)return withoutObsoleteOtta(cached);return cached;}const fallback=await caches.match("./index.html");if(fallback)return isNavigation?withInjectedEnhancements(fallback):fallback;return new Response("Offline",{status:503,statusText:"Service Unavailable",headers:{"Content-Type":"text/plain; charset=UTF-8"}});}));return;}
+  if(isNavigation||isCoreFile){event.respondWith(fetch(request,{cache:"no-store"}).then(async response=>{if(response&&response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}if(isNavigation)return withInjectedEnhancements(response);if(isStoresFile)return withoutObsoleteStores(response);return response;}).catch(async()=>{const cached=await caches.match(request);if(cached){if(isNavigation)return withInjectedEnhancements(cached);if(isStoresFile)return withoutObsoleteStores(cached);return cached;}const fallback=await caches.match("./index.html");if(fallback)return isNavigation?withInjectedEnhancements(fallback):fallback;return new Response("Offline",{status:503,statusText:"Service Unavailable",headers:{"Content-Type":"text/plain; charset=UTF-8"}});}));return;}
   event.respondWith(fetch(request).then(response=>{if(response&&response.ok&&response.type==="basic"){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}return response;}).catch(async()=>{const cached=await caches.match(request);if(cached)return cached;return new Response("",{status:504,statusText:"Gateway Timeout"});}));
 });
