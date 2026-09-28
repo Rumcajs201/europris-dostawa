@@ -20,13 +20,13 @@
 
   const fixedWidths = Object.freeze({
     date: 11,
-    time: 9,
-    tour: 6,
-    trailer: 10,
-    storeNumber: 11,
-    pallets: 14,
-    trailerCount: 16,
-    emptyPallets: 15
+    time: 7,
+    tour: 5,
+    trailer: 7,
+    storeNumber: 8,
+    pallets: 7,
+    trailerCount: 8,
+    emptyPallets: 8
   });
 
   function textLength(value) {
@@ -49,7 +49,7 @@
       }, 0);
 
       if (type === "storeName") {
-        return { wch: Math.min(50, Math.max(18, longest + 5)) };
+        return { wch: Math.min(28, Math.max(18, longest + 2)) };
       }
 
       if (type === "address") {
