@@ -20,14 +20,13 @@
         date: "Data (obowiązkowa)", time: "Godzina", tour: "Kurs",
         trailer: "Numer naczepy", storeNumber: "Numer sklepu",
         storeName: "Nazwa sklepu", pallets: "Liczba palet",
-        trailerCount: "Liczba naczep", emptyPallets: "Puste palety",
-        address: "Adres sklepu"
+        trailerCount: "Liczba naczep", emptyPallets: "Puste palety"
       },
       headers: {
         date: "Data", time: "Godzina", tour: "Kurs", trailer: "Naczepa",
         storeNumber: "Nr sklepu", storeName: "Nazwa sklepu",
         pallets: "Liczba palet", trailerCount: "Liczba naczep",
-        emptyPallets: "Puste palety", address: "Adres sklepu"
+        emptyPallets: "Puste palety"
       }
     },
     no: {
@@ -43,14 +42,13 @@
         date: "Dato (obligatorisk)", time: "Klokkeslett", tour: "Tur",
         trailer: "Tilhengernummer", storeNumber: "Butikknummer",
         storeName: "Butikknavn", pallets: "Antall paller",
-        trailerCount: "Antall tilhengere", emptyPallets: "Tomme paller",
-        address: "Butikkadresse"
+        trailerCount: "Antall tilhengere", emptyPallets: "Tomme paller"
       },
       headers: {
         date: "Dato", time: "Klokkeslett", tour: "Tur", trailer: "Tilhenger",
         storeNumber: "Butikknr.", storeName: "Butikknavn",
         pallets: "Antall paller", trailerCount: "Antall tilhengere",
-        emptyPallets: "Tomme paller", address: "Butikkadresse"
+        emptyPallets: "Tomme paller"
       }
     },
     en: {
@@ -66,14 +64,13 @@
         date: "Date (required)", time: "Time", tour: "Trip",
         trailer: "Trailer number", storeNumber: "Store number",
         storeName: "Store name", pallets: "Number of pallets",
-        trailerCount: "Number of trailers", emptyPallets: "Empty pallets",
-        address: "Store address"
+        trailerCount: "Number of trailers", emptyPallets: "Empty pallets"
       },
       headers: {
         date: "Date", time: "Time", tour: "Trip", trailer: "Trailer",
         storeNumber: "Store no.", storeName: "Store name",
         pallets: "Number of pallets", trailerCount: "Number of trailers",
-        emptyPallets: "Empty pallets", address: "Store address"
+        emptyPallets: "Empty pallets"
       }
     },
     de: {
@@ -89,21 +86,20 @@
         date: "Datum (erforderlich)", time: "Uhrzeit", tour: "Tour",
         trailer: "Aufliegernummer", storeNumber: "Filialnummer",
         storeName: "Filialname", pallets: "Anzahl Paletten",
-        trailerCount: "Anzahl Auflieger", emptyPallets: "Leere Paletten",
-        address: "Filialadresse"
+        trailerCount: "Anzahl Auflieger", emptyPallets: "Leere Paletten"
       },
       headers: {
         date: "Datum", time: "Uhrzeit", tour: "Tour", trailer: "Auflieger",
         storeNumber: "Filialnr.", storeName: "Filialname",
         pallets: "Anzahl Paletten", trailerCount: "Anzahl Auflieger",
-        emptyPallets: "Leere Paletten", address: "Filialadresse"
+        emptyPallets: "Leere Paletten"
       }
     }
   };
 
   const columnOrder = [
     "date", "time", "tour", "trailer", "storeNumber", "storeName",
-    "pallets", "trailerCount", "emptyPallets", "address"
+    "pallets", "trailerCount", "emptyPallets"
   ];
   const defaultColumns = [
     "date", "time", "tour", "trailer", "storeNumber", "storeName",
@@ -349,14 +345,24 @@
       const entry = activeExcelEntries[entryIndex++] || {};
       output.push(activeExcelColumns.map(key => {
         if (key === "emptyPallets") return Number(entry.emptyPallets) || 0;
-        if (key === "address") return String(entry.address || "");
         return row[sourceColumnIndex[key]] ?? "";
       }));
     }
 
     const newSheet = XLSX.utils.aoa_to_sheet(output);
+    const compactWidths = Object.freeze({
+      date: 11,
+      time: 7,
+      tour: 5,
+      trailer: 7,
+      storeNumber: 8,
+      storeName: 20,
+      pallets: 7,
+      trailerCount: 8,
+      emptyPallets: 8
+    });
     newSheet["!cols"] = activeExcelColumns.map(key => ({
-      wch: key === "storeName" || key === "address" ? 28 : key === "date" ? 13 : 15
+      wch: compactWidths[key] || 10
     }));
     workbook.Sheets[sheetName] = newSheet;
     return workbook;
