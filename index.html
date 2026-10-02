@@ -1673,7 +1673,7 @@
     panel.hidden = !isActiveAdmin();
     if (!isActiveAdmin()) { list.replaceChildren(); return; }
     list.replaceChildren();
-    const profilesForList = { ...ADMIN_PROFILES, "2345": { id: "fredrik", role: "driver", name: "Fredrik" } };\n    Object.entries(profilesForList).filter(([, profile]) => profile.role === "driver").forEach(([pin, profile]) => {
+    Object.entries(ADMIN_PROFILES).filter(([, profile]) => profile.role === "driver").forEach(([pin, profile]) => {
       const row = document.createElement("div");
       row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface,var(--card))";
       const name = document.createElement("strong");
