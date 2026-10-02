@@ -1,41 +1,56 @@
 (() => {
   "use strict";
 
-  const DISMISS_KEY = "europris_startup_info_feedback_v2_dismissed";
+  const DISMISS_KEY = "europris_startup_info_v58_31_dismissed";
 
   const copy = {
     pl: {
-      badge: "NOWA FUNKCJA",
-      title: "Informacje i kontakt z twórcą aplikacji",
-      text: "W aplikacji uruchomiona została nowa sekcja „Informacje”. Znajdziesz tam opis najważniejszych funkcji Europris Dostawy oraz formularz kontaktowy.",
-      points: ["zgłoś błąd lub coś, co nie działa prawidłowo","wyślij propozycję nowej funkcji lub usprawnienia","zadaj pytanie dotyczące działania aplikacji","prześlij inną uwagę lub sugestię"],
-      note: "Aby wysłać wiadomość, podaj swój adres e-mail. Zgłoszenie zostanie przekazane do Rumcajsa (Andrzej). Sekcję możesz później otworzyć przyciskiem „Informacje / Pytania?” u góry aplikacji.",
-      ending: "Mile widziane są wszystkie komentarze, uwagi i propozycje dotyczące aplikacji — pomagają ją dalej rozwijać i ulepszać.\n\nPozdrawiam,\nRumcajs (Andrzej)",
-      dontShow: "Nie pokazuj więcej tego komunikatu", close: "Rozumiem"
+      badge: "MAŁA AKTUALIZACJA",
+      title: "Europris Dostawy — wersja 58.31",
+      text: "Wprowadziliśmy małą aktualizację informacji o kolejności dostaw.",
+      points: [
+        "przy dostawie sklepu wyświetlany jest teraz numer PRI (kolejność dostawy)",
+        "numer PRI jest również widoczny na liście i w szczegółach dostaw kierowcy",
+        "PRI jest pokazane kompaktowo, bez niepotrzebnego powiększania kafelków"
+      ],
+      dontShow: "Nie pokazuj więcej tego komunikatu",
+      close: "Rozumiem"
     },
     no: {
-      badge: "NY FUNKSJON", title: "Informasjon og kontakt med appens utvikler",
-      text: "En ny seksjon, «Informasjon», er nå tilgjengelig i appen. Der finner du en oversikt over de viktigste funksjonene i Europris Levering og et kontaktskjema.",
-      points: ["rapporter en feil eller noe som ikke fungerer som det skal","send forslag til en ny funksjon eller forbedring","still spørsmål om hvordan appen fungerer","send en annen kommentar eller idé"],
-      note: "For å sende en melding må du oppgi e-postadressen din. Meldingen sendes til Rumcajs (Andrzej). Du kan senere åpne seksjonen med knappen «Informasjon / Spørsmål?» øverst i appen.",
-      ending: "Alle kommentarer, tilbakemeldinger og forslag om appen er hjertelig velkomne — de hjelper meg med å videreutvikle og forbedre den.\n\nHilsen,\nRumcajs (Andrzej)",
-      dontShow: "Ikke vis denne meldingen igjen", close: "Forstått"
+      badge: "LITEN OPPDATERING",
+      title: "Europris Levering — versjon 58.31",
+      text: "Vi har gjort en liten oppdatering av informasjonen om leveringsrekkefølgen.",
+      points: [
+        "butikkleveringen viser nå PRI-nummeret (leveringsrekkefølge)",
+        "PRI-nummeret vises også i sjåførlisten og i leveringsdetaljene",
+        "PRI vises kompakt uten å gjøre kortene unødvendig større"
+      ],
+      dontShow: "Ikke vis denne meldingen igjen",
+      close: "Forstått"
     },
     en: {
-      badge: "NEW FEATURE", title: "Information and contact with the app creator",
-      text: "A new “Information” section is now available in the app. It contains an overview of the main Europris Deliveries features and a contact form.",
-      points: ["report a bug or something that is not working correctly","suggest a new feature or improvement","ask a question about how the app works","send another comment or suggestion"],
-      note: "To send a message, enter your email address. Your report will be sent to Rumcajs (Andrzej). You can open this section later using the “Information / Questions?” button at the top of the app.",
-      ending: "All comments, feedback and suggestions about the app are very welcome — they help me continue developing and improving it.\n\nBest regards,\nRumcajs (Andrzej)",
-      dontShow: "Do not show this message again", close: "Got it"
+      badge: "SMALL UPDATE",
+      title: "Europris Deliveries — version 58.31",
+      text: "A small update has been made to the delivery-order information.",
+      points: [
+        "store deliveries now show the PRI number (delivery order)",
+        "the PRI number is also visible in the driver list and delivery details",
+        "PRI is displayed compactly without unnecessarily enlarging the cards"
+      ],
+      dontShow: "Do not show this message again",
+      close: "Got it"
     },
     de: {
-      badge: "NEUE FUNKTION", title: "Informationen und Kontakt zum App-Ersteller",
-      text: "In der App gibt es jetzt den neuen Bereich „Informationen“. Dort finden Sie eine Übersicht der wichtigsten Funktionen von Europris Lieferungen sowie ein Kontaktformular.",
-      points: ["einen Fehler oder eine nicht funktionierende Funktion melden","eine neue Funktion oder Verbesserung vorschlagen","eine Frage zur Bedienung der App stellen","einen anderen Hinweis oder Vorschlag senden"],
-      note: "Zum Senden einer Nachricht ist Ihre E-Mail-Adresse erforderlich. Die Meldung wird an Rumcajs (Andrzej) weitergeleitet. Später können Sie den Bereich über „Informationen / Fragen?” oben in der App öffnen.",
-      ending: "Kommentare, Rückmeldungen und Vorschläge zur App sind jederzeit willkommen — sie helfen mir, die App weiterzuentwickeln und zu verbessern.\n\nViele Grüße,\nRumcajs (Andrzej)",
-      dontShow: "Diese Meldung nicht mehr anzeigen", close: "Verstanden"
+      badge: "KLEINES UPDATE",
+      title: "Europris Lieferungen — Version 58.31",
+      text: "Die Informationen zur Lieferreihenfolge wurden leicht aktualisiert.",
+      points: [
+        "bei Filiallieferungen wird jetzt die PRI-Nummer (Lieferreihenfolge) angezeigt",
+        "die PRI-Nummer ist auch in der Fahrerliste und in den Lieferdetails sichtbar",
+        "PRI wird kompakt angezeigt, ohne die Karten unnötig zu vergrößern"
+      ],
+      dontShow: "Diese Meldung nicht mehr anzeigen",
+      close: "Verstanden"
     }
   };
 
@@ -51,14 +66,12 @@
     const title=document.createElement("h2");title.textContent=t.title;
     const text=document.createElement("p");text.textContent=t.text;
     const list=document.createElement("ul");t.points.forEach(value=>{const item=document.createElement("li");item.textContent=value;list.appendChild(item);});
-    const note=document.createElement("p");note.className="europris-startup-note";note.textContent=t.note;
-    const ending=document.createElement("p");ending.className="europris-startup-ending";ending.style.whiteSpace="pre-line";ending.textContent=t.ending;
     const choice=document.createElement("label");choice.className="europris-startup-choice";
     const checkbox=document.createElement("input");checkbox.type="checkbox";
     const choiceText=document.createElement("span");choiceText.textContent=t.dontShow;choice.append(checkbox,choiceText);
     const close=document.createElement("button");close.type="button";close.className="europris-startup-close";close.textContent=t.close;
     close.addEventListener("click",()=>{if(checkbox.checked)rememberDismissal();dialog.close();dialog.remove();});
-    card.append(badge,title,text,list,note,ending,choice,close);dialog.appendChild(card);document.body.appendChild(dialog);
+    card.append(badge,title,text,list,choice,close);dialog.appendChild(card);document.body.appendChild(dialog);
     if(typeof dialog.showModal==="function")dialog.showModal();else dialog.setAttribute("open","");
   }
   function start(){if(dismissed())return;window.setTimeout(show,350);}
