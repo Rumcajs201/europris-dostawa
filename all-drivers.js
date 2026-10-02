@@ -34,7 +34,7 @@ function groupReturnLoads(g){const map=new Map();g.rows.forEach(r=>(Array.isArra
 function returnEmptiesForRow(r,t){const raw=String(r.returnEmpties||"").trim();if(!raw||raw==="0"||raw==="32")return"";return`${t.emptyPallets}: ${raw}`;}
 function storesByTour(g,limit=4){
  return rowsByTour(g).map(group=>{
-   const all=group.rows.map(r=>{const n=String(r.storeNumber||"").trim(),s=String(r.storeName||"").trim();return n&&s?`${n} ${s}`:(n||s||"—");});
+   const all=group.rows.map(r=>{const n=String(r.storeNumber||"").trim(),s=String(r.storeName||"").trim(),pri=Number(r.deliverySequence)||0,store=n&&s?`${n} ${s}`:(n||s||"—");return pri>0?`PRI ${pri} · ${store}`:store;});
    const visible=all.slice(0,limit),left=all.length-visible.length;
    return{tour:group.tour,list:left?`${visible.join(" • ")} • +${left}`:visible.join(" • ")};
  });
