@@ -71,7 +71,7 @@ function details(g,t,target){
    const seq=document.createElement("div");seq.className=`selected-driver-sequence tour-color-${tourGroup.tour}`;seq.textContent=String(r.deliverySequence||i+1);
    const c=document.createElement("div"),store=document.createElement("div"),meta=document.createElement("div");c.className="selected-driver-stop-content";store.className="selected-driver-store";meta.className="selected-driver-meta";
    store.textContent=`${r.storeNumber||"—"} — ${r.storeName||"—"}`;
-   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",`${t.pal}: ${Number(r.pallets)||0}`,returnEmptiesForRow(r,t)].filter(Boolean).join(" • ");
+   meta.textContent=[r.deadline?`${t.time}: ${r.deadline}`:"",Number(r.deliverySequence)>0?`PRI ${Number(r.deliverySequence)}`:"",`${t.pal}: ${Number(r.pallets)||0}`,returnEmptiesForRow(r,t)].filter(Boolean).join(" • ");
    c.append(store,meta);stop.append(seq,c);section.append(stop);});
    stops.append(section);
  });card.append(stops);
