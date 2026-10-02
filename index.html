@@ -1087,6 +1087,10 @@
       </div>
       <div id="adminSummary" class="admin-summary"></div>
       <div id="adminPlanList" class="admin-plan-list"></div>
+      <details id="adminFullAccessDrivers" class="stats-panel" style="margin-bottom:12px">
+        <summary style="cursor:pointer;font-weight:900;color:var(--green);padding:2px 0">Kierowcy — pełny dostęp</summary>
+        <div id="adminFullAccessDriversList" style="display:grid;gap:8px;margin-top:12px"></div>
+      </details>
       <section id="adminStatsPanel" class="stats-panel" hidden>
         <div class="stats-panel-header">
           <div>
@@ -1652,6 +1656,7 @@
     loadAdminProfile(profile.id);
     void initializeHistoryCloudBackup(false);
     scheduleHistoryBackup("profile-login");
+    renderFullAccessDrivers();
     return true;
   }
 
@@ -1659,6 +1664,26 @@
     return Object.values(ADMIN_PROFILES).find(
       profile => profile.id === activeAdminProfileId
     ) || ADMIN_PROFILES["4878"];
+  }
+
+  function renderFullAccessDrivers() {
+    const panel = document.getElementById("adminFullAccessDrivers");
+    const list = document.getElementById("adminFullAccessDriversList");
+    if (!panel || !list) return;
+    panel.hidden = !isActiveAdmin();
+    if (!isActiveAdmin()) { list.replaceChildren(); return; }
+    list.replaceChildren();
+    Object.entries(ADMIN_PROFILES).filter(([, profile]) => profile.role === "driver").forEach(([pin, profile]) => {
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface,var(--card))";
+      const name = document.createElement("strong");
+      name.textContent = profile.name || profile.id;
+      const code = document.createElement("span");
+      code.style.cssText = "font-weight:950;font-variant-numeric:tabular-nums;letter-spacing:.08em";
+      code.textContent = "PIN " + pin;
+      row.append(name, code);
+      list.append(row);
+    });
   }
 
   function isActiveAdmin() {
