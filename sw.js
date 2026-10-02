@@ -1,4 +1,4 @@
-const CACHE_NAME = "europris-app-v58-33-bartek-alias";
+const CACHE_NAME = "europris-app-v58-34-pri-traller";
 
 const STATIC_FILES = [
   "./", "./index.html", "./xlsx.full.min.js", "./rumcajs-logo.png", "./manifest.webmanifest", "./stores.json",
