@@ -34,7 +34,7 @@ function groupReturnLoads(g){const map=new Map();g.rows.forEach(r=>(Array.isArra
 function returnEmptiesForRow(r,t){const raw=String(r.returnEmpties||"").trim();if(!raw||raw==="0"||raw==="32")return"";return`${t.emptyPallets}: ${raw}`;}
 function appendWithPri(el,text){
  const parts=String(text||"").split(/(PRI \d+(?:[ \/,]+\d+)*)/g);
- parts.forEach(part=>{if(/^PRI \d+/.test(part)){const s=document.createElement("span");s.className="pri-highlight";s.textContent=part;el.append(s);}else el.append(document.createTextNode(part));});
+ parts.forEach(part=>{if(/^PRI \d+/.test(part)){const s=document.createElement("span");s.className="pri-highlight";s.style.setProperty("color","#dc2626","important");s.style.setProperty("font-weight","900","important");s.textContent=part;el.append(s);}else el.append(document.createTextNode(part));});
 }
 function storesByTour(g,limit=4){
  return rowsByTour(g).map(group=>{
