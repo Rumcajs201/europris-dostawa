@@ -2108,19 +2108,22 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
           driver,
           tour,
           pallets: 0,
-          deadlines: new Set()
+          deadlines: new Set(),
+          priorities: new Set()
         });
       }
 
       const item = grouped.get(key);
       item.pallets += Number(row.pallets) || 0;
       if (row.deadline) item.deadlines.add(String(row.deadline));
+      if (Number(row.deliverySequence) > 0) item.priorities.add(Number(row.deliverySequence));
     });
 
     return [...grouped.values()]
       .map(item => ({
         ...item,
-        deadlines: [...item.deadlines].sort()
+        deadlines: [...item.deadlines].sort(),
+        priorities: [...item.priorities].sort((a, b) => a - b)
       }))
       .sort((a, b) =>
         Number(a.tour) - Number(b.tour) ||
@@ -2174,6 +2177,7 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
         driver.deadlines.length
           ? text.storeDriversDeadline(driver.deadlines.join(" / "))
           : "",
+        driver.priorities.length ? `PRI ${driver.priorities.join(" / ")}` : "",
         text.storeDriversPallets(driver.pallets)
       ].filter(Boolean).join(" • ");
 
