@@ -146,7 +146,7 @@
       border-color: var(--green);
     }
 
-    .pri-highlight { color: #dc2626; font-weight: 900; }\n\n    .app-version {
+    .pri-highlight { color: #dc2626 !important; font-weight: 900; }\n\n    .app-version {
       min-height: 20px;
       display: flex;
       align-items: center;
@@ -2187,8 +2187,8 @@ adminPinTitle.textContent=t.adminPinTitle;adminPinDescription.textContent=t.admi
         driver.priorities.length ? `PRI ${driver.priorities.join(" / ")}` : "",
         text.storeDriversPallets(driver.pallets)
       ].filter(Boolean).join(" • ");
-      String(metaText).split(/(PRI \\d+(?:[ \\/,]+\\d+)*)/g).forEach(part => {
-        if (/^PRI \\d+/.test(part)) {
+      String(metaText).split(/(PRI \d+(?:[ \/,]+\d+)*)/g).forEach(part => {
+        if (/^PRI \d+/.test(part)) {
           const pri = document.createElement("span");
           pri.className = "pri-highlight";
           pri.textContent = part;
