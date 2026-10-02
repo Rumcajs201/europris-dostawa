@@ -33,8 +33,8 @@ function rowsByTour(g){
 function groupReturnLoads(g){const map=new Map();g.rows.forEach(r=>(Array.isArray(r.returnLoads)?r.returnLoads:[]).forEach(load=>{const key=String(load.orderNumber||load.terminal||load.supplier||JSON.stringify(load));if(!map.has(key))map.set(key,load);}));return[...map.values()];}
 function returnEmptiesForRow(r,t){const raw=String(r.returnEmpties||"").trim();if(!raw||raw==="0"||raw==="32")return"";return`${t.emptyPallets}: ${raw}`;}
 function appendWithPri(el,text){
- const parts=String(text||"").split(/(PRI \\d+(?:[ \/,]+\\d+)*)/g);
- parts.forEach(part=>{if(/^PRI \\d+/.test(part)){const s=document.createElement("span");s.className="pri-highlight";s.textContent=part;el.append(s);}else el.append(document.createTextNode(part));});
+ const parts=String(text||"").split(/(PRI \d+(?:[ \/,]+\d+)*)/g);
+ parts.forEach(part=>{if(/^PRI \d+/.test(part)){const s=document.createElement("span");s.className="pri-highlight";s.textContent=part;el.append(s);}else el.append(document.createTextNode(part));});
 }
 function storesByTour(g,limit=4){
  return rowsByTour(g).map(group=>{
@@ -113,5 +113,5 @@ document.addEventListener("DOMContentLoaded",()=>{createPanel();refresh();
  document.getElementById("adminDeliveryDate")?.addEventListener("change",()=>{setTimeout(refresh,300);setTimeout(refresh,1200);});
  document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setTimeout(refresh,0)));
 });
-if(!document.getElementById("priHighlightStyle")){const s=document.createElement("style");s.id="priHighlightStyle";s.textContent=".pri-highlight{color:#dc2626;font-weight:900}";document.head.append(s);}\nwindow.EuroprisAllDrivers=Object.freeze({render});
+if(!document.getElementById("priHighlightStyle")){const s=document.createElement("style");s.id="priHighlightStyle";s.textContent=".pri-highlight{color:#dc2626!important;font-weight:900}";document.head.append(s);}\nwindow.EuroprisAllDrivers=Object.freeze({render});
 })();
