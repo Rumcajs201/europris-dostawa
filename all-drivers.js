@@ -113,5 +113,6 @@ document.addEventListener("DOMContentLoaded",()=>{createPanel();refresh();
  document.getElementById("adminDeliveryDate")?.addEventListener("change",()=>{setTimeout(refresh,300);setTimeout(refresh,1200);});
  document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>setTimeout(refresh,0)));
 });
-if(!document.getElementById("priHighlightStyle")){const s=document.createElement("style");s.id="priHighlightStyle";s.textContent=".pri-highlight{color:#dc2626!important;font-weight:900}";document.head.append(s);}\nwindow.EuroprisAllDrivers=Object.freeze({render});
+if(!document.getElementById("priHighlightStyle")){const s=document.createElement("style");s.id="priHighlightStyle";s.textContent=".pri-highlight{color:#dc2626!important;font-weight:900}";document.head.append(s);}
+window.EuroprisAllDrivers=Object.freeze({render});
 })();
